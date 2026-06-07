@@ -1,5 +1,5 @@
 # Meridian
-A blogging website for engineers and tech enthusiasts
+
 # 📝 Meridian — Where Great Engineering Writing Gets Found
  
 > A peer-driven blogging platform built for tech enthusiasts and engineers.  
