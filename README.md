@@ -5,7 +5,6 @@ A blogging website for engineers and tech enthusiasts
 > A peer-driven blogging platform built for tech enthusiasts and engineers.  
 > Great posts don't go unread here.
  
-![License](https://img.shields.io/badge/license-MIT-blue.svg)
 ![Frontend](https://img.shields.io/badge/frontend-React-61DAFB?logo=react)
 ![Backend](https://img.shields.io/badge/backend-Python-3776AB?logo=python)
 ![Status](https://img.shields.io/badge/status-In%20Development-yellow)
@@ -162,9 +161,9 @@ surfaced-backend/
                     ┌──────────────────────┼──────────────────────┐
                     │                      │                       │
              ┌──────▼──────┐      ┌────────▼──────┐     ┌────────▼──────┐
-             │ PostgreSQL  │      │     Redis      │     │    Celery     │
-             │  (primary   │      │  (cache +      │     │  (background  │
-             │   store)    │      │   sessions)    │     │    tasks)     │
+             │ PostgreSQL  │      │     Redis     │     │    Celery     │
+             │  (primary   │      │  (cache +     │     │  (background  │
+             │   store)    │      │   sessions)   │     │    tasks)     │
              └─────────────┘      └───────────────┘     └───────────────┘
 ```
  
@@ -210,18 +209,4 @@ cd surfaced-backend && pytest --cov=app tests/
  
 ---
 
-## 📄 License
- 
-MIT License — see [LICENSE](./LICENSE) for details.
- 
----
- 
-## 🌐 Links
- 
-- 📖 [Documentation](#) *(coming soon)*
-- 🐛 [Report a Bug](../../issues)
-- 💡 [Request a Feature](../../issues)
-- 💬 [Discord Community](#) *(coming soon)*
----
- 
 <p align="center">Built with ❤️ for engineers, by engineers.</p>
