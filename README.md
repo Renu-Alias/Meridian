@@ -1,4 +1,3 @@
-# Meridian
 
 # 📝 Meridian — Where Great Engineering Writing Gets Found
  
