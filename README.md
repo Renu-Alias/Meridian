@@ -1,6 +1,6 @@
 # Meridian
 A blogging website for engineers and tech enthusiasts
-# 📝 Surfaced — Where Great Engineering Writing Gets Found
+# 📝 Meridian — Where Great Engineering Writing Gets Found
  
 > A peer-driven blogging platform built for tech enthusiasts and engineers.  
 > Great posts don't go unread here.
@@ -12,9 +12,9 @@ A blogging website for engineers and tech enthusiasts
  
 ---
  
-## 🚀 What is Surfaced?
+## 🚀 What is Meridian?
  
-**Surfaced** is an open blogging platform designed exclusively for engineers and tech enthusiasts. Unlike Medium or Hashnode — where algorithmic feeds and follower counts dictate who gets read — Surfaced is built around **peer-driven discovery**, **technical integrity**, and **long-term value**.
+**Meridian** is an open blogging platform designed exclusively for engineers and tech enthusiasts. Unlike Medium or Hashnode — where algorithmic feeds and follower counts dictate who gets read — Surfaced is built around **peer-driven discovery**, **technical integrity**, and **long-term value**.
  
 Eight core USPs define everything we build:
  
@@ -209,17 +209,7 @@ cd surfaced-backend && pytest --cov=app tests/
 ```
  
 ---
- 
-## 🤝 Contributing
- 
-We welcome contributions! Please read [CONTRIBUTING.md](./CONTRIBUTING.md) before submitting a PR.
- 
-1. Fork the repo
-2. Create a feature branch: `git checkout -b feature/your-feature`
-3. Commit your changes: `git commit -m 'feat: add your feature'`
-4. Push and open a PR
----
- 
+
 ## 📄 License
  
 MIT License — see [LICENSE](./LICENSE) for details.
