@@ -12,7 +12,7 @@
  
 ## 🚀 What is Meridian?
  
-**Meridian** is an open blogging platform designed exclusively for engineers and tech enthusiasts. Unlike Medium or Hashnode — where algorithmic feeds and follower counts dictate who gets read — Surfaced is built around **peer-driven discovery**, **technical integrity**, and **long-term value**.
+**Meridian** is an open blogging platform designed exclusively for engineers and tech enthusiasts. Unlike Medium or Hashnode — where algorithmic feeds and follower counts dictate who gets read — Meridian is built around **peer-driven discovery**, **technical integrity**, and **long-term value**.
  
 Eight core USPs define everything we build:
  
