@@ -13,6 +13,10 @@
 ## 🚀 What is Meridian?
  
 **Meridian** is an open blogging platform designed exclusively for engineers and tech enthusiasts. Unlike Medium or Hashnode — where algorithmic feeds and follower counts dictate who gets read — Meridian is built around **peer-driven discovery**, **technical integrity**, and **long-term value**.
+
+<p align="center">
+    <img src="logo.png" alt="logo" width="500">
+</p>
  
 Eight core USPs define everything we build:
  
