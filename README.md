@@ -18,8 +18,6 @@
     <img src="logo.png" alt="logo" width="500">
 </p>
  
-Eight core USPs define everything we build:
- 
 ---
  
 ## ✨ Core USPs
