@@ -1,4 +1,5 @@
 import { ReactNode } from 'react';
+import Sidebar from './Sidebar';
 
 interface LayoutProps {
   children: ReactNode;
@@ -24,10 +25,7 @@ export default function Layout({ children }: LayoutProps) {
       <main className="flex-1 p-6 overflow-y-auto">{children}</main>
 
       {/* Right sidebar */}
-      <aside className="hidden lg:block w-80 p-4 border-l border-muted">
-        {/* Placeholder for Sidebar widgets */}
-        <div className="text-sm text-muted">Sidebar widgets</div>
-      </aside>
+      <Sidebar />
     </div>
   );
 }
