@@ -1,3 +1,5 @@
+import { ContributionTracker } from '../components/ContributionTracker';
+
 export function AuthorProfile() {
   return (
     <div className="min-h-screen">
@@ -23,12 +25,8 @@ export function AuthorProfile() {
           Currently building high-throughput microservices.
         </p>
 
-        {/* Placeholder for Contribution Tracker component */}
-        <div className="mb-8">
-          <h2 className="font-bold mb-4">412 contributions in the last year</h2>
-          <div className="h-32 bg-surface/5 border border-surface/20 rounded-xl flex items-center justify-center text-muted">
-            [Contribution Tracker Component]
-          </div>
+        <div className="mb-8 overflow-x-auto">
+          <ContributionTracker />
         </div>
 
         {/* Skills Graph */}
