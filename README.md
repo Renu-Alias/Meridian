@@ -33,7 +33,7 @@ Posts are intelligently matched to engineers based on their current tech stack, 
 ### 2. ⏱️ Living Posts — Your Writing Doesn't Expire
 > *"Your best posts don't go stale."*
  
-Technical content has a shelf life. Surfaced lets the community submit *patches* to outdated posts — like a pull request, but for writing. Articles stay accurate, keep ranking, and keep helping.
+Technical content has a shelf life. Surfaced lets the community submit *patches* to outdated posts — like a pull request but for writing. Articles stay accurate, keep ranking, and keep helping.
  
 - Community-submitted corrections and updates
 - Author approves/rejects patches via a PR-style interface
@@ -104,7 +104,7 @@ A dedicated track for junior engineers — posts are reviewed and mentored by se
  
 ### Frontend — React
 ```
-surfaced-frontend/
+meridian-frontend/
 ├── src/
 │   ├── components/        # Reusable UI components
 │   ├── pages/             # Route-level page components
@@ -127,7 +127,7 @@ surfaced-frontend/
  
 ### Backend — Python
 ```
-surfaced-backend/
+meridian-backend/
 ├── app/
 │   ├── api/               # Route handlers (FastAPI routers)
 │   ├── models/            # SQLAlchemy ORM models
@@ -177,7 +177,7 @@ surfaced-backend/
 - Redis 7+
 ### Frontend Setup
 ```bash
-cd surfaced-frontend
+cd meridian-frontend
 npm install
 cp .env.example .env        # Add your API base URL
 npm run dev                 # Runs on http://localhost:5173
@@ -185,7 +185,7 @@ npm run dev                 # Runs on http://localhost:5173
  
 ### Backend Setup
 ```bash
-cd surfaced-backend
+cd meridian-backend
 python -m venv venv
 source venv/bin/activate    # Windows: venv\Scripts\activate
 pip install -r requirements.txt
@@ -200,10 +200,10 @@ uvicorn main:app --reload   # Runs on http://localhost:8000
  
 ```bash
 # Frontend
-cd surfaced-frontend && npm run test
+cd meridian-frontend && npm run test
  
 # Backend
-cd surfaced-backend && pytest --cov=app tests/
+cd meridian-backend && pytest --cov=app tests/
 ```
  
 ---
