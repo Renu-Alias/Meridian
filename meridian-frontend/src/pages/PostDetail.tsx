@@ -1,4 +1,6 @@
+import React, { useState, useEffect } from 'react';
 import { Bookmark, Share2, AlertTriangle, GitFork } from 'lucide-react';
+import { Skeleton } from '../components/Skeleton';
 
 export function PostDetail() {
   return (
