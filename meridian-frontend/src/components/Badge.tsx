@@ -14,8 +14,8 @@ export function Badge({ status, label }: BadgeProps) {
   const Icon = isFlagged ? Flag : CheckCircle2;
 
   return (
-    <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold ${className}`}>
-      <Icon aria-hidden="true" size={13} />
+    <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-semibold leading-4 ${className}`}>
+      <Icon aria-hidden="true" size={12} />
       {label ?? (isFlagged ? 'Unverified Claim' : 'Verified')}
     </span>
   );

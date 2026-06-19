@@ -8,6 +8,7 @@
   font-synthesis: none;
   text-rendering: geometricPrecision;
   -webkit-font-smoothing: antialiased;
+  --font-twitter: TwitterChirp, "Twitter Chirp", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   --color-primary: #000000;
   --color-surface: #EAECEC;
   --color-muted: #999B9B;
@@ -25,7 +26,7 @@ body {
   min-width: 320px;
   min-height: 100vh;
   background: #f7f8f8;
-  font-family: TwitterChirp, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-family: var(--font-twitter);
 }
 
 button,
@@ -66,12 +67,12 @@ button {
 }
 
 .x-post-font {
-  font-family: TwitterChirp, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-family: var(--font-twitter);
   letter-spacing: 0;
 }
 
 .x-post-body {
-  font-size: 15.5px;
-  line-height: 1.55;
+  font-size: 15px;
+  line-height: 1.42;
   font-weight: 400;
 }

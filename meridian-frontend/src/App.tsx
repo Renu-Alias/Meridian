@@ -7,13 +7,13 @@ import { EditorPage } from './pages/EditorPage';
 import { FeedPage } from './pages/FeedPage';
 import { LandingPage } from './pages/LandingPage';
 import { NotificationsPage } from './pages/NotificationsPage';
-import { ProfilePage } from './pages/ProfilePage';
+import { ProfilePage, ProfileShell } from './pages/ProfilePage';
 import { WalletPage } from './pages/WalletPage';
 
 function AppShell() {
   return (
     <div className="min-h-screen bg-[#f7f8f8] text-ink">
-      <div className="flex">
+      <div className="grid min-h-screen grid-cols-[260px_minmax(0,1fr)_320px]">
         <Sidebar />
         <main className="min-w-0 flex-1">
           <HeaderBar />
@@ -22,9 +22,9 @@ function AppShell() {
             <Route path="/discover" element={<DiscoverPage />} />
             <Route path="/notifications" element={<NotificationsPage />} />
             <Route path="/wallet" element={<WalletPage />} />
-            <Route path="/profile/:username" element={<ProfilePage />} />
+            <Route path="/profile/:username/*" element={<ProfileShell />} />
             <Route path="/mentored" element={<DiscoverPage />} />
-            <Route path="/settings" element={<ProfilePage />} />
+            <Route path="/settings" element={<ProfileShell />} />
             <Route path="*" element={<Navigate to="/discover" replace />} />
           </Routes>
         </main>

@@ -55,9 +55,9 @@ export function Sidebar() {
 
         <NavLink
           to="/editor/new"
-          className="mt-12 inline-flex h-14 items-center justify-center gap-3 rounded-full bg-black px-5 font-bold text-white transition hover:bg-verified hover:text-black"
+          className="mt-8 inline-flex h-10 w-full max-w-[180px] items-center justify-center gap-2 self-start rounded-full bg-black px-4 text-sm font-bold text-white transition hover:bg-verified hover:text-black"
         >
-          <Edit3 size={20} aria-hidden="true" />
+          <Edit3 size={16} aria-hidden="true" />
           Write
         </NavLink>
 
