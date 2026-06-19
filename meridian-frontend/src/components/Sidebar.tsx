@@ -1,6 +1,7 @@
 import { Bell, Compass, Edit3, Home, User, WalletCards, X } from 'lucide-react';
 import { NavLink } from 'react-router-dom';
 import { useUiStore } from '../store/uiStore';
+import { Logo } from './Logo';
 
 const links = [
   { to: '/feed', label: 'Feed', icon: Home },
@@ -23,9 +24,7 @@ export function Sidebar() {
       >
         <div className="flex items-center justify-between">
           <NavLink to="/" className="flex items-center gap-3">
-            <span className="grid h-10 w-10 place-items-center bg-black text-white">
-              <img src="/logo.png" alt="" className="h-8 w-8 object-contain invert" />
-            </span>
+            <Logo size="sm" />
             <span>
               <span className="block text-2xl font-bold leading-none">Meridian</span>
               <span className="mt-1 block font-mono text-[10px] uppercase tracking-[0.32em] text-muted">Engineer Network</span>

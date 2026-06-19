@@ -29,6 +29,10 @@ export default {
           '0%': { opacity: '0', transform: 'translateY(18px)' },
           '100%': { opacity: '1', transform: 'translateY(0)' },
         },
+        scroll: {
+          '0%': { transform: 'translateX(0)' },
+          '100%': { transform: 'translateX(-50%)' },
+        },
         ripple: {
           '0%': { transform: 'scale(0.72)', opacity: '0.55' },
           '100%': { transform: 'scale(1.5)', opacity: '0' },
@@ -37,6 +41,7 @@ export default {
       animation: {
         pulseGlow: 'pulseGlow 2.4s ease-in-out infinite',
         fadeUp: 'fadeUp 700ms ease-out both',
+        scroll: 'scroll 32s linear infinite',
         ripple: 'ripple 3s ease-out infinite',
       },
     },
