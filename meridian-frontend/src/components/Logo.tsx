@@ -1,5 +1,3 @@
-import { useEffect, useRef } from 'react';
-
 function OrbitalRing({ size, duration, delay, reverse }: { size: number; duration: number; delay: number; reverse?: boolean }) {
   return (
     <svg className="pointer-events-none absolute inset-0 h-full w-full" viewBox="0 0 100 100" fill="none" style={{ animation: `spin${reverse ? 'Reverse' : ''} ${duration}s linear infinite`, animationDelay: `${delay}s` }}>
@@ -21,26 +19,10 @@ function OrbitDot({ angle, radius, size, duration, delay }: { angle: number; rad
 }
 
 export function Logo({ className = '', size = 'md' }: { className?: string; size?: 'sm' | 'md' | 'lg' }) {
-  const svgRef = useRef<SVGSVGElement>(null);
   const sizeMap = { sm: 8, md: 10, lg: 14 };
   const imgSize = sizeMap[size];
   const containerSize = imgSize + 2;
   const dim = containerSize * 4;
-
-  useEffect(() => {
-    const el = svgRef.current;
-    if (!el) return;
-    const path = el.querySelector('path');
-    if (!path) return;
-    const length = path.getTotalLength();
-    path.style.strokeDasharray = String(length);
-    path.style.strokeDashoffset = String(length);
-    path.style.transition = 'none';
-    requestAnimationFrame(() => {
-      path.style.transition = 'stroke-dashoffset 1.4s cubic-bezier(0.22, 1, 0.36, 1)';
-      path.style.strokeDashoffset = '0';
-    });
-  }, []);
 
   return (
     <span className={`group relative grid place-items-center ${className}`} style={{ width: `${dim}px`, height: `${dim}px` }}>
@@ -59,10 +41,8 @@ export function Logo({ className = '', size = 'md' }: { className?: string; size
       <OrbitDot angle={80} radius={34} size={0.9} duration={14} delay={0.7} />
       <OrbitDot angle={220} radius={34} size={1.1} duration={14} delay={0.7} />
 
-      <span className="relative grid h-full w-full place-items-center p-[18%]">
-        <svg ref={svgRef} viewBox="0 0 100 84" fill="none" className="h-full w-full">
-          <path d="M10 74V16L34 50V4L50 36L66 4V50L90 16V74" stroke="white" strokeWidth="8" strokeLinecap="round" strokeLinejoin="round" />
-        </svg>
+      <span className="relative grid h-full w-full place-items-center p-[12%]">
+        <img src="/logo.png" alt="Meridian" className="h-full w-full object-contain" />
       </span>
 
       <span className="absolute -inset-1 animate-pingSlow rounded-xl border border-verified/0 transition-all duration-500 group-hover:border-verified/30" />
