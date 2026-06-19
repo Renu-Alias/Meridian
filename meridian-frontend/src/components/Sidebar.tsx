@@ -24,7 +24,7 @@ export function Sidebar() {
       >
         <div className="flex items-center justify-between">
           <NavLink to="/" className="flex items-center gap-3">
-            <Logo size="sm" />
+            <Logo />
             <span>
               <span className="block text-2xl font-bold leading-none">Meridian</span>
               <span className="mt-1 block font-mono text-[10px] uppercase tracking-[0.32em] text-muted">Engineer Network</span>

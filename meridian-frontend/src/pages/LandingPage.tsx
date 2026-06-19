@@ -1,261 +1,591 @@
-import { useEffect, useRef, useState } from 'react';
-import { ArrowRight, Bookmark, Code2, Coins, GitFork, GraduationCap, Layers, MessageSquare, Repeat2, Search, ShieldCheck, Sparkles, TrendingUp, Users } from 'lucide-react';
+import { useEffect, useRef, useCallback } from 'react';
+import { motion, useMotionValue, useSpring } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import { AnimatedNetwork } from '../components/AnimatedNetwork';
-import { Logo } from '../components/Logo';
+import { ArrowRight, BookOpen } from 'lucide-react';
+import { ScrollStory } from '../components/ScrollStory';
 
-function useReveal(threshold = 0.18) {
-  const ref = useRef<HTMLDivElement>(null);
-  const [visible, setVisible] = useState(false);
+/* ─────────────────────────────────────────────────────────────────────────
+   CANVAS ANIMATOR
+   Draws layered stars + volumetric drifting clouds + aurora streaks
+   entirely with requestAnimationFrame — no external GL dependency needed.
+───────────────────────────────────────────────────────────────────────── */
+
+interface Star {
+  x: number; y: number; r: number; a: number; speed: number; twinkle: number;
+}
+
+interface Cloud {
+  x: number; y: number; w: number; h: number; speed: number; opacity: number;
+  layer: number; color: string;
+}
+
+interface Streak {
+  x: number; y: number; len: number; angle: number; opacity: number;
+  speed: number; life: number; maxLife: number;
+}
+
+interface Particle {
+  x: number; y: number; vx: number; vy: number; r: number;
+  opacity: number; color: string;
+}
+
+function initCanvas(canvas: HTMLCanvasElement) {
+  const W = canvas.width = canvas.offsetWidth;
+  const H = canvas.height = canvas.offsetHeight;
+
+  // Stars
+  const STAR_COUNT = 280;
+  const stars: Star[] = Array.from({ length: STAR_COUNT }, () => ({
+    x: Math.random() * W,
+    y: Math.random() * H * 0.6,
+    r: Math.random() * 1.4 + 0.2,
+    a: Math.random(),
+    speed: Math.random() * 0.008 + 0.003,
+    twinkle: Math.random() * Math.PI * 2,
+  }));
+
+  // Volumetric cloud layers (dark to mid-gray) 
+  const cloudColors = ['#0d0d0e', '#111213', '#161718', '#1c1d1e', '#222426', '#2a2c2e'];
+  const clouds: Cloud[] = Array.from({ length: 50 }, (_, i) => ({
+    x: Math.random() * W * 1.8 - W * 0.4,
+    y: H * 0.15 + Math.random() * H * 0.7,
+    w: 220 + Math.random() * 500,
+    h: 80 + Math.random() * 200,
+    speed: 0.04 + Math.random() * 0.08 + (i % 3) * 0.03,
+    opacity: 0.2 + Math.random() * 0.6,
+    layer: i % 3,
+    color: cloudColors[Math.floor(Math.random() * cloudColors.length)],
+  }));
+
+  // Aurora streaks
+  const streaks: Streak[] = Array.from({ length: 6 }, () => ({
+    x: Math.random() * W,
+    y: H * 0.1 + Math.random() * H * 0.5,
+    len: 80 + Math.random() * 200,
+    angle: -Math.PI / 6 + Math.random() * Math.PI / 3,
+    opacity: 0,
+    speed: 0.003 + Math.random() * 0.004,
+    life: 0,
+    maxLife: 200 + Math.random() * 300,
+  }));
+
+  // Floating data particles
+  const dataColors = ['#3a3a3a', '#555', '#777', '#444', '#666'];
+  const particles: Particle[] = Array.from({ length: 60 }, () => ({
+    x: Math.random() * W,
+    y: Math.random() * H,
+    vx: (Math.random() - 0.5) * 0.15,
+    vy: (Math.random() - 0.5) * 0.15,
+    r: 1 + Math.random() * 2.5,
+    opacity: 0.2 + Math.random() * 0.5,
+    color: dataColors[Math.floor(Math.random() * dataColors.length)],
+  }));
+
+  return { W, H, stars, clouds, streaks, particles };
+}
+
+function drawCloud(ctx: CanvasRenderingContext2D, cloud: Cloud, t: number) {
+  const { x, y, w, h, opacity, color } = cloud;
+  ctx.save();
+  ctx.globalAlpha = opacity;
+
+  // Main cloud body – stacked radial gradients give volumetric feel
+  const gradient = ctx.createRadialGradient(x + w / 2, y + h / 2, 0, x + w / 2, y + h / 2, Math.max(w, h) / 1.5);
+  gradient.addColorStop(0, color);
+  gradient.addColorStop(0.4, color + 'cc');
+  gradient.addColorStop(1, 'transparent');
+
+  ctx.beginPath();
+  ctx.ellipse(x + w / 2, y + h / 2, w / 2, h / 2, 0, 0, Math.PI * 2);
+  ctx.fillStyle = gradient;
+  ctx.fill();
+
+  // Secondary puffs for definition
+  const puffCount = 4;
+  for (let p = 0; p < puffCount; p++) {
+    const px = x + (p / puffCount) * w + Math.sin(t * 0.3 + p) * 6;
+    const py = y + h * 0.3 + Math.cos(t * 0.2 + p) * 4;
+    const pr = h * (0.3 + p * 0.05);
+    const pg = ctx.createRadialGradient(px, py, 0, px, py, pr);
+    pg.addColorStop(0, color + 'aa');
+    pg.addColorStop(1, 'transparent');
+    ctx.beginPath();
+    ctx.ellipse(px, py, pr * 1.6, pr * 0.8, 0, 0, Math.PI * 2);
+    ctx.fillStyle = pg;
+    ctx.fill();
+  }
+
+  ctx.restore();
+}
+
+function drawStreak(ctx: CanvasRenderingContext2D, s: Streak) {
+  if (s.opacity <= 0) return;
+  ctx.save();
+  ctx.globalAlpha = s.opacity * 0.4;
+  const ex = s.x + Math.cos(s.angle) * s.len;
+  const ey = s.y + Math.sin(s.angle) * s.len;
+  const grad = ctx.createLinearGradient(s.x, s.y, ex, ey);
+  grad.addColorStop(0, 'transparent');
+  grad.addColorStop(0.4, 'rgba(180,180,180,0.6)');
+  grad.addColorStop(1, 'transparent');
+  ctx.beginPath();
+  ctx.moveTo(s.x, s.y);
+  ctx.lineTo(ex, ey);
+  ctx.strokeStyle = grad;
+  ctx.lineWidth = 1.5;
+  ctx.stroke();
+  ctx.restore();
+}
+
+function drawKnowledgeLines(ctx: CanvasRenderingContext2D, particles: Particle[]) {
+  const DIST = 90;
+  ctx.save();
+  for (let i = 0; i < particles.length; i++) {
+    for (let j = i + 1; j < particles.length; j++) {
+      const dx = particles[i].x - particles[j].x;
+      const dy = particles[i].y - particles[j].y;
+      const d = Math.sqrt(dx * dx + dy * dy);
+      if (d < DIST) {
+        const alpha = (1 - d / DIST) * 0.12;
+        ctx.globalAlpha = alpha;
+        ctx.beginPath();
+        ctx.moveTo(particles[i].x, particles[i].y);
+        ctx.lineTo(particles[j].x, particles[j].y);
+        ctx.strokeStyle = '#777';
+        ctx.lineWidth = 0.5;
+        ctx.stroke();
+      }
+    }
+  }
+  ctx.restore();
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   ANIMATION HOOK
+───────────────────────────────────────────────────────────────────────── */
+function useAtmosphereCanvas(
+  canvasRef: React.RefObject<HTMLCanvasElement>,
+  mouseX: ReturnType<typeof useMotionValue>,
+  mouseY: ReturnType<typeof useMotionValue>
+) {
+  const stateRef = useRef<ReturnType<typeof initCanvas> | null>(null);
+  const rafRef = useRef<number>(0);
+  const frameRef = useRef(0);
+
+  const animate = useCallback(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    // Handle resize
+    if (canvas.offsetWidth !== stateRef.current?.W || canvas.offsetHeight !== stateRef.current?.H) {
+      stateRef.current = initCanvas(canvas);
+    }
+
+    const state = stateRef.current!;
+    const { W, H, stars, clouds, streaks, particles } = state;
+    const t = frameRef.current;
+    frameRef.current++;
+
+    const mx = mouseX.get() * W;
+    const my = mouseY.get() * H;
+
+    // ── Background gradient (dark sky to charcoal ground)
+    const bg = ctx.createLinearGradient(0, 0, 0, H);
+    bg.addColorStop(0, '#06080a');
+    bg.addColorStop(0.35, '#0b0d10');
+    bg.addColorStop(0.7, '#111316');
+    bg.addColorStop(1, '#1a1c20');
+    ctx.fillStyle = bg;
+    ctx.fillRect(0, 0, W, H);
+
+    // ── Stars (upper 60% only)
+    for (const s of stars) {
+      s.twinkle += s.speed;
+      const alpha = 0.3 + Math.sin(s.twinkle) * 0.5;
+      // Parallax from mouse
+      const px = s.x + (mx / W - 0.5) * s.r * -8;
+      const py = s.y + (my / H - 0.5) * s.r * -4;
+      ctx.save();
+      ctx.globalAlpha = Math.max(0, alpha);
+      ctx.beginPath();
+      ctx.arc(px, py, s.r, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(230,232,232,${alpha})`;
+      ctx.fill();
+      ctx.restore();
+    }
+
+    // ── Layer 0 clouds (back, slowest)
+    for (const c of clouds.filter(c => c.layer === 0)) {
+      c.x -= c.speed * 0.6;
+      if (c.x + c.w < 0) c.x = W + 50;
+      const px = c.x + (mx / W - 0.5) * -12;
+      const py = c.y + (my / H - 0.5) * -6;
+      drawCloud(ctx, { ...c, x: px, y: py }, t);
+    }
+
+    // ── Aurora streaks
+    for (const s of streaks) {
+      s.life++;
+      if (s.life > s.maxLife) {
+        s.life = 0;
+        s.x = Math.random() * W;
+        s.y = H * 0.1 + Math.random() * H * 0.4;
+        s.maxLife = 200 + Math.random() * 300;
+        s.opacity = 0;
+      }
+      const half = s.maxLife / 2;
+      s.opacity = s.life < half ? s.life / half : 1 - (s.life - half) / half;
+      drawStreak(ctx, s);
+    }
+
+    // ── Layer 1 clouds (mid)
+    for (const c of clouds.filter(c => c.layer === 1)) {
+      c.x -= c.speed;
+      if (c.x + c.w < 0) c.x = W + 80;
+      const px = c.x + (mx / W - 0.5) * -20;
+      const py = c.y + (my / H - 0.5) * -10;
+      drawCloud(ctx, { ...c, x: px, y: py }, t);
+    }
+
+    // ── Data particles + knowledge lines
+    for (const p of particles) {
+      p.x += p.vx;
+      p.y += p.vy;
+      if (p.x < 0) p.x = W;
+      if (p.x > W) p.x = 0;
+      if (p.y < 0) p.y = H;
+      if (p.y > H) p.y = 0;
+
+      ctx.save();
+      ctx.globalAlpha = p.opacity;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      ctx.fillStyle = p.color;
+      ctx.fill();
+      ctx.restore();
+    }
+    drawKnowledgeLines(ctx, particles);
+
+    // ── Layer 2 clouds (front, fastest, darkest)
+    for (const c of clouds.filter(c => c.layer === 2)) {
+      c.x -= c.speed * 1.5;
+      if (c.x + c.w < 0) c.x = W + 100;
+      const px = c.x + (mx / W - 0.5) * -30;
+      const py = c.y + (my / H - 0.5) * -14;
+      drawCloud(ctx, { ...c, x: px, y: py }, t);
+    }
+
+    // ── Subtle horizontal light beam at center-bottom (horizon)
+    const horizon = ctx.createLinearGradient(0, H * 0.65, 0, H * 0.8);
+    horizon.addColorStop(0, 'transparent');
+    horizon.addColorStop(0.4, 'rgba(200,202,202,0.02)');
+    horizon.addColorStop(1, 'transparent');
+    ctx.fillStyle = horizon;
+    ctx.fillRect(0, H * 0.65, W, H * 0.15);
+
+    rafRef.current = requestAnimationFrame(animate);
+  }, [canvasRef, mouseX, mouseY]);
 
   useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    const observer = new IntersectionObserver(
-      ([entry]) => { if (entry.isIntersecting) { setVisible(true); observer.disconnect(); } },
-      { threshold }
-    );
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, [threshold]);
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    stateRef.current = initCanvas(canvas);
 
-  return { ref, visible };
+    const onResize = () => {
+      if (canvas) stateRef.current = initCanvas(canvas);
+    };
+    window.addEventListener('resize', onResize);
+    rafRef.current = requestAnimationFrame(animate);
+
+    return () => {
+      cancelAnimationFrame(rafRef.current);
+      window.removeEventListener('resize', onResize);
+    };
+  }, [animate, canvasRef]);
 }
 
-function RevealSection({ children, className = '' }: { children: React.ReactNode; className?: string }) {
-  const { ref, visible } = useReveal();
-  return (
-    <div
-      ref={ref}
-      className={`transition-all duration-700 ease-out ${visible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'} ${className}`}
-    >
-      {children}
-    </div>
-  );
-}
-
-function FloatingMetric({ label, value, delay }: { label: string; value: string; delay: number }) {
-  return (
-    <div
-      className="animate-fadeUp rounded-xl border border-white/10 bg-white/5 px-5 py-4 backdrop-blur-sm"
-      style={{ animationDelay: `${delay}ms` }}
-    >
-      <p className="text-2xl font-black text-verified">{value}</p>
-      <p className="mt-1 text-sm text-white/60">{label}</p>
-    </div>
-  );
-}
-
-const features = [
-  {
-    icon: Search,
-    title: 'Stack-Matched Discovery',
-    body: 'Every post is algorithmically matched to the right engineering stack — Go, Rust, Kubernetes, eBPF, and more. No noise, just signal.',
-    stats: ['12+ stacks', '98% relevance'],
-  },
-  {
-    icon: ShieldCheck,
-    title: 'Verified Claims',
-    body: 'Inline citations and community verification ensure claims carry proof. Flagged content is transparently marked until resolved.',
-    stats: ['94% verified', '2.1s avg. resolve'],
-  },
-  {
-    icon: GitFork,
-    title: 'Living Posts',
-    body: 'Patch, fork, and merge knowledge like code. Attribution chains preserve credit across every revision and derivative work.',
-    stats: ['45k forks', '100% attribution'],
-  },
-  {
-    icon: Coins,
-    title: 'Impact-Backed Earning',
-    body: 'Writers earn when their work is bookmarked, shared, forked, or cited. Your impact is your income — transparently on-chain.',
-    stats: ['$3400+ paid', '18k reactions'],
-  },
-  {
-    icon: Users,
-    title: 'Mentor Network',
-    body: 'Get matched with distinguished engineers who review your work, suggest improvements, and fast-track your growth.',
-    stats: ['200+ mentors', '4.9 avg. rating'],
-  },
-  {
-    icon: TrendingUp,
-    title: 'Trending Intelligence',
-    body: 'Real-time trending patches and vulnerability hotfixes. Know what the community is rallying behind, before it hits production.',
-    stats: ['Real-time', '2.4k% spikes'],
-  },
-];
-
-function FeatureCard({ feature, index }: { feature: typeof features[number]; index: number }) {
-  const { ref, visible } = useReveal(0.1);
-  const Icon = feature.icon;
-
-  return (
-    <div
-      ref={ref}
-      className={`group rounded-2xl border border-white/10 bg-white/[0.03] p-7 backdrop-blur-sm transition-all duration-700 ease-out hover:border-verified/30 hover:bg-white/[0.06] ${
-        visible ? 'translate-y-0 opacity-100' : 'translate-y-12 opacity-0'
-      }`}
-      style={{ transitionDelay: `${index * 100}ms` }}
-    >
-      <div className="mb-4 grid h-12 w-12 place-items-center rounded-xl bg-verified/10 text-verified ring-1 ring-verified/20 transition group-hover:bg-verified/20">
-        <Icon size={24} />
-      </div>
-      <h3 className="text-xl font-bold text-white">{feature.title}</h3>
-      <p className="mt-3 leading-relaxed text-white/60">{feature.body}</p>
-      <div className="mt-5 flex gap-3">
-        {feature.stats.map((stat) => (
-          <span key={stat} className="rounded-full bg-white/5 px-3 py-1 font-mono text-xs text-white/50 ring-1 ring-white/10">
-            {stat}
-          </span>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function TestimonialTicker() {
-  const { ref, visible } = useReveal(0.2);
-  const testimonials = [
-    { text: 'Meridian changed how our team consumes engineering knowledge.', author: '— Sarah Chen, Principal Systems Engineer' },
-    { text: 'The stack matching is incredible. I find relevant posts in seconds.', author: '— Marcus Thorne, Staff Platform Engineer' },
-    { text: 'Finally, a platform that rewards actual engineering impact.', author: '— Lyn Park, Backend Engineer' },
-  ];
-
-  return (
-    <div ref={ref} className={`overflow-hidden transition-all duration-700 ${visible ? 'opacity-100' : 'opacity-0'}`}>
-      <div className="animate-scroll inline-flex gap-6">
-        {[...testimonials, ...testimonials].map((t, i) => (
-          <div
-            key={i}
-            className="flex w-[420px] shrink-0 flex-col gap-2 rounded-xl border border-white/10 bg-white/[0.03] p-5 backdrop-blur-sm"
-          >
-            <p className="leading-relaxed text-white/70">&ldquo;{t.text}&rdquo;</p>
-            <p className="text-sm text-white/40">{t.author}</p>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
+/* ─────────────────────────────────────────────────────────────────────────
+   MAIN COMPONENT
+───────────────────────────────────────────────────────────────────────── */
+const fadeUp = {
+  hidden: { opacity: 0, y: 28 },
+  visible: (d: number) => ({
+    opacity: 1, y: 0,
+    transition: { duration: 0.85, delay: d, ease: [0.22, 1, 0.36, 1] },
+  }),
+};
 
 export function LandingPage() {
-  return (
-    <main className="relative min-h-screen overflow-hidden bg-black text-white">
-      <AnimatedNetwork />
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_25%_30%,rgba(0,200,150,0.18),transparent_32%),linear-gradient(180deg,rgba(0,0,0,0.92)_0%,rgba(0,0,0,0.55)_55%,rgba(0,0,0,0.3)_100%)]" />
+  const canvasRef = useRef<HTMLCanvasElement>(null!);
+  const containerRef = useRef<HTMLDivElement>(null!);
 
-      <nav className="relative z-10 flex h-16 items-center justify-between px-5 sm:px-8 lg:px-12">
-        <Link to="/" className="flex items-center gap-3">
-          <Logo size="sm" />
-          <span className="text-xl font-bold">Meridian</span>
+  const rawMx = useMotionValue(0.5);
+  const rawMy = useMotionValue(0.5);
+  const mx = useSpring(rawMx, { stiffness: 40, damping: 20 });
+  const my = useSpring(rawMy, { stiffness: 40, damping: 20 });
+
+  const handleMouseMove = useCallback((e: React.MouseEvent) => {
+    const rect = containerRef.current.getBoundingClientRect();
+    rawMx.set((e.clientX - rect.left) / rect.width);
+    rawMy.set((e.clientY - rect.top) / rect.height);
+  }, [rawMx, rawMy]);
+
+  useAtmosphereCanvas(canvasRef, mx, my);
+
+  return (
+    <main
+      ref={containerRef}
+      className="relative min-h-screen w-full overflow-hidden"
+      style={{ background: '#06080a' }}
+      onMouseMove={handleMouseMove}
+      aria-label="Meridian hero"
+    >
+      {/* ── Animated Canvas Background */}
+      <canvas
+        ref={canvasRef}
+        className="absolute inset-0 h-full w-full"
+        aria-hidden="true"
+      />
+
+      {/* ── Vignette overlay */}
+      <div
+        className="pointer-events-none absolute inset-0"
+        style={{
+          background: 'radial-gradient(ellipse at center, transparent 30%, rgba(0,0,0,0.65) 100%)',
+        }}
+        aria-hidden="true"
+      />
+
+      {/* ── Top nav */}
+      <nav className="relative z-20 flex items-center justify-between px-8 pt-6">
+        <Link to="/" className="flex items-center gap-2.5 group">
+          {/* Logo mark */}
+          <span
+            className="grid h-8 w-8 place-items-center rounded-lg"
+            style={{
+              background: 'rgba(255,255,255,0.06)',
+              border: '1px solid rgba(255,255,255,0.12)',
+              backdropFilter: 'blur(8px)',
+            }}
+          >
+            {/* Meridian "M" SVG */}
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+              <path d="M2 13V3l6 7 6-7v10" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </span>
+          <span className="text-sm font-semibold text-white/80 group-hover:text-white transition-colors" style={{ fontFamily: 'Inter, sans-serif', letterSpacing: '0.01em' }}>
+            Meridian
+          </span>
         </Link>
-        <Link to="/discover" className="hidden text-sm font-semibold text-white/80 hover:text-white sm:inline">
-          Open app
-        </Link>
+
+        <div className="flex items-center gap-5">
+          <Link to="/discover" className="text-xs text-white/50 hover:text-white/80 transition-colors" style={{ fontFamily: 'Inter, sans-serif' }}>
+            Discover
+          </Link>
+          <Link
+            to="/discover"
+            className="inline-flex h-7 items-center gap-1 rounded-full px-3.5 text-xs font-medium transition-all hover:bg-white/15"
+            style={{
+              fontFamily: 'Inter, sans-serif',
+              background: 'rgba(255,255,255,0.08)',
+              border: '1px solid rgba(255,255,255,0.12)',
+              color: 'rgba(255,255,255,0.8)',
+              backdropFilter: 'blur(8px)',
+            }}
+          >
+            Sign in
+          </Link>
+        </div>
       </nav>
 
-      <section className="relative z-10 flex min-h-[calc(100vh-4rem)] items-center px-5 pb-32 pt-12 sm:px-8 lg:px-12">
-        <div className="w-full max-w-3xl">
-          <p className="animate-fadeUp font-mono text-xs uppercase tracking-[0.36em] text-verified">
-            Knowledge unfolding. Impact rippling.
-          </p>
-          <h1 className="mt-5 animate-fadeUp text-5xl font-black leading-[0.95] text-white sm:text-7xl lg:text-8xl" style={{ animationDelay: '120ms' }}>
-            Where code
-            <br />
-            meets <span className="text-verified">credibility</span>.
-          </h1>
-          <p className="mt-6 max-w-2xl animate-fadeUp text-xl leading-8 text-white/70 sm:text-2xl" style={{ animationDelay: '240ms' }}>
-            A peer-driven engineering writing network where posts find the right stack, claims carry proof, and useful ideas keep earning.
-          </p>
+      {/* ── Hero Content — centered, pushed down */}
+      <div className="relative z-10 flex min-h-screen flex-col items-center justify-center px-6 text-center" style={{ paddingTop: '100px', paddingBottom: '40px' }}>
 
-          <div className="mt-10 flex animate-fadeUp flex-col gap-3 sm:flex-row" style={{ animationDelay: '360ms' }}>
-            <Link
-              to="/discover"
-              className="inline-flex h-12 items-center justify-center gap-2 rounded-full bg-verified px-7 font-bold text-black shadow-glow transition hover:scale-[1.02]"
-            >
-              Join Meridian
-              <ArrowRight size={18} />
-            </Link>
-            <a
-              href="#features"
-              className="inline-flex h-12 items-center justify-center rounded-full border border-white/25 px-7 font-bold text-white transition hover:border-white hover:bg-white/10"
-            >
-              Explore Features
-            </a>
-          </div>
+        {/* Badge */}
+        <motion.div
+          custom={0.2}
+          variants={fadeUp}
+          initial="hidden"
+          animate="visible"
+          className="mb-4"
+        >
+          <span
+            className="inline-flex items-center gap-2 rounded-full px-3.5 py-1 text-[11px] font-semibold uppercase tracking-widest"
+            style={{
+              fontFamily: 'Inter, sans-serif',
+              background: 'rgba(255,255,255,0.06)',
+              border: '1px solid rgba(255,255,255,0.14)',
+              backdropFilter: 'blur(12px)',
+              color: 'rgba(210,212,212,0.85)',
+              letterSpacing: '0.13em',
+            }}
+          >
+            <span
+              className="h-1.5 w-1.5 rounded-full"
+              style={{ background: 'rgba(200,202,202,0.6)' }}
+            />
+            Built for Engineers
+          </span>
+        </motion.div>
 
-          <div className="mt-16 grid animate-fadeUp gap-3 sm:grid-cols-3" style={{ animationDelay: '480ms' }}>
-            <FloatingMetric label="Active Engineers" value="12.4k" delay={0} />
-            <FloatingMetric label="Posts Published" value="8.2k" delay={150} />
-            <FloatingMetric label="Impact Paid" value="$86k" delay={300} />
-          </div>
+        {/* Main Headline */}
+        <motion.h1
+          custom={0.45}
+          variants={fadeUp}
+          initial="hidden"
+          animate="visible"
+          className="mx-auto max-w-4xl leading-[1.04]"
+          style={{
+            fontFamily: '"Playfair Display", Georgia, serif',
+            fontSize: 'clamp(2rem, 4.8vw, 4.6rem)',
+            fontWeight: 800,
+            color: 'rgba(240,242,242,0.96)',
+            letterSpacing: '-0.02em',
+            textShadow: '0 2px 40px rgba(0,0,0,0.8)',
+          }}
+        >
+          Where Great Engineering
+          <br />
+          <span style={{ fontStyle: 'italic', color: 'rgba(200,202,202,0.85)' }}>Writing Gets Found</span>
+        </motion.h1>
 
-          <RevealSection className="mt-20">
-            <TestimonialTicker />
-          </RevealSection>
-        </div>
-      </section>
+        {/* Subheading */}
+        <motion.p
+          custom={0.65}
+          variants={fadeUp}
+          initial="hidden"
+          animate="visible"
+          className="mt-4 max-w-md leading-relaxed"
+          style={{
+            fontFamily: 'Inter, sans-serif',
+            fontSize: 'clamp(0.8rem, 1.5vw, 0.95rem)',
+            fontWeight: 400,
+            color: 'rgba(160,162,162,0.85)',
+            textShadow: '0 1px 20px rgba(0,0,0,0.6)',
+          }}
+        >
+          Discover stack-matched articles, fork ideas, publish living posts,
+          and earn from impact — not algorithms.
+        </motion.p>
 
-      <section id="features" className="relative z-10 border-t border-white/10 px-5 py-28 sm:px-8 lg:px-12">
-        <RevealSection>
-          <p className="font-mono text-xs uppercase tracking-[0.36em] text-verified">Platform capabilities</p>
-          <h2 className="mt-3 text-4xl font-black text-white sm:text-5xl">
-            Everything a modern
-            <br />
-            engineering writer needs.
-          </h2>
-        </RevealSection>
+        {/* Supporting caption */}
+        <motion.p
+          custom={0.75}
+          variants={fadeUp}
+          initial="hidden"
+          animate="visible"
+          className="mt-2 text-[12px]"
+          style={{
+            fontFamily: 'Inter, sans-serif',
+            color: 'rgba(120,122,122,0.7)',
+            letterSpacing: '0.04em',
+          }}
+        >
+          Great posts don't go unread here.
+        </motion.p>
 
-        <div className="mt-14 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {features.map((feature, index) => (
-            <FeatureCard key={feature.title} feature={feature} index={index} />
-          ))}
-        </div>
-      </section>
+        {/* CTA Buttons */}
+        <motion.div
+          custom={0.9}
+          variants={fadeUp}
+          initial="hidden"
+          animate="visible"
+          className="mt-7 flex flex-col items-center gap-3 sm:flex-row"
+        >
+          {/* Primary CTA */}
+          <Link
+            to="/editor/new"
+            id="cta-start-writing"
+            className="group inline-flex h-10 items-center gap-2 rounded-full px-6 text-sm font-semibold transition-all hover:scale-[1.03] active:scale-[0.98]"
+            style={{
+              fontFamily: 'Inter, sans-serif',
+              background: 'rgba(240,242,242,0.95)',
+              color: '#0d0f10',
+              boxShadow: '0 0 0 1px rgba(255,255,255,0.15), 0 4px 24px rgba(0,0,0,0.4)',
+              letterSpacing: '0.01em',
+            }}
+            aria-label="Start writing on Meridian"
+          >
+            Start Writing
+            <ArrowRight size={14} className="transition-transform group-hover:translate-x-0.5" />
+          </Link>
 
-      <section className="relative z-10 border-t border-white/10 px-5 py-28 sm:px-8 lg:px-12">
-        <div className="mx-auto max-w-5xl">
-          <RevealSection>
-            <div className="rounded-2xl border border-white/10 bg-gradient-to-br from-white/[0.04] to-transparent p-8 sm:p-12">
-              <p className="font-mono text-xs uppercase tracking-[0.36em] text-verified">Get started</p>
-              <h2 className="mt-3 text-3xl font-black text-white sm:text-4xl">
-                Ready to make your knowledge count?
-              </h2>
-              <p className="mt-4 max-w-xl text-lg leading-relaxed text-white/60">
-                Join thousands of engineers publishing, reviewing, and earning on the network that treats knowledge like infrastructure.
-              </p>
-              <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-                <Link
-                  to="/discover"
-                  className="inline-flex h-12 items-center justify-center gap-2 rounded-full bg-verified px-7 font-bold text-black shadow-glow transition hover:scale-[1.02]"
-                >
-                  Create your first post
-                  <ArrowRight size={18} />
-                </Link>
-                <a
-                  href="#features"
-                  className="inline-flex h-12 items-center justify-center rounded-full border border-white/25 px-7 font-bold text-white transition hover:border-white hover:bg-white/10"
-                >
-                  Learn more
-                </a>
-              </div>
+          {/* Secondary CTA */}
+          <Link
+            to="/discover"
+            id="cta-explore-posts"
+            className="inline-flex h-10 items-center gap-2 rounded-full px-6 text-sm font-medium transition-all hover:scale-[1.03] active:scale-[0.98]"
+            style={{
+              fontFamily: 'Inter, sans-serif',
+              background: 'rgba(255,255,255,0.06)',
+              border: '1px solid rgba(255,255,255,0.14)',
+              backdropFilter: 'blur(12px)',
+              color: 'rgba(200,202,202,0.85)',
+              letterSpacing: '0.01em',
+            }}
+            aria-label="Explore posts on Meridian"
+          >
+            <BookOpen size={14} />
+            Explore Posts
+          </Link>
+        </motion.div>
+
+        {/* Social proof / stats */}
+        <motion.div
+          custom={1.1}
+          variants={fadeUp}
+          initial="hidden"
+          animate="visible"
+          className="mt-8 flex items-center gap-8"
+        >
+          {[
+            { value: '12k+', label: 'Engineers' },
+            { value: '8k+', label: 'Posts' },
+            { value: '$86k', label: 'Earned' },
+          ].map(s => (
+            <div key={s.label} className="flex flex-col items-center gap-0.5">
+              <span
+                className="text-base font-semibold"
+                style={{ fontFamily: 'Inter, sans-serif', color: 'rgba(220,222,222,0.7)' }}
+              >
+                {s.value}
+              </span>
+              <span
+                className="text-[11px] uppercase tracking-widest"
+                style={{ fontFamily: 'Inter, sans-serif', color: 'rgba(130,132,132,0.6)', letterSpacing: '0.1em' }}
+              >
+                {s.label}
+              </span>
             </div>
-          </RevealSection>
-        </div>
-      </section>
+          ))}
+        </motion.div>
 
-      <footer className="relative z-10 border-t border-white/10 px-5 py-12 sm:px-8 lg:px-12">
-        <div className="flex flex-col items-center justify-between gap-4 sm:flex-row">
-          <div className="flex items-center gap-3">
-            <Logo size="sm" />
-            <span className="text-sm font-bold text-white/60">Meridian &mdash; Knowledge unfolding. Impact rippling.</span>
-          </div>
-          <div className="flex gap-6 text-sm text-white/40">
-            <Link to="/discover" className="hover:text-white/80">Discover</Link>
-            <a href="#features" className="hover:text-white/80">Features</a>
-          </div>
-        </div>
-      </footer>
+      </div>
+
+      {/* ── Scroll-Driven Storytelling */}
+      <ScrollStory />
+
+      {/* ── Bottom bar */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 2.2, duration: 0.8 }}
+        className="absolute bottom-0 left-0 right-0 z-20 flex items-center justify-between border-t px-8 py-3"
+        style={{
+          borderColor: 'rgba(255,255,255,0.06)',
+          backdropFilter: 'blur(8px)',
+          background: 'rgba(6,8,10,0.3)',
+        }}
+      >
+        <p className="font-mono text-[10px]" style={{ color: 'rgba(100,102,102,0.6)', letterSpacing: '0.04em' }}>
+          Meridian — Where Great Engineering Writing Gets Found
+        </p>
+        <p className="font-mono text-[10px]" style={{ color: 'rgba(100,102,102,0.6)', letterSpacing: '0.04em' }}>
+          © {new Date().getFullYear()} Meridian
+        </p>
+      </motion.div>
     </main>
   );
 }
