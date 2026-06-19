@@ -32,10 +32,46 @@ function roundRect(ctx: CanvasRenderingContext2D, x: number, y: number, w: numbe
   ctx.closePath();
 }
 
+/* ── Space background helper ──────────────────────────────────────────── */
+
+function drawSpaceBackground(ctx: CanvasRenderingContext2D, w: number, h: number, p: number) {
+  const bg = ctx.createRadialGradient(w * 0.5, h * 0.25, 0, w * 0.5, h * 0.25, Math.max(w, h) * 0.8);
+  bg.addColorStop(0, '#0e141c');
+  bg.addColorStop(0.3, '#080b10');
+  bg.addColorStop(0.7, '#030406');
+  bg.addColorStop(1, '#000000');
+  ctx.fillStyle = bg;
+  ctx.fillRect(0, 0, w, h);
+
+  const nebulaColors = ['rgba(28,42,72,0.06)', 'rgba(48,22,58,0.04)', 'rgba(12,48,64,0.05)'];
+  for (let n = 0; n < 3; n++) {
+    const nx = ((n * 173 + 31) % 100) / 100 * w;
+    const ny = ((n * 237 + 17) % 100) / 100 * h;
+    const nr = 100 + ((n * 311 + 53) % 100) / 100 * 180;
+    const grad = ctx.createRadialGradient(nx, ny, 0, nx, ny, nr);
+    grad.addColorStop(0, nebulaColors[n]);
+    grad.addColorStop(1, 'transparent');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, w, h);
+  }
+
+  const starCount = 100;
+  for (let i = 0; i < starCount; i++) {
+    const sx = ((i * 37 + 13) % 100) / 100 * w;
+    const sy = ((i * 73 + 7) % 100) / 100 * h;
+    const sr = 0.3 + ((i * 131 + 5) % 100) / 100;
+    const twinkle = Math.sin(p * 6 + i * 1.7) * 0.25 + 0.5;
+    const alpha = twinkle * (0.12 + ((i * 53 + 11) % 100) / 100 * 0.25);
+    ctx.fillStyle = `rgba(200, 215, 230, ${alpha})`;
+    ctx.beginPath();
+    ctx.arc(sx, sy, sr, 0, Math.PI * 2);
+    ctx.fill();
+  }
+}
+
 /* ── Feature drawing functions ────────────────────────────────────────── */
 
 function drawDiscovery(ctx: CanvasRenderingContext2D, w: number, h: number, p: number) {
-  clear(ctx, w, h);
   const cx = w / 2, cy = h / 2;
   const tags = ['React', 'Go', 'Python', 'K8s', 'Rust', 'TS', 'Docker', 'Postgres'];
   const n = tags.length;
@@ -97,7 +133,6 @@ function drawDiscovery(ctx: CanvasRenderingContext2D, w: number, h: number, p: n
 }
 
 function drawLivingPosts(ctx: CanvasRenderingContext2D, w: number, h: number, p: number) {
-  clear(ctx, w, h);
   const cx = w / 2, cy = h / 2;
 
   // document outline
@@ -158,7 +193,6 @@ function drawLivingPosts(ctx: CanvasRenderingContext2D, w: number, h: number, p:
 }
 
 function drawForkable(ctx: CanvasRenderingContext2D, w: number, h: number, p: number) {
-  clear(ctx, w, h);
   const cx = w / 2;
 
   // tree levels — max 4 levels
@@ -208,7 +242,6 @@ function drawForkable(ctx: CanvasRenderingContext2D, w: number, h: number, p: nu
 }
 
 function drawRewards(ctx: CanvasRenderingContext2D, w: number, h: number, p: number) {
-  clear(ctx, w, h);
   const cx = w / 2, cy = h / 2;
 
   // central metric
@@ -253,7 +286,6 @@ function drawRewards(ctx: CanvasRenderingContext2D, w: number, h: number, p: num
 }
 
 function drawPeerDiscovery(ctx: CanvasRenderingContext2D, w: number, h: number, p: number) {
-  clear(ctx, w, h);
   const cx = w / 2, cy = h / 2;
 
   // avatar positions in a loose network
@@ -322,7 +354,6 @@ function drawPeerDiscovery(ctx: CanvasRenderingContext2D, w: number, h: number, 
 }
 
 function drawConstellation(ctx: CanvasRenderingContext2D, w: number, h: number, p: number) {
-  clear(ctx, w, h);
   const cx = w / 2, cy = h / 2;
   const s = Math.min(w, h) * 0.15;
 
@@ -473,9 +504,10 @@ function FeatureSection({ feature, index }: { feature: FeatureDef; index: number
         const w = canvas.offsetWidth;
         const h = canvas.offsetHeight;
         ctx2d.save();
-        // reset transform since Canvas2D state accumulates
         ctx2d.setTransform(window.devicePixelRatio || 1, 0, 0, window.devicePixelRatio || 1, 0, 0);
-        feature.draw(ctx2d, w, h, progress);
+        drawSpaceBackground(ctx2d, w, h, progress);
+        const speed = Math.min(1, progress * 1.4);
+        feature.draw(ctx2d, w, h, speed);
         ctx2d.restore();
       },
       onRefresh: resize,
@@ -497,7 +529,7 @@ function FeatureSection({ feature, index }: { feature: FeatureDef; index: number
     <section
       ref={sectionRef}
       className="relative"
-      style={{ height: '300vh', background: BLACK }}
+      style={{ height: '200vh', background: BLACK }}
     >
       <div
         ref={contentRef}
@@ -591,7 +623,9 @@ function FinalConstellation() {
         const h = canvas.offsetHeight;
         ctx.save();
         ctx.setTransform(window.devicePixelRatio || 1, 0, 0, window.devicePixelRatio || 1, 0, 0);
-        drawConstellation(ctx, w, h, self.progress);
+        drawSpaceBackground(ctx, w, h, self.progress);
+        const speed = Math.min(1, self.progress * 1.5);
+        drawConstellation(ctx, w, h, speed);
         ctx.restore();
       },
       onRefresh: resize,
