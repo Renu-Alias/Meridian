@@ -1,5 +1,5 @@
 import { useEffect, useRef, useCallback } from 'react';
-import { motion, useMotionValue, useSpring, type MotionValue } from 'framer-motion';
+import { motion, useMotionValue, useSpring } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { ArrowRight, BookOpen } from 'lucide-react';
 import { ScrollStory } from '../components/ScrollStory';
@@ -165,8 +165,8 @@ function drawKnowledgeLines(ctx: CanvasRenderingContext2D, particles: Particle[]
 ───────────────────────────────────────────────────────────────────────── */
 function useAtmosphereCanvas(
   canvasRef: React.RefObject<HTMLCanvasElement>,
-  mouseX: MotionValue<number>,
-  mouseY: MotionValue<number>
+  mouseX: ReturnType<typeof useMotionValue>,
+  mouseY: ReturnType<typeof useMotionValue>
 ) {
   const stateRef = useRef<ReturnType<typeof initCanvas> | null>(null);
   const rafRef = useRef<number>(0);
@@ -313,7 +313,7 @@ const fadeUp = {
   hidden: { opacity: 0, y: 28 },
   visible: (d: number) => ({
     opacity: 1, y: 0,
-    transition: { duration: 0.85, delay: d, ease: [0.22, 1, 0.36, 1] as [number, number, number, number] },
+    transition: { duration: 0.85, delay: d, ease: [0.22, 1, 0.36, 1] },
   }),
 };
 
@@ -337,7 +337,7 @@ export function LandingPage() {
   return (
     <main
       ref={containerRef}
-      className="relative w-full"
+      className="relative min-h-screen w-full overflow-hidden"
       style={{ background: '#06080a' }}
       onMouseMove={handleMouseMove}
       aria-label="Meridian hero"
@@ -400,8 +400,8 @@ export function LandingPage() {
         </div>
       </nav>
 
-      {/* ── Hero Content — centered, pushed down, extra tall */}
-      <div className="relative z-10 flex min-h-[120vh] flex-col items-center justify-center px-6 text-center" style={{ paddingTop: '140px', paddingBottom: '40px' }}>
+      {/* ── Hero Content — centered, pushed down */}
+      <div className="relative z-10 flex min-h-screen flex-col items-center justify-center px-6 text-center" style={{ paddingTop: '100px', paddingBottom: '40px' }}>
 
         {/* Badge */}
         <motion.div
@@ -572,7 +572,7 @@ export function LandingPage() {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 2.2, duration: 0.8 }}
-        className="fixed bottom-0 left-0 right-0 z-50 flex items-center justify-between border-t px-8 py-3"
+        className="absolute bottom-0 left-0 right-0 z-20 flex items-center justify-between border-t px-8 py-3"
         style={{
           borderColor: 'rgba(255,255,255,0.06)',
           backdropFilter: 'blur(8px)',

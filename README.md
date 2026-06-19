@@ -125,6 +125,7 @@ meridian-frontend/
 - `Zustand` — lightweight client state
 - `Monaco Editor` — rich code blocks in posts
 - `Tailwind CSS` — utility-first styling
+- `IBM Plex Sans` - custom font creation
 ---
  
 ### Backend — Python
