@@ -1,5 +1,5 @@
 import { useEffect, useRef, useCallback } from 'react';
-import { motion, useMotionValue, useSpring } from 'framer-motion';
+import { motion, MotionValue, useMotionValue, useSpring } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { ArrowRight, BookOpen } from 'lucide-react';
 import { ScrollStory } from '../components/ScrollStory';
@@ -167,8 +167,8 @@ function drawKnowledgeLines(ctx: CanvasRenderingContext2D, particles: Particle[]
 ───────────────────────────────────────────────────────────────────────── */
 function useAtmosphereCanvas(
   canvasRef: React.RefObject<HTMLCanvasElement>,
-  mouseX: ReturnType<typeof useMotionValue>,
-  mouseY: ReturnType<typeof useMotionValue>
+  mouseX: MotionValue<number>,
+  mouseY: MotionValue<number>
 ) {
   const stateRef = useRef<ReturnType<typeof initCanvas> | null>(null);
   const rafRef = useRef<number>(0);
@@ -315,7 +315,7 @@ const fadeUp = {
   hidden: { opacity: 0, y: 28 },
   visible: (d: number) => ({
     opacity: 1, y: 0,
-    transition: { duration: 0.85, delay: d, ease: [0.22, 1, 0.36, 1] },
+    transition: { duration: 0.85, delay: d, ease: [0.22, 1, 0.36, 1] as const },
   }),
 };
 
