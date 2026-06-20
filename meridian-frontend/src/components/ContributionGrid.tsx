@@ -1,4 +1,5 @@
 const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+const monthStartWeeks = [0, 4, 9, 13, 17, 22, 26, 31, 35, 39, 44, 48];
 const weekdayLabels = ['Mon', '', 'Wed', '', 'Fri', '', ''];
 const levels = ['bg-surface', 'bg-verified/20', 'bg-verified/45', 'bg-verified', 'bg-emerald-700'];
 
@@ -11,9 +12,13 @@ export function ContributionGrid() {
   return (
     <div className="overflow-x-auto pb-2 thin-scrollbar" aria-label="Meridian contribution tracker">
       <div className="min-w-[860px]">
-        <div className="mb-2 ml-[38px] grid grid-cols-[repeat(53,minmax(0,1fr))] gap-1 text-[11px] text-muted">
+        <div className="relative mb-2 ml-[38px] h-4 text-[11px] text-muted">
           {months.map((month, index) => (
-            <span key={month} className={index % 4 === 0 ? 'block' : 'invisible'}>
+            <span
+              key={month}
+              className="absolute"
+              style={{ left: `${(monthStartWeeks[index] / 53) * 100}%` }}
+            >
               {month}
             </span>
           ))}

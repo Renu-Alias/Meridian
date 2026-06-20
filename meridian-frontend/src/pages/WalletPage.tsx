@@ -55,7 +55,7 @@ export function WalletPage() {
         </div>
         <div className="overflow-x-auto thin-scrollbar">
           <table className="w-full min-w-[720px] text-left text-sm">
-            <thead className="bg-surface/60 font-mono text-xs uppercase tracking-[0.18em] text-muted">
+            <thead className="bg-[#1a1d24] font-mono text-xs uppercase tracking-[0.18em] text-[#EAECEC]">
               <tr>
                 <th className="p-4">Post</th>
                 <th className="p-4">Earnings</th>

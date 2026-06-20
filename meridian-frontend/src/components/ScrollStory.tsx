@@ -445,13 +445,15 @@ interface FeatureDef {
 function FeatureSection({ feature, index }: { feature: FeatureDef; index: number }) {
   const sectionRef = useRef<HTMLDivElement>(null!);
   const canvasRef = useRef<HTMLCanvasElement>(null!);
+  const canvasWrapperRef = useRef<HTMLDivElement>(null!);
   const contentRef = useRef<HTMLDivElement>(null!);
   const frameRef = useRef(0);
 
   useEffect(() => {
     const section = sectionRef.current;
     const canvas = canvasRef.current;
-    if (!section || !canvas) return;
+    const canvasWrapper = canvasWrapperRef.current;
+    if (!section || !canvas || !canvasWrapper) return;
     const ctx2d = canvas.getContext('2d');
     if (!ctx2d) return;
 
@@ -474,15 +476,13 @@ function FeatureSection({ feature, index }: { feature: FeatureDef; index: number
         const progress = self.progress;
         const w = canvas.offsetWidth;
         const h = canvas.offsetHeight;
+
+        // Scale wrapper via CSS so canvas visually enlarges without clipping
+        const scale = 1 + progress * 0.5;
+        canvasWrapper.style.transform = `scale(${scale})`;
+
         ctx2d.save();
-        // reset transform since Canvas2D state accumulates
         ctx2d.setTransform(window.devicePixelRatio || 1, 0, 0, window.devicePixelRatio || 1, 0, 0);
-        
-        // Scale and translate based on progress for a growing, dominant effect
-        const scale = 1 + progress * 0.6; // Increased scale for more dominancy
-        ctx2d.translate(w / 2, h / 2);
-        ctx2d.scale(scale, scale);
-        ctx2d.translate(-w / 2, -h / 2);
 
         const speed = Math.min(1, progress * 2);
         feature.draw(ctx2d, w, h, speed);
@@ -511,10 +511,14 @@ function FeatureSection({ feature, index }: { feature: FeatureDef; index: number
     >
       <div
         ref={contentRef}
-        className="sticky top-0 flex h-screen w-full flex-col-reverse items-center justify-center gap-8 overflow-hidden px-6 md:flex-row md:px-16 lg:px-24"
+        className="sticky top-0 flex h-screen w-full flex-col-reverse items-center justify-center gap-8 px-6 md:flex-row md:px-16 lg:px-24"
       >
         {/* Canvas */}
-        <div className="flex w-full items-center justify-center md:w-1/2" style={{ height: 'clamp(280px, 45vh, 500px)' }}>
+        <div
+          ref={canvasWrapperRef}
+          className="flex w-full items-center justify-center md:w-1/2"
+          style={{ height: 'clamp(280px, 45vh, 500px)', willChange: 'transform' }}
+        >
           <canvas
             ref={canvasRef}
             className="h-full w-full rounded-xl"
@@ -691,7 +695,7 @@ function FinalConstellation() {
           </Link>
 
           <Link
-            to="/discover"
+            to="/feed"
             className="inline-flex h-10 items-center gap-2 rounded-full px-6 text-sm font-medium transition-all hover:scale-[1.03] active:scale-[0.98]"
             style={{
               fontFamily: 'Inter, sans-serif',

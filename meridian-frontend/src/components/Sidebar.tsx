@@ -1,4 +1,4 @@
-import { Bell, Compass, Edit3, Home, User, WalletCards, X } from 'lucide-react';
+import { Bell, Compass, Edit3, Home, Settings, User, WalletCards, X } from 'lucide-react';
 import { NavLink } from 'react-router-dom';
 import { useUiStore } from '../store/uiStore';
 import { Logo } from './Logo';
@@ -9,6 +9,7 @@ const links = [
   { to: '/notifications', label: 'Notifications', icon: Bell },
   { to: '/wallet', label: 'Wallet', icon: WalletCards },
   { to: '/profile/alex', label: 'Profile', icon: User },
+  { to: '/settings', label: 'Settings', icon: Settings },
 ];
 
 const colors = {

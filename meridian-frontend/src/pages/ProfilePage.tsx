@@ -42,7 +42,7 @@ function ProfileContent() {
         <h3 className="text-xl font-bold">Tech stack</h3>
         <div className="mt-4 flex flex-wrap gap-2">
           {profile.stack.map((tag) => (
-            <span key={tag} className="rounded-full bg-surface px-3 py-1 text-sm font-semibold">
+            <span key={tag} className="rounded-full bg-[#222] px-3 py-1 text-sm font-semibold text-[#EAECEC]">
               {tag}
             </span>
           ))}
@@ -124,8 +124,7 @@ export function ProfilePage() {
 export function ProfileShell() {
   return (
     <div className="min-h-screen bg-black text-[#EAECEC]">
-      <div className="mx-auto grid max-w-6xl gap-6 px-6 py-8 lg:grid-cols-[220px_minmax(0,1fr)]">
-        <ProfileSidebar />
+      <div className="mx-auto max-w-4xl px-6 py-8">
         <ProfileContent />
       </div>
     </div>

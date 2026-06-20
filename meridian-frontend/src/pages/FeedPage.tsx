@@ -18,7 +18,7 @@ export function FeedPage() {
   const { data: posts = [] } = useQuery({ queryKey: ['feed'], queryFn: fetchFeed });
 
   return (
-    <div className="mx-auto max-w-3xl">
+    <div>
       {/* Composer */}
       <section className="border-b px-4 py-3 sm:px-5" style={{ borderColor: colors.border }}>
         <div className="flex gap-3">

@@ -1,5 +1,5 @@
 import { HelpCircle, Menu, Search, Settings } from 'lucide-react';
-import { useLocation } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { useUiStore } from '../store/uiStore';
 
 const titles: Record<string, string> = {
@@ -60,9 +60,9 @@ export function HeaderBar() {
       </div>
 
       <div className="flex items-center gap-1">
-        <button className="grid h-8 w-8 place-items-center rounded-md transition-colors hover:bg-[#1a1d24]" style={{ color: colors.muted }} aria-label="Settings">
+        <Link to="/settings" className="grid h-8 w-8 place-items-center rounded-md transition-colors hover:bg-[#1a1d24]" style={{ color: colors.muted }} aria-label="Settings">
           <Settings size={18} />
-        </button>
+        </Link>
         <button className="grid h-8 w-8 place-items-center rounded-md transition-colors hover:bg-[#1a1d24]" style={{ color: colors.muted }} aria-label="Help">
           <HelpCircle size={18} />
         </button>

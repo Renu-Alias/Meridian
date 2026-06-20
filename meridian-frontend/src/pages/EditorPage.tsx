@@ -6,7 +6,7 @@ const starterCode = `pub fn coordinate_meridian() {\n    // Initializing network
 
 export function EditorPage() {
   return (
-    <main className="min-h-screen bg-neutral-500 p-4 text-[#EAECEC] sm:p-8">
+    <main className="min-h-screen bg-black p-4 text-[#EAECEC] sm:p-8">
       <section className="mx-auto flex min-h-[calc(100vh-4rem)] max-w-7xl flex-col border border-[#333] bg-black shadow-panel">
         <header className="flex h-16 items-center justify-between border-b border-[#333] px-5">
           <div className="flex items-center gap-4 text-neutral-600">

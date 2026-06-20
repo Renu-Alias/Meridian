@@ -9,6 +9,7 @@ import { FeedPage } from './pages/FeedPage';
 import { LandingPage } from './pages/LandingPage';
 import { NotificationsPage } from './pages/NotificationsPage';
 import { ProfilePage, ProfileShell } from './pages/ProfilePage';
+import { SettingsPage } from './pages/SettingsPage';
 import { WalletPage } from './pages/WalletPage';
 
 function AppShell() {
@@ -25,7 +26,7 @@ function AppShell() {
             <Route path="/wallet" element={<WalletPage />} />
             <Route path="/profile/:username/*" element={<ProfileShell />} />
             <Route path="/mentored" element={<DiscoverPage />} />
-            <Route path="/settings" element={<ProfileShell />} />
+            <Route path="/settings" element={<SettingsPage />} />
             <Route path="*" element={<Navigate to="/discover" replace />} />
           </Routes>
         </main>

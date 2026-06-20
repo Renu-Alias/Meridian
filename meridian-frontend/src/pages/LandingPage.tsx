@@ -418,7 +418,7 @@ export function LandingPage() {
             <Link to="/editor/new" id="cta-start-writing" className="group inline-flex h-10 items-center gap-2 rounded-full px-6 text-sm font-semibold transition-all hover:scale-[1.03] active:scale-[0.98]" style={{ fontFamily: 'Inter, sans-serif', background: 'var(--color-verified)', color: 'var(--color-primary)', boxShadow: '0 4px 14px rgba(0,200,150,0.3)', letterSpacing: '0.01em' }} aria-label="Start writing on Meridian">
               Start Writing <ArrowRight size={14} className="transition-transform group-hover:translate-x-0.5" />
             </Link>
-            <Link to="/discover" id="cta-explore-posts" className="inline-flex h-10 items-center gap-2 rounded-full px-6 text-sm font-medium transition-all hover:scale-[1.03] active:scale-[0.98]" style={{ fontFamily: 'Inter, sans-serif', background: 'transparent', border: '1px solid var(--color-muted)', color: 'var(--color-surface)', letterSpacing: '0.01em' }} aria-label="Explore posts on Meridian">
+            <Link to="/feed" id="cta-explore-posts" className="inline-flex h-10 items-center gap-2 rounded-full px-6 text-sm font-medium transition-all hover:scale-[1.03] active:scale-[0.98]" style={{ fontFamily: 'Inter, sans-serif', background: 'transparent', border: '1px solid var(--color-muted)', color: 'var(--color-surface)', letterSpacing: '0.01em' }} aria-label="Explore posts on Meridian">
               <BookOpen size={14} /> Explore Posts
             </Link>
           </motion.div>
