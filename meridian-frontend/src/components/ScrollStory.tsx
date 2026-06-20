@@ -484,7 +484,8 @@ function FeatureSection({ feature, index }: { feature: FeatureDef; index: number
         ctx2d.scale(scale, scale);
         ctx2d.translate(-w / 2, -h / 2);
 
-        feature.draw(ctx2d, w, h, progress);
+        const speed = Math.min(1, progress * 2);
+        feature.draw(ctx2d, w, h, speed);
         ctx2d.restore();
       },
       onRefresh: resize,
@@ -506,7 +507,7 @@ function FeatureSection({ feature, index }: { feature: FeatureDef; index: number
     <section
       ref={sectionRef}
       className="relative"
-      style={{ height: '180vh', background: 'transparent' }}
+      style={{ height: '120vh', background: 'transparent' }}
     >
       <div
         ref={contentRef}
@@ -600,7 +601,8 @@ function FinalConstellation() {
         const h = canvas.offsetHeight;
         ctx.save();
         ctx.setTransform(window.devicePixelRatio || 1, 0, 0, window.devicePixelRatio || 1, 0, 0);
-        drawConstellation(ctx, w, h, self.progress);
+        const speed = Math.min(1, self.progress * 2);
+        drawConstellation(ctx, w, h, speed);
         ctx.restore();
       },
       onRefresh: resize,

@@ -337,245 +337,121 @@ export function LandingPage() {
   useAtmosphereCanvas(canvasRef, mx, my);
 
   return (
-    <main
-      ref={containerRef}
-      className="relative min-h-screen w-full overflow-x-hidden"
-      style={{ background: 'var(--color-primary)' }}
-      onMouseMove={handleMouseMove}
-      aria-label="Meridian hero"
-    >
-      {/* ── Animated Canvas Background */}
-      <div className="fixed inset-0 z-0 pointer-events-none">
-        <canvas
-          ref={canvasRef}
-          className="h-full w-full"
+    <main className="relative w-full" aria-label="Meridian hero">
+      {/* ── Hero Section — atmosphere canvas scoped to this area */}
+      <section
+        ref={containerRef}
+        className="relative min-h-screen w-full overflow-hidden"
+        onMouseMove={handleMouseMove}
+      >
+        {/* Animated atmosphere canvas */}
+        <div className="absolute inset-0 z-0 pointer-events-none">
+          <canvas ref={canvasRef} className="h-full w-full" aria-hidden="true" />
+        </div>
+
+        {/* Vignette overlay */}
+        <div
+          className="absolute inset-0 z-0 pointer-events-none"
+          style={{
+            background: 'radial-gradient(ellipse at center, transparent 30%, rgba(0,0,0,0.85) 100%)',
+          }}
           aria-hidden="true"
         />
-      </div>
 
-      {/* ── Vignette overlay */}
-      <div
-        className="fixed inset-0 z-0 pointer-events-none"
-        style={{
-          background: 'radial-gradient(ellipse at center, transparent 30%, rgba(0,0,0,0.85) 100%)',
-        }}
-        aria-hidden="true"
-      />
-
-      {/* ── Top nav */}
-      <nav className="relative z-20 flex items-center justify-between px-8 pt-6">
-        <Link to="/" className="flex items-center gap-2.5 group">
-          {/* Logo mark */}
-          <span
-            className="grid h-8 w-8 place-items-center rounded-lg"
-            style={{
-              background: 'rgba(255,255,255,0.06)',
-              border: '1px solid rgba(255,255,255,0.12)',
-              backdropFilter: 'blur(8px)',
-            }}
-          >
-            {/* Meridian "M" SVG */}
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-              <path d="M2 13V3l6 7 6-7v10" stroke="var(--color-surface)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-          </span>
-          <span className="text-sm font-semibold transition-colors" style={{ fontFamily: 'Inter, sans-serif', letterSpacing: '0.01em', color: 'var(--color-surface)' }}>
-            Meridian
-          </span>
-        </Link>
-
-        <div className="flex items-center gap-5">
-          <Link to="/discover" className="text-xs transition-colors hover:text-white" style={{ fontFamily: 'Inter, sans-serif', color: 'var(--color-muted)' }}>
-            Discover
-          </Link>
-          <Link
-            to="/discover"
-            className="inline-flex h-7 items-center gap-1 rounded-full px-3.5 text-xs font-medium transition-all hover:bg-black/10"
-            style={{
-              fontFamily: 'Inter, sans-serif',
-              background: 'transparent',
-              border: '1px solid var(--color-muted)',
-              color: 'var(--color-surface)',
-            }}
-          >
-            Sign in
-          </Link>
-        </div>
-      </nav>
-
-      {/* ── Hero Content — centered, pushed down */}
-      <div className="relative z-10 flex min-h-screen flex-col items-center justify-center px-6 text-center" style={{ paddingTop: '80px', paddingBottom: '15vh' }}>
-
-        {/* Badge */}
-        <motion.div
-          custom={0.2}
-          variants={fadeUp}
-          initial="hidden"
-          animate="visible"
-          className="mb-4"
-        >
-          <span
-            className="inline-flex items-center gap-2 rounded-full px-3.5 py-1 text-[11px] font-semibold uppercase tracking-widest"
-            style={{
-              fontFamily: 'Inter, sans-serif',
-              background: 'rgba(0,200,150,0.08)',
-              border: '1px solid rgba(0,200,150,0.3)',
-              color: 'var(--color-verified)',
-              letterSpacing: '0.13em',
-            }}
-          >
+        {/* Top nav */}
+        <nav className="relative z-20 flex items-center justify-between px-8 pt-6">
+          <Link to="/" className="flex items-center gap-2.5 group">
             <span
-              className="h-1.5 w-1.5 rounded-full"
-              style={{ background: 'var(--color-verified)' }}
-            />
-            Built for Engineers
-          </span>
-        </motion.div>
-
-        {/* Main Headline */}
-        <motion.h1
-          custom={0.45}
-          variants={fadeUp}
-          initial="hidden"
-          animate="visible"
-          className="mx-auto max-w-4xl leading-[1.04]"
-          style={{
-            fontFamily: '"Playfair Display", Georgia, serif',
-            fontSize: 'clamp(2rem, 4.8vw, 4.6rem)',
-            fontWeight: 800,
-            color: 'var(--color-surface)',
-            letterSpacing: '-0.02em',
-          }}
-        >
-          Where Great Engineering
-          <br />
-          <span style={{ fontStyle: 'italic', color: 'var(--color-muted)' }}>Writing Gets Found</span>
-        </motion.h1>
-
-        {/* Subheading */}
-        <motion.p
-          custom={0.65}
-          variants={fadeUp}
-          initial="hidden"
-          animate="visible"
-          className="mt-4 max-w-md leading-relaxed"
-          style={{
-            fontFamily: 'Inter, sans-serif',
-            fontSize: 'clamp(0.8rem, 1.5vw, 0.95rem)',
-            fontWeight: 400,
-            color: 'var(--color-surface)',
-            opacity: 0.8,
-          }}
-        >
-          Discover stack-matched articles, fork ideas, publish living posts,
-          and earn from impact — not algorithms.
-        </motion.p>
-
-        {/* Supporting caption */}
-        <motion.p
-          custom={0.75}
-          variants={fadeUp}
-          initial="hidden"
-          animate="visible"
-          className="mt-2 text-[12px]"
-          style={{
-            fontFamily: 'Inter, sans-serif',
-            color: 'var(--color-muted)',
-            letterSpacing: '0.04em',
-          }}
-        >
-          Great posts don't go unread here.
-        </motion.p>
-
-        {/* CTA Buttons */}
-        <motion.div
-          custom={0.9}
-          variants={fadeUp}
-          initial="hidden"
-          animate="visible"
-          className="mt-7 flex flex-col items-center gap-3 sm:flex-row"
-        >
-          {/* Primary CTA */}
-          <Link
-            to="/editor/new"
-            id="cta-start-writing"
-            className="group inline-flex h-10 items-center gap-2 rounded-full px-6 text-sm font-semibold transition-all hover:scale-[1.03] active:scale-[0.98]"
-            style={{
-              fontFamily: 'Inter, sans-serif',
-              background: 'var(--color-verified)',
-              color: 'var(--color-primary)',
-              boxShadow: '0 4px 14px rgba(0,200,150,0.3)',
-              letterSpacing: '0.01em',
-            }}
-            aria-label="Start writing on Meridian"
-          >
-            Start Writing
-            <ArrowRight size={14} className="transition-transform group-hover:translate-x-0.5" />
+              className="grid h-8 w-8 place-items-center rounded-lg"
+              style={{
+                background: 'rgba(255,255,255,0.06)',
+                border: '1px solid rgba(255,255,255,0.12)',
+                backdropFilter: 'blur(8px)',
+              }}
+            >
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                <path d="M2 13V3l6 7 6-7v10" stroke="var(--color-surface)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </span>
+            <span className="text-sm font-semibold transition-colors" style={{ fontFamily: 'Inter, sans-serif', letterSpacing: '0.01em', color: 'var(--color-surface)' }}>
+              Meridian
+            </span>
           </Link>
+          <div className="flex items-center gap-5">
+            <Link to="/discover" className="text-xs transition-colors hover:text-white" style={{ fontFamily: 'Inter, sans-serif', color: 'var(--color-muted)' }}>
+              Discover
+            </Link>
+            <Link
+              to="/discover"
+              className="inline-flex h-7 items-center gap-1 rounded-full px-3.5 text-xs font-medium transition-all hover:bg-black/10"
+              style={{
+                fontFamily: 'Inter, sans-serif',
+                background: 'transparent',
+                border: '1px solid var(--color-muted)',
+                color: 'var(--color-surface)',
+              }}
+            >
+              Sign in
+            </Link>
+          </div>
+        </nav>
 
-          {/* Secondary CTA */}
-          <Link
-            to="/discover"
-            id="cta-explore-posts"
-            className="inline-flex h-10 items-center gap-2 rounded-full px-6 text-sm font-medium transition-all hover:scale-[1.03] active:scale-[0.98]"
-            style={{
-              fontFamily: 'Inter, sans-serif',
-              background: 'transparent',
-              border: '1px solid var(--color-muted)',
-              color: 'var(--color-surface)',
-              letterSpacing: '0.01em',
-            }}
-            aria-label="Explore posts on Meridian"
-          >
-            <BookOpen size={14} />
-            Explore Posts
-          </Link>
-        </motion.div>
+        {/* Hero Content */}
+        <div className="relative z-10 flex min-h-screen flex-col items-center justify-center px-6 text-center" style={{ paddingTop: '80px', paddingBottom: '15vh' }}>
+          <motion.div custom={0.2} variants={fadeUp} initial="hidden" animate="visible" className="mb-4">
+            <span className="inline-flex items-center gap-2 rounded-full px-3.5 py-1 text-[11px] font-semibold uppercase tracking-widest" style={{ fontFamily: 'Inter, sans-serif', background: 'rgba(0,200,150,0.08)', border: '1px solid rgba(0,200,150,0.3)', color: 'var(--color-verified)', letterSpacing: '0.13em' }}>
+              <span className="h-1.5 w-1.5 rounded-full" style={{ background: 'var(--color-verified)' }} />
+              Built for Engineers
+            </span>
+          </motion.div>
+          <motion.h1 custom={0.45} variants={fadeUp} initial="hidden" animate="visible" className="mx-auto max-w-4xl leading-[1.04]" style={{ fontFamily: '"Playfair Display", Georgia, serif', fontSize: 'clamp(2rem, 4.8vw, 4.6rem)', fontWeight: 800, color: 'var(--color-surface)', letterSpacing: '-0.02em' }}>
+            Where Great Engineering<br />
+            <span style={{ fontStyle: 'italic', color: 'var(--color-muted)' }}>Writing Gets Found</span>
+          </motion.h1>
+          <motion.p custom={0.65} variants={fadeUp} initial="hidden" animate="visible" className="mt-4 max-w-md leading-relaxed" style={{ fontFamily: 'Inter, sans-serif', fontSize: 'clamp(0.8rem, 1.5vw, 0.95rem)', fontWeight: 400, color: 'var(--color-surface)', opacity: 0.8 }}>
+            Discover stack-matched articles, fork ideas, publish living posts, and earn from impact — not algorithms.
+          </motion.p>
+          <motion.p custom={0.75} variants={fadeUp} initial="hidden" animate="visible" className="mt-2 text-[12px]" style={{ fontFamily: 'Inter, sans-serif', color: 'var(--color-muted)', letterSpacing: '0.04em' }}>
+            Great posts don't go unread here.
+          </motion.p>
+          <motion.div custom={0.9} variants={fadeUp} initial="hidden" animate="visible" className="mt-7 flex flex-col items-center gap-3 sm:flex-row">
+            <Link to="/editor/new" id="cta-start-writing" className="group inline-flex h-10 items-center gap-2 rounded-full px-6 text-sm font-semibold transition-all hover:scale-[1.03] active:scale-[0.98]" style={{ fontFamily: 'Inter, sans-serif', background: 'var(--color-verified)', color: 'var(--color-primary)', boxShadow: '0 4px 14px rgba(0,200,150,0.3)', letterSpacing: '0.01em' }} aria-label="Start writing on Meridian">
+              Start Writing <ArrowRight size={14} className="transition-transform group-hover:translate-x-0.5" />
+            </Link>
+            <Link to="/discover" id="cta-explore-posts" className="inline-flex h-10 items-center gap-2 rounded-full px-6 text-sm font-medium transition-all hover:scale-[1.03] active:scale-[0.98]" style={{ fontFamily: 'Inter, sans-serif', background: 'transparent', border: '1px solid var(--color-muted)', color: 'var(--color-surface)', letterSpacing: '0.01em' }} aria-label="Explore posts on Meridian">
+              <BookOpen size={14} /> Explore Posts
+            </Link>
+          </motion.div>
+          <motion.div custom={1.1} variants={fadeUp} initial="hidden" animate="visible" className="mt-8 flex items-center gap-8">
+            {[
+              { value: '12k+', label: 'Engineers' },
+              { value: '8k+', label: 'Posts' },
+              { value: '$86k', label: 'Earned' },
+            ].map(s => (
+              <div key={s.label} className="flex flex-col items-center gap-0.5">
+                <span className="text-base font-semibold" style={{ fontFamily: 'Inter, sans-serif', color: 'var(--color-surface)' }}>{s.value}</span>
+                <span className="text-[11px] uppercase tracking-widest" style={{ fontFamily: 'Inter, sans-serif', color: 'var(--color-muted)', letterSpacing: '0.1em' }}>{s.label}</span>
+              </div>
+            ))}
+          </motion.div>
+        </div>
+      </section>
 
-        {/* Social proof / stats */}
-        <motion.div
-          custom={1.1}
-          variants={fadeUp}
-          initial="hidden"
-          animate="visible"
-          className="mt-8 flex items-center gap-8"
-        >
-          {[
-            { value: '12k+', label: 'Engineers' },
-            { value: '8k+', label: 'Posts' },
-            { value: '$86k', label: 'Earned' },
-          ].map(s => (
-            <div key={s.label} className="flex flex-col items-center gap-0.5">
-              <span
-                className="text-base font-semibold"
-                style={{ fontFamily: 'Inter, sans-serif', color: 'var(--color-surface)' }}
-              >
-                {s.value}
-              </span>
-              <span
-                className="text-[11px] uppercase tracking-widest"
-                style={{ fontFamily: 'Inter, sans-serif', color: 'var(--color-muted)', letterSpacing: '0.1em' }}
-              >
-                {s.label}
-              </span>
-            </div>
-          ))}
-        </motion.div>
-
+      {/* ── Scroll-Driven Storytelling — transparent bg shows space background */}
+      <div className="relative z-10">
+        <ScrollStory />
       </div>
-
-      {/* ── Scroll-Driven Storytelling */}
-      <ScrollStory />
 
       {/* ── Bottom bar */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 2.2, duration: 0.8 }}
-        className="absolute bottom-0 left-0 right-0 z-20 flex items-center justify-between border-t px-8 py-3"
+        className="fixed bottom-0 left-0 right-0 z-50 flex items-center justify-between border-t px-8 py-3"
         style={{
           borderTop: '1px solid rgba(234,236,236,0.1)',
           background: 'rgba(0,0,0,0.5)',
+          backdropFilter: 'blur(8px)',
         }}
       >
         <p className="font-mono text-[10px]" style={{ color: 'var(--color-muted)', letterSpacing: '0.04em' }}>

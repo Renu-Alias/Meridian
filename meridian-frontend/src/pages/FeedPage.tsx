@@ -4,114 +4,154 @@ import { Badge } from '../components/Badge';
 import { fetchFeed } from '../services/mockApi';
 import { compactNumber } from '../utils/format';
 
+const colors = {
+  primary: '#e7e9ea',
+  secondary: '#71767b',
+  muted: '#536471',
+  border: '#2f3336',
+  card: '#14171c',
+  cardHover: '#1a1d24',
+  verified: '#00C896',
+};
+
 export function FeedPage() {
   const { data: posts = [] } = useQuery({ queryKey: ['feed'], queryFn: fetchFeed });
 
   return (
     <div className="mx-auto max-w-3xl">
-      <section className="x-post-font border-b border-[#333] bg-black px-4 py-3 sm:px-5">
+      {/* Composer */}
+      <section className="border-b px-4 py-3 sm:px-5" style={{ borderColor: colors.border }}>
         <div className="flex gap-3">
           <img
             src="https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=120&q=80"
             alt=""
-            className="h-12 w-12 rounded-full object-cover"
+            className="h-11 w-11 rounded-full object-cover grayscale"
           />
           <textarea
-            className="min-h-16 flex-1 resize-none bg-transparent text-[20px] leading-6 outline-none placeholder:text-[#536471]"
+            className="min-h-[52px] flex-1 resize-none bg-transparent text-lg leading-6 outline-none"
+            style={{ color: colors.primary, '--tw-placeholder-color': colors.muted } as React.CSSProperties}
             placeholder="What's the latest patch?"
             aria-label="Create a post"
           />
         </div>
-        <div className="mt-3 flex items-center justify-between pl-[60px]">
-          <div className="flex gap-4 text-emerald-700">
+        <div className="mt-3 flex items-center justify-between pl-[56px]">
+          <div className="flex gap-4" style={{ color: colors.verified }}>
             {[Code2, Paperclip, Image, Video, BarChart3].map((Icon, index) => (
-              <button key={index} aria-label="Add content" className="hover:text-black">
-                <Icon size={19} />
+              <button key={index} aria-label="Add content" className="hover:opacity-70 transition-opacity">
+                <Icon size={18} />
               </button>
             ))}
           </div>
-          <button className="h-9 rounded-full bg-black px-6 text-[15px] font-bold text-white hover:bg-verified hover:text-black">Post</button>
+          <button
+            className="h-9 rounded-full px-5 text-[15px] font-bold transition-all hover:brightness-110"
+            style={{ background: colors.verified, color: '#000' }}
+          >
+            Post
+          </button>
         </div>
       </section>
 
-      <div className="bg-black">
+      {/* Feed */}
+      <div>
         {posts.map((post) => (
-          <article key={post.id} className="x-post-font border-b border-[#333] px-4 py-2.5 transition hover:bg-neutral-50 sm:px-5">
+          <article
+            key={post.id}
+            className="border-b px-4 py-3 transition-colors sm:px-5"
+            style={{ borderColor: colors.border, background: 'transparent' }}
+          >
             <div className="flex items-start gap-3">
-              <img src={post.avatar} alt="" className="h-12 w-12 shrink-0 rounded-full object-cover grayscale" />
+              <img src={post.avatar} alt="" className="mt-1 h-11 w-11 shrink-0 rounded-full object-cover grayscale" />
               <div className="min-w-0 flex-1">
-                <div className="flex min-w-0 items-start gap-2">
+                {/* Author row */}
+                <div className="flex items-start gap-2">
                   <div className="min-w-0 flex-1">
-                    <div className="flex min-w-0 flex-wrap items-center gap-x-1.5 gap-y-0.5 text-[15px] leading-5">
-                      <h2 className="truncate font-bold text-[#0f1419]">{post.author}</h2>
-                      <span className="truncate text-[#536471]">{post.handle}</span>
-                      <span className="text-[#536471]">·</span>
-                      <span className="text-[#536471]">{post.age}</span>
+                    <div className="flex flex-wrap items-center gap-x-1.5 gap-y-0.5 text-[15px] leading-5">
+                      <h2 className="truncate font-bold" style={{ color: colors.primary }}>{post.author}</h2>
+                      <span className="truncate" style={{ color: colors.muted }}>{post.handle}</span>
+                      <span style={{ color: colors.muted }}>·</span>
+                      <span style={{ color: colors.muted }}>{post.age}</span>
                       <Badge status={post.status} />
                     </div>
                   </div>
-                  <button className="-mt-1 grid h-8 w-8 place-items-center rounded-full text-[#536471] hover:bg-surface hover:text-[#EAECEC]" aria-label="More actions">
-                    <MoreHorizontal size={19} />
+                  <button className="grid h-8 w-8 shrink-0 place-items-center rounded-full transition-colors hover:bg-[#1a1d24]" style={{ color: colors.muted }} aria-label="More actions">
+                    <MoreHorizontal size={18} />
                   </button>
                 </div>
 
-                <div className="mt-0.5 flex flex-wrap items-center gap-2 text-[13px] leading-5">
-                  {post.version && <span className="rounded-full bg-black px-2.5 py-0.5 font-mono text-xs font-bold text-white">{post.version}</span>}
-                  <span className="font-medium text-emerald-700">{post.patched}</span>
-                  <span className="text-[#536471]">
-                    Impact Score: <b className="text-[#0f1419]">{post.impactScore}</b>
+                {/* Version & impact */}
+                <div className="mt-0.5 flex flex-wrap items-center gap-2 text-[13px]">
+                  {post.version && (
+                    <span className="rounded-full px-2.5 py-0.5 font-mono text-xs font-bold" style={{ background: 'rgba(0,200,150,0.12)', color: colors.verified }}>
+                      {post.version}
+                    </span>
+                  )}
+                  <span style={{ color: colors.verified }}>{post.patched}</span>
+                  <span style={{ color: colors.muted }}>
+                    Impact: <b style={{ color: colors.primary }}>{post.impactScore}</b>
                   </span>
                 </div>
 
-                {post.lineage && <p className="mt-1.5 font-mono text-[11px] leading-4 text-muted">Fork lineage: {post.lineage.join(' / ')}</p>}
+                {/* Lineage */}
+                {post.lineage && (
+                  <p className="mt-1 font-mono text-[11px] leading-4" style={{ color: colors.muted }}>
+                    Fork lineage: {post.lineage.join(' / ')}
+                  </p>
+                )}
 
-                <p className="x-post-body mt-1.5 max-w-[620px] text-[#0f1419]">{post.excerpt}</p>
+                {/* Excerpt */}
+                <p className="mt-1.5 max-w-[620px] text-[15px] leading-5" style={{ color: colors.primary }}>
+                  {post.excerpt}
+                </p>
 
+                {/* Code block */}
                 {post.code && (
-                  <pre className="code-block thin-scrollbar mt-2.5 max-w-[620px] overflow-x-auto p-3 font-mono text-[13px] leading-5">
+                  <pre className="mt-2.5 max-w-[620px] overflow-x-auto rounded-lg p-3 font-mono text-[13px] leading-5" style={{ background: '#0a0c10', border: `1px solid ${colors.border}`, color: '#c9d1d9' }}>
                     <code>{post.code}</code>
                   </pre>
                 )}
 
+                {/* Tags */}
                 <div className="mt-2 flex flex-wrap gap-1.5">
                   {post.tags.map((tag) => (
-                    <span key={tag} className="rounded-full bg-surface px-2 py-0.5 text-xs font-medium text-[#536471]">
+                    <span key={tag} className="rounded-md px-2 py-0.5 text-xs font-medium" style={{ background: 'rgba(0,200,150,0.08)', color: colors.verified }}>
                       [{tag}]
                     </span>
                   ))}
                 </div>
 
-                <details className="mt-2.5 max-w-[620px] rounded-md border border-[#333] px-3 py-2 text-[13px]">
-                  <summary className="cursor-pointer font-semibold">Patch history timeline</summary>
-                  <ol className="mt-2 space-y-1.5 text-neutral-600">
+                {/* Patch history */}
+                <details className="mt-2.5 max-w-[620px] rounded-lg px-3 py-2 text-[13px]" style={{ border: `1px solid ${colors.border}` }}>
+                  <summary className="cursor-pointer font-semibold" style={{ color: colors.primary }}>Patch history timeline</summary>
+                  <ol className="mt-2 space-y-1.5" style={{ color: colors.secondary }}>
                     <li>v2.4 accepted benchmark correction by @kernel_notes</li>
                     <li>v2.3 merged epoll fallback note by @ops-lab</li>
                   </ol>
                 </details>
 
-                <div className="mt-2.5 flex max-w-[600px] items-center justify-between text-[13px] text-[#536471]">
-                  <button className="inline-flex items-center gap-2 hover:text-sky-600">
-                    <MessageCircle size={18} />
+                {/* Actions */}
+                <div className="mt-2.5 flex max-w-[600px] items-center justify-between text-[13px]" style={{ color: colors.muted }}>
+                  <button className="inline-flex items-center gap-1.5 transition-colors hover:text-sky-500">
+                    <MessageCircle size={17} />
                     {post.comments}
                   </button>
-                  <button className="inline-flex items-center gap-2 hover:text-emerald-700">
-                    <Repeat2 size={18} />
+                  <button className="inline-flex items-center gap-1.5 transition-colors hover:text-[#00C896]">
+                    <Repeat2 size={17} />
                     {post.forks}
                   </button>
-                  <button className="inline-flex items-center gap-2 hover:text-rose-600">
-                    <Heart size={18} />
+                  <button className="inline-flex items-center gap-1.5 transition-colors hover:text-rose-500">
+                    <Heart size={17} />
                     {post.likes}
                   </button>
-                  <button className="inline-flex items-center gap-2 hover:text-[#EAECEC]">
-                    <Bookmark size={18} />
+                  <button className="inline-flex items-center gap-1.5 transition-colors hover:text-surface">
+                    <Bookmark size={17} />
                     Save
                   </button>
-                  <button className="hidden items-center gap-2 hover:text-sky-600 sm:inline-flex">
-                    <Share2 size={18} />
+                  <button className="hidden items-center gap-1.5 transition-colors hover:text-sky-500 sm:inline-flex">
+                    <Share2 size={17} />
                     Share
                   </button>
-                  <span className="inline-flex items-center gap-2">
-                    <BarChart3 size={18} />
+                  <span className="inline-flex items-center gap-1.5">
+                    <BarChart3 size={17} />
                     {compactNumber(post.impressions)}
                   </span>
                 </div>

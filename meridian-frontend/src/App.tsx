@@ -2,6 +2,7 @@ import { Navigate, Route, Routes } from 'react-router-dom';
 import { HeaderBar } from './components/HeaderBar';
 import { RightPanel } from './components/RightPanel';
 import { Sidebar } from './components/Sidebar';
+import { SpaceBackground } from './components/SpaceBackground';
 import { DiscoverPage } from './pages/DiscoverPage';
 import { EditorPage } from './pages/EditorPage';
 import { FeedPage } from './pages/FeedPage';
@@ -12,8 +13,8 @@ import { WalletPage } from './pages/WalletPage';
 
 function AppShell() {
   return (
-    <div className="min-h-screen" style={{ background: 'var(--color-primary)', color: 'var(--color-surface)' }}>
-      <div className="grid min-h-screen grid-cols-[260px_minmax(0,1fr)_320px]">
+    <div className="min-h-screen text-surface" style={{ background: 'transparent' }}>
+      <div className="relative z-10 grid min-h-screen grid-cols-[260px_minmax(0,1fr)_320px]">
         <Sidebar />
         <main className="min-w-0 flex-1">
           <HeaderBar />
@@ -36,10 +37,13 @@ function AppShell() {
 
 export default function App() {
   return (
-    <Routes>
-      <Route path="/" element={<LandingPage />} />
-      <Route path="/editor/new" element={<EditorPage />} />
-      <Route path="/*" element={<AppShell />} />
-    </Routes>
+    <>
+      <SpaceBackground />
+      <Routes>
+        <Route path="/" element={<LandingPage />} />
+        <Route path="/editor/new" element={<EditorPage />} />
+        <Route path="/*" element={<AppShell />} />
+      </Routes>
+    </>
   );
 }
