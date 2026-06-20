@@ -9,7 +9,7 @@ export function FeedPage() {
 
   return (
     <div className="mx-auto max-w-3xl">
-      <section className="x-post-font border-b border-surface bg-white px-4 py-3 sm:px-5">
+      <section className="x-post-font border-b border-[#333] bg-black px-4 py-3 sm:px-5">
         <div className="flex gap-3">
           <img
             src="https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=120&q=80"
@@ -34,9 +34,9 @@ export function FeedPage() {
         </div>
       </section>
 
-      <div className="bg-white">
+      <div className="bg-black">
         {posts.map((post) => (
-          <article key={post.id} className="x-post-font border-b border-surface px-4 py-2.5 transition hover:bg-neutral-50 sm:px-5">
+          <article key={post.id} className="x-post-font border-b border-[#333] px-4 py-2.5 transition hover:bg-neutral-50 sm:px-5">
             <div className="flex items-start gap-3">
               <img src={post.avatar} alt="" className="h-12 w-12 shrink-0 rounded-full object-cover grayscale" />
               <div className="min-w-0 flex-1">
@@ -50,7 +50,7 @@ export function FeedPage() {
                       <Badge status={post.status} />
                     </div>
                   </div>
-                  <button className="-mt-1 grid h-8 w-8 place-items-center rounded-full text-[#536471] hover:bg-surface hover:text-ink" aria-label="More actions">
+                  <button className="-mt-1 grid h-8 w-8 place-items-center rounded-full text-[#536471] hover:bg-surface hover:text-[#EAECEC]" aria-label="More actions">
                     <MoreHorizontal size={19} />
                   </button>
                 </div>
@@ -81,7 +81,7 @@ export function FeedPage() {
                   ))}
                 </div>
 
-                <details className="mt-2.5 max-w-[620px] rounded-md border border-surface px-3 py-2 text-[13px]">
+                <details className="mt-2.5 max-w-[620px] rounded-md border border-[#333] px-3 py-2 text-[13px]">
                   <summary className="cursor-pointer font-semibold">Patch history timeline</summary>
                   <ol className="mt-2 space-y-1.5 text-neutral-600">
                     <li>v2.4 accepted benchmark correction by @kernel_notes</li>
@@ -102,7 +102,7 @@ export function FeedPage() {
                     <Heart size={18} />
                     {post.likes}
                   </button>
-                  <button className="inline-flex items-center gap-2 hover:text-ink">
+                  <button className="inline-flex items-center gap-2 hover:text-[#EAECEC]">
                     <Bookmark size={18} />
                     Save
                   </button>

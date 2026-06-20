@@ -18,7 +18,7 @@ export function WalletPage() {
     <div className="mx-auto max-w-5xl p-6 lg:p-8">
       <div className="grid gap-4 md:grid-cols-3">
         {stats.map(([label, value, Icon]) => (
-          <section key={label} className="border border-surface bg-white p-5">
+          <section key={label} className="border border-[#333] bg-black p-5">
             <div className="flex items-center justify-between">
               <p className="font-mono text-xs uppercase tracking-[0.22em] text-muted">{label}</p>
               <Icon size={20} className="text-emerald-700" />
@@ -28,7 +28,7 @@ export function WalletPage() {
         ))}
       </div>
 
-      <section className="mt-6 border border-surface bg-white p-6">
+      <section className="mt-6 border border-[#333] bg-black p-6">
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-2xl font-bold">Monthly impact analytics</h2>
@@ -36,7 +36,7 @@ export function WalletPage() {
           </div>
           <button className="hidden h-10 rounded-full bg-black px-5 font-bold text-white sm:block">Request payout</button>
         </div>
-        <div className="mt-8 flex h-56 items-end gap-2 border-b border-l border-surface px-3">
+        <div className="mt-8 flex h-56 items-end gap-2 border-b border-l border-[#333] px-3">
           {data.trend.map((point, index) => (
             <div key={index} className="flex flex-1 items-end">
               <span
@@ -49,8 +49,8 @@ export function WalletPage() {
         </div>
       </section>
 
-      <section className="mt-6 overflow-hidden border border-surface bg-white">
-        <div className="border-b border-surface p-5">
+      <section className="mt-6 overflow-hidden border border-[#333] bg-black">
+        <div className="border-b border-[#333] p-5">
           <h2 className="text-2xl font-bold">Earnings by post</h2>
         </div>
         <div className="overflow-x-auto thin-scrollbar">
@@ -66,7 +66,7 @@ export function WalletPage() {
             </thead>
             <tbody>
               {data.breakdown.map(([title, earnings, bookmarks, shares, used]) => (
-                <tr key={title as string} className="border-t border-surface">
+                <tr key={title as string} className="border-t border-[#333]">
                   <td className="p-4 font-bold">{title as string}</td>
                   <td className="p-4">{currency(earnings as number)}</td>
                   <td className="p-4">{bookmarks as number}</td>

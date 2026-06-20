@@ -44,8 +44,8 @@ function initCanvas(canvas: HTMLCanvasElement) {
     twinkle: Math.random() * Math.PI * 2,
   }));
 
-  // Volumetric cloud layers (deep space blues/purples)
-  const cloudColors = ['#0d0d1a', '#111222', '#16172e', '#1c1d38', '#222442', '#2a2c50'];
+  // Volumetric cloud layers (Teal / Grey)
+  const cloudColors = ['#0d0d0d', '#111111', '#161a1a', '#0a1a15', '#0f221c', '#152b24'];
   const clouds: Cloud[] = Array.from({ length: 50 }, (_, i) => ({
     x: Math.random() * W * 1.8 - W * 0.4,
     y: H * 0.15 + Math.random() * H * 0.7,
@@ -390,7 +390,7 @@ export function LandingPage() {
           </Link>
           <Link
             to="/discover"
-            className="inline-flex h-7 items-center gap-1 rounded-full px-3.5 text-xs font-medium transition-all hover:bg-white/10"
+            className="inline-flex h-7 items-center gap-1 rounded-full px-3.5 text-xs font-medium transition-all hover:bg-black/10"
             style={{
               fontFamily: 'Inter, sans-serif',
               background: 'transparent',

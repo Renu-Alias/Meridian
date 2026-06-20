@@ -6,9 +6,9 @@ const starterCode = `pub fn coordinate_meridian() {\n    // Initializing network
 
 export function EditorPage() {
   return (
-    <main className="min-h-screen bg-neutral-500 p-4 text-ink sm:p-8">
-      <section className="mx-auto flex min-h-[calc(100vh-4rem)] max-w-7xl flex-col border border-neutral-300 bg-white shadow-panel">
-        <header className="flex h-16 items-center justify-between border-b border-surface px-5">
+    <main className="min-h-screen bg-neutral-500 p-4 text-[#EAECEC] sm:p-8">
+      <section className="mx-auto flex min-h-[calc(100vh-4rem)] max-w-7xl flex-col border border-[#333] bg-black shadow-panel">
+        <header className="flex h-16 items-center justify-between border-b border-[#333] px-5">
           <div className="flex items-center gap-4 text-neutral-600">
             <Link to="/feed" className="inline-flex items-center gap-2 font-mono">
               <X size={18} />
@@ -56,22 +56,22 @@ export function EditorPage() {
             </div>
           </section>
 
-          <aside className="border-t border-surface bg-[#f8fafa] p-6 lg:border-l lg:border-t-0">
+          <aside className="border-t border-[#333] bg-[#f8fafa] p-6 lg:border-l lg:border-t-0">
             <div className="flex items-center justify-between">
               <h2 className="font-mono text-sm uppercase tracking-[0.18em] text-neutral-600">Stack Tags</h2>
               <button className="text-2xl text-neutral-600" aria-label="Add tag">+</button>
             </div>
             <div className="mt-5 flex flex-wrap gap-2">
               {['Rust', 'Distributed Systems'].map((tag) => (
-                <span key={tag} className="border border-surface bg-white px-3 py-2 font-mono text-sm">{tag} ×</span>
+                <span key={tag} className="border border-[#333] bg-black px-3 py-2 font-mono text-sm">{tag} ×</span>
               ))}
-              <button className="border border-dashed border-neutral-300 px-3 py-2 font-mono text-sm text-muted">+ Add Tag</button>
+              <button className="border border-dashed border-[#333] px-3 py-2 font-mono text-sm text-muted">+ Add Tag</button>
             </div>
 
             <h2 className="mt-12 font-mono text-sm uppercase tracking-[0.18em] text-neutral-600">Audience</h2>
             <div className="mt-5 space-y-3">
               {['Global Network', 'Organization Only', 'Private Draft'].map((item, index) => (
-                <label key={item} className="flex h-14 items-center justify-between border border-surface bg-white px-4 text-lg">
+                <label key={item} className="flex h-14 items-center justify-between border border-[#333] bg-black px-4 text-lg">
                   {item}
                   <input type="radio" name="audience" defaultChecked={index === 0} className="h-5 w-5 accent-black" />
                 </label>
@@ -88,7 +88,7 @@ export function EditorPage() {
               </label>
             </div>
 
-            <div className="mt-12 grid h-44 place-items-center border border-dashed border-neutral-300 bg-surface text-neutral-500">
+            <div className="mt-12 grid h-44 place-items-center border border-dashed border-[#333] bg-surface text-neutral-500">
               <div className="text-center">
                 <Image className="mx-auto" />
                 <p className="mt-2">Cover Image</p>
@@ -97,7 +97,7 @@ export function EditorPage() {
           </aside>
         </div>
 
-        <footer className="flex h-16 flex-wrap items-center gap-5 border-t border-surface px-6 text-sm text-neutral-600">
+        <footer className="flex h-16 flex-wrap items-center gap-5 border-t border-[#333] px-6 text-sm text-neutral-600">
           <button aria-label="Code block"><span className="font-mono text-xl">&lt;&gt;</span></button>
           <button aria-label="Image"><Image size={19} /></button>
           <button aria-label="Citation"><LinkIcon size={19} /></button>

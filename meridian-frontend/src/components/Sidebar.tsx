@@ -18,7 +18,7 @@ export function Sidebar() {
   return (
     <>
       <aside
-        className={`fixed inset-y-0 left-0 z-30 flex w-[260px] flex-col border-r border-surface bg-white px-4 py-8 transition-transform lg:sticky lg:top-0 lg:h-screen lg:translate-x-0 ${
+        className={`fixed inset-y-0 left-0 z-30 flex w-[260px] flex-col border-r border-[#333] bg-black px-4 py-8 transition-transform lg:sticky lg:top-0 lg:h-screen lg:translate-x-0 ${
           sidebarOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
@@ -42,7 +42,7 @@ export function Sidebar() {
               to={to}
               className={({ isActive }) =>
                 `flex h-12 items-center gap-4 rounded-md px-4 text-base font-medium ${
-                  isActive ? 'bg-surface text-ink' : 'text-neutral-500 hover:bg-surface/60 hover:text-ink'
+                  isActive ? 'bg-surface text-[#EAECEC]' : 'text-neutral-500 hover:bg-surface/60 hover:text-[#EAECEC]'
                 }`
               }
             >
@@ -60,7 +60,7 @@ export function Sidebar() {
           Write
         </NavLink>
 
-        <div className="mt-auto border-t border-surface pt-6">
+        <div className="mt-auto border-t border-[#333] pt-6">
           <div className="flex items-center gap-3">
             <img
               src="https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&w=120&q=80"

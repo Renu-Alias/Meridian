@@ -9,7 +9,7 @@ function ProfileContent() {
 
   return (
     <div className="space-y-6">
-      <section className="border border-surface bg-white p-5">
+      <section className="border border-[#333] bg-black p-5">
         <div className="flex flex-col gap-6 sm:flex-row">
           <img
             src="https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&w=200&q=80"
@@ -38,7 +38,7 @@ function ProfileContent() {
         </div>
       </section>
 
-      <section className="border border-surface bg-white p-5">
+      <section className="border border-[#333] bg-black p-5">
         <h3 className="text-xl font-bold">Tech stack</h3>
         <div className="mt-4 flex flex-wrap gap-2">
           {profile.stack.map((tag) => (
@@ -49,7 +49,7 @@ function ProfileContent() {
         </div>
       </section>
 
-      <section className="border border-surface bg-white p-5">
+      <section className="border border-[#333] bg-black p-5">
         <div className="flex items-center justify-between">
           <h3 className="text-xl font-bold">Auto-built skills graph</h3>
           <label className="flex items-center gap-2 text-sm font-semibold">
@@ -72,7 +72,7 @@ function ProfileContent() {
         </div>
       </section>
 
-      <section className="border border-surface bg-white p-5">
+      <section className="border border-[#333] bg-black p-5">
         <h3 className="text-xl font-bold">Meridian contributions</h3>
         <p className="mt-1 text-sm text-neutral-500">Patches, answers, citations, and published writing over the last year.</p>
         <div className="mt-5">
@@ -80,7 +80,7 @@ function ProfileContent() {
         </div>
       </section>
 
-      <section className="border border-surface bg-white p-5">
+      <section className="border border-[#333] bg-black p-5">
         <h3 className="text-xl font-bold">Contribution history</h3>
         <div className="mt-4 space-y-4">
           {[
@@ -102,7 +102,7 @@ function ProfileContent() {
 function ProfileSidebar() {
   const items = ['Profile', 'Security', 'Settings'];
   return (
-    <aside className="h-max border border-surface bg-white p-4">
+    <aside className="h-max border border-[#333] bg-black p-4">
       {items.map((item, index) => (
         <button
           key={item}
@@ -123,7 +123,7 @@ export function ProfilePage() {
 
 export function ProfileShell() {
   return (
-    <div className="min-h-screen bg-[#f7f8f8] text-ink">
+    <div className="min-h-screen bg-black text-[#EAECEC]">
       <div className="mx-auto grid max-w-6xl gap-6 px-6 py-8 lg:grid-cols-[220px_minmax(0,1fr)]">
         <ProfileSidebar />
         <ProfileContent />

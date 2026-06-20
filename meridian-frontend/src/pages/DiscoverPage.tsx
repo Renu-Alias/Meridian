@@ -16,7 +16,7 @@ export function DiscoverPage() {
         <span className="rounded-full bg-surface px-4 py-1.5 font-mono text-xs text-neutral-500">Distributed Systems</span>
       </div>
 
-      <article className="x-post-font mt-6 border border-surface bg-white p-4">
+      <article className="x-post-font mt-6 border border-[#333] bg-black p-4">
         <div className="flex gap-3">
           <div className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-surface font-mono text-lg">λ</div>
           <div className="min-w-0 flex-1">
@@ -28,7 +28,7 @@ export function DiscoverPage() {
               <Badge status="verified" label="Verified Claim" />
             </div>
             <p className="x-post-body mt-2 max-w-3xl text-[#0f1419]">{data.featured.excerpt}</p>
-            <div className="mt-3 flex gap-6 border-t border-surface pt-3 text-[13px] text-[#536471]">
+            <div className="mt-3 flex gap-6 border-t border-[#333] pt-3 text-[13px] text-[#536471]">
               <span className="inline-flex items-center gap-2"><Repeat2 size={18} />1.2k Impact Ripples</span>
               <span className="inline-flex items-center gap-2"><MessageSquare size={18} />84 Comments</span>
             </div>
@@ -38,7 +38,7 @@ export function DiscoverPage() {
 
       <div className="mt-4 grid gap-4 md:grid-cols-2">
         {data.cards.map((card) => (
-          <article key={card.title} className="x-post-font border border-surface bg-white p-3">
+          <article key={card.title} className="x-post-font border border-[#333] bg-black p-3">
             <img src={card.image} alt="" className="h-36 w-full object-cover grayscale" />
             <h3 className="mt-3 text-[16px] font-bold leading-6 text-[#0f1419]">{card.title}</h3>
             <p className="mt-2 text-[13px] text-emerald-700">{card.status}</p>
@@ -54,7 +54,7 @@ export function DiscoverPage() {
         <h2 className="flex items-center gap-3 text-3xl font-bold"><Flame size={25} />Trending Patches</h2>
         <div className="mt-4 space-y-2">
           {data.trending.map(([title, growth], index) => (
-            <article key={title} className="x-post-font flex items-center gap-4 border border-surface bg-white p-4">
+            <article key={title} className="x-post-font flex items-center gap-4 border border-[#333] bg-black p-4">
               <span className="text-2xl font-bold text-neutral-300">{String(index + 1).padStart(2, '0')}</span>
               <div className="min-w-0 flex-1">
                 <h3 className="truncate text-[15px] font-bold text-[#0f1419]">{title}</h3>
@@ -73,7 +73,7 @@ export function DiscoverPage() {
         </div>
         <div className="mt-5 grid gap-4 md:grid-cols-3">
           {data.mentors.map(([name, role, tagA, tagB]) => (
-            <article key={name} className="border border-surface bg-white p-5 text-center">
+            <article key={name} className="border border-[#333] bg-black p-5 text-center">
               <div className="mx-auto h-14 w-14 rounded-full bg-black" />
               <h3 className="mt-3 font-bold">{name}</h3>
               <p className="text-sm text-muted">{role}</p>

@@ -37,9 +37,9 @@ export function NotificationsPage() {
         ))}
       </div>
 
-      <section className="mt-6 border border-surface bg-white">
+      <section className="mt-6 border border-[#333] bg-black">
         {notifications.map((notification) => (
-          <article key={notification.id} className="flex gap-4 border-b border-surface p-5 last:border-b-0">
+          <article key={notification.id} className="flex gap-4 border-b border-[#333] p-5 last:border-b-0">
             <span className={`mt-1 h-3 w-3 shrink-0 rounded-full ${accentClass[notification.accent]}`} />
             <div className="min-w-0 flex-1">
               <div className="flex flex-wrap items-center gap-2">

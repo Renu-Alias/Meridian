@@ -6,11 +6,11 @@ export function RightPanel() {
   const cells = Array.from({ length: 32 }, (_, index) => (index * 7) % 5);
 
   return (
-    <aside className="hidden w-[330px] shrink-0 border-l border-surface bg-[#f4f6f6] p-5 xl:block">
-      <section className="border border-surface bg-white p-5">
+    <aside className="hidden w-[330px] shrink-0 border-l border-[#333] bg-[#f4f6f6] p-5 xl:block">
+      <section className="border border-[#333] bg-black p-5">
         <div className="flex items-center justify-between">
           <h2 className="font-bold">Your Stack</h2>
-          <button aria-label="Edit stack" className="text-muted hover:text-ink">
+          <button aria-label="Edit stack" className="text-muted hover:text-[#EAECEC]">
             <Edit3 size={16} />
           </button>
         </div>
@@ -35,23 +35,23 @@ export function RightPanel() {
         </div>
       </section>
 
-      <section className="mt-6 border border-surface bg-white">
+      <section className="mt-6 border border-[#333] bg-black">
         <h2 className="p-5 font-bold">Trending in your Stack</h2>
         {[
           ['Architecture', 'eBPF-based Observability', '2.4k engineers discussing'],
           ['DevOps', 'ArgoCD v2.10 Migration', '1.1k active patches'],
           ['Languages', 'Zig for Python Extensions', '842 impact score'],
         ].map(([category, title, meta]) => (
-          <article key={title} className="border-t border-surface p-5">
+          <article key={title} className="border-t border-[#333] p-5">
             <p className="font-mono text-xs uppercase tracking-[0.18em] text-muted">{category}</p>
             <h3 className="mt-3 font-bold">{title}</h3>
             <p className="mt-1 text-sm text-neutral-500">{meta}</p>
           </article>
         ))}
-        <button className="w-full border-t border-surface p-4 text-sm font-bold text-emerald-700">Show more</button>
+        <button className="w-full border-t border-[#333] p-4 text-sm font-bold text-emerald-700">Show more</button>
       </section>
 
-      <section className="mt-6 border border-surface bg-white p-5">
+      <section className="mt-6 border border-[#333] bg-black p-5">
         <h2 className="font-bold">Mentorship Opportunities</h2>
         {['Help with Kubernetes CRDs', 'Code Review: Rust WASM'].map((item) => (
           <div key={item} className="mt-4 flex items-center gap-3">
