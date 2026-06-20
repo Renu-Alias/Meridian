@@ -9,13 +9,12 @@ gsap.registerPlugin(ScrollTrigger);
 
 /* ── Monochrome canvas utilities ──────────────────────────────────────── */
 
-const BLACK = '#000000';
+const BLACK = 'transparent';
 const SURFACE = '#EAECEC';
 const MUTED = '#999B99';
 
 function clear(ctx: CanvasRenderingContext2D, w: number, h: number) {
-  ctx.fillStyle = BLACK;
-  ctx.fillRect(0, 0, w, h);
+  ctx.clearRect(0, 0, w, h);
 }
 
 function roundRect(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, r: number) {
@@ -475,6 +474,13 @@ function FeatureSection({ feature, index }: { feature: FeatureDef; index: number
         ctx2d.save();
         // reset transform since Canvas2D state accumulates
         ctx2d.setTransform(window.devicePixelRatio || 1, 0, 0, window.devicePixelRatio || 1, 0, 0);
+        
+        // Scale and translate based on progress for a growing, dominant effect
+        const scale = 1 + progress * 0.4;
+        ctx2d.translate(w / 2, h / 2);
+        ctx2d.scale(scale, scale);
+        ctx2d.translate(-w / 2, -h / 2);
+
         feature.draw(ctx2d, w, h, progress);
         ctx2d.restore();
       },
@@ -497,7 +503,7 @@ function FeatureSection({ feature, index }: { feature: FeatureDef; index: number
     <section
       ref={sectionRef}
       className="relative"
-      style={{ height: '300vh', background: BLACK }}
+      style={{ height: '180vh', background: 'transparent' }}
     >
       <div
         ref={contentRef}
@@ -613,7 +619,7 @@ function FinalConstellation() {
     <section
       ref={sectionRef}
       className="relative flex min-h-screen w-full flex-col items-center justify-center overflow-hidden px-6"
-      style={{ background: BLACK }}
+      style={{ background: 'transparent' }}
     >
       <canvas
         ref={canvasRef}
@@ -708,30 +714,6 @@ export function ScrollStory() {
 
   return (
     <>
-      {/* Separator before storytelling */}
-      <section className="relative flex h-[60vh] items-end justify-center pb-16" style={{ background: BLACK }}>
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
-          className="text-center"
-        >
-          <span
-            className="font-mono text-[11px] uppercase tracking-[0.2em]"
-            style={{ color: MUTED }}
-          >
-            Scroll to explore
-          </span>
-          <div className="mt-4 flex justify-center">
-            <div
-              className="h-8 w-px animate-pulse"
-              style={{ background: `linear-gradient(to bottom, ${MUTED}, transparent)` }}
-            />
-          </div>
-        </motion.div>
-      </section>
-
       {/* 5 feature storytelling sections */}
       {features.map((feature, idx) => (
         <FeatureSection key={feature.id} feature={feature} index={idx} />

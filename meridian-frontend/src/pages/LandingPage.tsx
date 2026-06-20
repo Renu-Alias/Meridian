@@ -34,18 +34,18 @@ function initCanvas(canvas: HTMLCanvasElement) {
   const H = canvas.height = canvas.offsetHeight;
 
   // Stars
-  const STAR_COUNT = 280;
+  const STAR_COUNT = 500;
   const stars: Star[] = Array.from({ length: STAR_COUNT }, () => ({
     x: Math.random() * W,
-    y: Math.random() * H * 0.6,
+    y: Math.random() * H,
     r: Math.random() * 1.4 + 0.2,
     a: Math.random(),
     speed: Math.random() * 0.008 + 0.003,
     twinkle: Math.random() * Math.PI * 2,
   }));
 
-  // Volumetric cloud layers (dark to mid-gray) 
-  const cloudColors = ['#0d0d0e', '#111213', '#161718', '#1c1d1e', '#222426', '#2a2c2e'];
+  // Volumetric cloud layers (deep space blues/purples)
+  const cloudColors = ['#0d0d1a', '#111222', '#16172e', '#1c1d38', '#222442', '#2a2c50'];
   const clouds: Cloud[] = Array.from({ length: 50 }, (_, i) => ({
     x: Math.random() * W * 1.8 - W * 0.4,
     y: H * 0.15 + Math.random() * H * 0.7,
@@ -58,7 +58,7 @@ function initCanvas(canvas: HTMLCanvasElement) {
   }));
 
   // Aurora streaks
-  const streaks: Streak[] = Array.from({ length: 6 }, () => ({
+  const streaks: Streak[] = Array.from({ length: 12 }, () => ({
     x: Math.random() * W,
     y: H * 0.1 + Math.random() * H * 0.5,
     len: 80 + Math.random() * 200,
@@ -126,7 +126,7 @@ function drawStreak(ctx: CanvasRenderingContext2D, s: Streak) {
   const ey = s.y + Math.sin(s.angle) * s.len;
   const grad = ctx.createLinearGradient(s.x, s.y, ex, ey);
   grad.addColorStop(0, 'transparent');
-  grad.addColorStop(0.4, 'rgba(180,180,180,0.6)');
+  grad.addColorStop(0.4, 'rgba(140, 170, 255, 0.4)');
   grad.addColorStop(1, 'transparent');
   ctx.beginPath();
   ctx.moveTo(s.x, s.y);
@@ -200,7 +200,7 @@ function useAtmosphereCanvas(
     ctx.fillStyle = bg;
     ctx.fillRect(0, 0, W, H);
 
-    // ── Stars (upper 60% only)
+    // ── Stars (full screen)
     for (const s of stars) {
       s.twinkle += s.speed;
       const alpha = 0.3 + Math.sin(s.twinkle) * 0.5;
@@ -337,21 +337,23 @@ export function LandingPage() {
   return (
     <main
       ref={containerRef}
-      className="relative min-h-screen w-full overflow-hidden"
+      className="relative min-h-screen w-full overflow-x-hidden"
       style={{ background: '#06080a' }}
       onMouseMove={handleMouseMove}
       aria-label="Meridian hero"
     >
       {/* ── Animated Canvas Background */}
-      <canvas
-        ref={canvasRef}
-        className="absolute inset-0 h-full w-full"
-        aria-hidden="true"
-      />
+      <div className="fixed inset-0 z-0 pointer-events-none">
+        <canvas
+          ref={canvasRef}
+          className="h-full w-full"
+          aria-hidden="true"
+        />
+      </div>
 
       {/* ── Vignette overlay */}
       <div
-        className="pointer-events-none absolute inset-0"
+        className="fixed inset-0 z-0 pointer-events-none"
         style={{
           background: 'radial-gradient(ellipse at center, transparent 30%, rgba(0,0,0,0.65) 100%)',
         }}
