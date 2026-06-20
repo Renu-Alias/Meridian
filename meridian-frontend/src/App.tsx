@@ -12,7 +12,7 @@ import { WalletPage } from './pages/WalletPage';
 
 function AppShell() {
   return (
-    <div className="min-h-screen bg-[#f7f8f8] text-ink">
+    <div className="min-h-screen" style={{ background: 'var(--color-primary)', color: 'var(--color-surface)' }}>
       <div className="grid min-h-screen grid-cols-[260px_minmax(0,1fr)_320px]">
         <Sidebar />
         <main className="min-w-0 flex-1">

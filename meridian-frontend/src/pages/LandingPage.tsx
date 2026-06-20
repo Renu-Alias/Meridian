@@ -21,7 +21,7 @@ interface Cloud {
 
 interface Streak {
   x: number; y: number; len: number; angle: number; opacity: number;
-  speed: number; life: number; maxLife: number;
+  speed: number; life: number; maxLife: number; color: string;
 }
 
 interface Particle {
@@ -58,6 +58,7 @@ function initCanvas(canvas: HTMLCanvasElement) {
   }));
 
   // Aurora streaks
+  const auroraColors = ['rgba(0,200,150,0.6)', 'rgba(255,185,0,0.6)', 'rgba(255,107,107,0.6)'];
   const streaks: Streak[] = Array.from({ length: 12 }, () => ({
     x: Math.random() * W,
     y: H * 0.1 + Math.random() * H * 0.5,
@@ -67,6 +68,7 @@ function initCanvas(canvas: HTMLCanvasElement) {
     speed: 0.003 + Math.random() * 0.004,
     life: 0,
     maxLife: 200 + Math.random() * 300,
+    color: auroraColors[Math.floor(Math.random() * auroraColors.length)],
   }));
 
   // Floating data particles
@@ -126,7 +128,7 @@ function drawStreak(ctx: CanvasRenderingContext2D, s: Streak) {
   const ey = s.y + Math.sin(s.angle) * s.len;
   const grad = ctx.createLinearGradient(s.x, s.y, ex, ey);
   grad.addColorStop(0, 'transparent');
-  grad.addColorStop(0.4, 'rgba(140, 170, 255, 0.4)');
+  grad.addColorStop(0.4, s.color);
   grad.addColorStop(1, 'transparent');
   ctx.beginPath();
   ctx.moveTo(s.x, s.y);
@@ -193,10 +195,10 @@ function useAtmosphereCanvas(
 
     // ── Background gradient (dark sky to charcoal ground)
     const bg = ctx.createLinearGradient(0, 0, 0, H);
-    bg.addColorStop(0, '#06080a');
-    bg.addColorStop(0.35, '#0b0d10');
-    bg.addColorStop(0.7, '#111316');
-    bg.addColorStop(1, '#1a1c20');
+    bg.addColorStop(0, '#000000');
+    bg.addColorStop(0.35, '#06080a');
+    bg.addColorStop(0.7, '#0b0d10');
+    bg.addColorStop(1, '#111316');
     ctx.fillStyle = bg;
     ctx.fillRect(0, 0, W, H);
 
@@ -211,7 +213,7 @@ function useAtmosphereCanvas(
       ctx.globalAlpha = Math.max(0, alpha);
       ctx.beginPath();
       ctx.arc(px, py, s.r, 0, Math.PI * 2);
-      ctx.fillStyle = `rgba(230,232,232,${alpha})`;
+      ctx.fillStyle = `rgba(234,236,236,${alpha})`;
       ctx.fill();
       ctx.restore();
     }
@@ -280,7 +282,7 @@ function useAtmosphereCanvas(
     // ── Subtle horizontal light beam at center-bottom (horizon)
     const horizon = ctx.createLinearGradient(0, H * 0.65, 0, H * 0.8);
     horizon.addColorStop(0, 'transparent');
-    horizon.addColorStop(0.4, 'rgba(200,202,202,0.02)');
+    horizon.addColorStop(0.4, 'rgba(234,236,236,0.03)');
     horizon.addColorStop(1, 'transparent');
     ctx.fillStyle = horizon;
     ctx.fillRect(0, H * 0.65, W, H * 0.15);
@@ -338,7 +340,7 @@ export function LandingPage() {
     <main
       ref={containerRef}
       className="relative min-h-screen w-full overflow-x-hidden"
-      style={{ background: '#06080a' }}
+      style={{ background: 'var(--color-primary)' }}
       onMouseMove={handleMouseMove}
       aria-label="Meridian hero"
     >
@@ -355,7 +357,7 @@ export function LandingPage() {
       <div
         className="fixed inset-0 z-0 pointer-events-none"
         style={{
-          background: 'radial-gradient(ellipse at center, transparent 30%, rgba(0,0,0,0.65) 100%)',
+          background: 'radial-gradient(ellipse at center, transparent 30%, rgba(0,0,0,0.85) 100%)',
         }}
         aria-hidden="true"
       />
@@ -374,27 +376,26 @@ export function LandingPage() {
           >
             {/* Meridian "M" SVG */}
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-              <path d="M2 13V3l6 7 6-7v10" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M2 13V3l6 7 6-7v10" stroke="var(--color-surface)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
           </span>
-          <span className="text-sm font-semibold text-white/80 group-hover:text-white transition-colors" style={{ fontFamily: 'Inter, sans-serif', letterSpacing: '0.01em' }}>
+          <span className="text-sm font-semibold transition-colors" style={{ fontFamily: 'Inter, sans-serif', letterSpacing: '0.01em', color: 'var(--color-surface)' }}>
             Meridian
           </span>
         </Link>
 
         <div className="flex items-center gap-5">
-          <Link to="/discover" className="text-xs text-white/50 hover:text-white/80 transition-colors" style={{ fontFamily: 'Inter, sans-serif' }}>
+          <Link to="/discover" className="text-xs transition-colors hover:text-white" style={{ fontFamily: 'Inter, sans-serif', color: 'var(--color-muted)' }}>
             Discover
           </Link>
           <Link
             to="/discover"
-            className="inline-flex h-7 items-center gap-1 rounded-full px-3.5 text-xs font-medium transition-all hover:bg-white/15"
+            className="inline-flex h-7 items-center gap-1 rounded-full px-3.5 text-xs font-medium transition-all hover:bg-white/10"
             style={{
               fontFamily: 'Inter, sans-serif',
-              background: 'rgba(255,255,255,0.08)',
-              border: '1px solid rgba(255,255,255,0.12)',
-              color: 'rgba(255,255,255,0.8)',
-              backdropFilter: 'blur(8px)',
+              background: 'transparent',
+              border: '1px solid var(--color-muted)',
+              color: 'var(--color-surface)',
             }}
           >
             Sign in
@@ -403,7 +404,7 @@ export function LandingPage() {
       </nav>
 
       {/* ── Hero Content — centered, pushed down */}
-      <div className="relative z-10 flex min-h-screen flex-col items-center justify-center px-6 text-center" style={{ paddingTop: '100px', paddingBottom: '40px' }}>
+      <div className="relative z-10 flex min-h-screen flex-col items-center justify-center px-6 text-center" style={{ paddingTop: '80px', paddingBottom: '15vh' }}>
 
         {/* Badge */}
         <motion.div
@@ -417,16 +418,15 @@ export function LandingPage() {
             className="inline-flex items-center gap-2 rounded-full px-3.5 py-1 text-[11px] font-semibold uppercase tracking-widest"
             style={{
               fontFamily: 'Inter, sans-serif',
-              background: 'rgba(255,255,255,0.06)',
-              border: '1px solid rgba(255,255,255,0.14)',
-              backdropFilter: 'blur(12px)',
-              color: 'rgba(210,212,212,0.85)',
+              background: 'rgba(0,200,150,0.08)',
+              border: '1px solid rgba(0,200,150,0.3)',
+              color: 'var(--color-verified)',
               letterSpacing: '0.13em',
             }}
           >
             <span
               className="h-1.5 w-1.5 rounded-full"
-              style={{ background: 'rgba(200,202,202,0.6)' }}
+              style={{ background: 'var(--color-verified)' }}
             />
             Built for Engineers
           </span>
@@ -443,14 +443,13 @@ export function LandingPage() {
             fontFamily: '"Playfair Display", Georgia, serif',
             fontSize: 'clamp(2rem, 4.8vw, 4.6rem)',
             fontWeight: 800,
-            color: 'rgba(240,242,242,0.96)',
+            color: 'var(--color-surface)',
             letterSpacing: '-0.02em',
-            textShadow: '0 2px 40px rgba(0,0,0,0.8)',
           }}
         >
           Where Great Engineering
           <br />
-          <span style={{ fontStyle: 'italic', color: 'rgba(200,202,202,0.85)' }}>Writing Gets Found</span>
+          <span style={{ fontStyle: 'italic', color: 'var(--color-muted)' }}>Writing Gets Found</span>
         </motion.h1>
 
         {/* Subheading */}
@@ -464,8 +463,8 @@ export function LandingPage() {
             fontFamily: 'Inter, sans-serif',
             fontSize: 'clamp(0.8rem, 1.5vw, 0.95rem)',
             fontWeight: 400,
-            color: 'rgba(160,162,162,0.85)',
-            textShadow: '0 1px 20px rgba(0,0,0,0.6)',
+            color: 'var(--color-surface)',
+            opacity: 0.8,
           }}
         >
           Discover stack-matched articles, fork ideas, publish living posts,
@@ -481,7 +480,7 @@ export function LandingPage() {
           className="mt-2 text-[12px]"
           style={{
             fontFamily: 'Inter, sans-serif',
-            color: 'rgba(120,122,122,0.7)',
+            color: 'var(--color-muted)',
             letterSpacing: '0.04em',
           }}
         >
@@ -503,9 +502,9 @@ export function LandingPage() {
             className="group inline-flex h-10 items-center gap-2 rounded-full px-6 text-sm font-semibold transition-all hover:scale-[1.03] active:scale-[0.98]"
             style={{
               fontFamily: 'Inter, sans-serif',
-              background: 'rgba(240,242,242,0.95)',
-              color: '#0d0f10',
-              boxShadow: '0 0 0 1px rgba(255,255,255,0.15), 0 4px 24px rgba(0,0,0,0.4)',
+              background: 'var(--color-verified)',
+              color: 'var(--color-primary)',
+              boxShadow: '0 4px 14px rgba(0,200,150,0.3)',
               letterSpacing: '0.01em',
             }}
             aria-label="Start writing on Meridian"
@@ -521,10 +520,9 @@ export function LandingPage() {
             className="inline-flex h-10 items-center gap-2 rounded-full px-6 text-sm font-medium transition-all hover:scale-[1.03] active:scale-[0.98]"
             style={{
               fontFamily: 'Inter, sans-serif',
-              background: 'rgba(255,255,255,0.06)',
-              border: '1px solid rgba(255,255,255,0.14)',
-              backdropFilter: 'blur(12px)',
-              color: 'rgba(200,202,202,0.85)',
+              background: 'transparent',
+              border: '1px solid var(--color-muted)',
+              color: 'var(--color-surface)',
               letterSpacing: '0.01em',
             }}
             aria-label="Explore posts on Meridian"
@@ -550,13 +548,13 @@ export function LandingPage() {
             <div key={s.label} className="flex flex-col items-center gap-0.5">
               <span
                 className="text-base font-semibold"
-                style={{ fontFamily: 'Inter, sans-serif', color: 'rgba(220,222,222,0.7)' }}
+                style={{ fontFamily: 'Inter, sans-serif', color: 'var(--color-surface)' }}
               >
                 {s.value}
               </span>
               <span
                 className="text-[11px] uppercase tracking-widest"
-                style={{ fontFamily: 'Inter, sans-serif', color: 'rgba(130,132,132,0.6)', letterSpacing: '0.1em' }}
+                style={{ fontFamily: 'Inter, sans-serif', color: 'var(--color-muted)', letterSpacing: '0.1em' }}
               >
                 {s.label}
               </span>
@@ -576,15 +574,14 @@ export function LandingPage() {
         transition={{ delay: 2.2, duration: 0.8 }}
         className="absolute bottom-0 left-0 right-0 z-20 flex items-center justify-between border-t px-8 py-3"
         style={{
-          borderColor: 'rgba(255,255,255,0.06)',
-          backdropFilter: 'blur(8px)',
-          background: 'rgba(6,8,10,0.3)',
+          borderTop: '1px solid rgba(234,236,236,0.1)',
+          background: 'rgba(0,0,0,0.5)',
         }}
       >
-        <p className="font-mono text-[10px]" style={{ color: 'rgba(100,102,102,0.6)', letterSpacing: '0.04em' }}>
+        <p className="font-mono text-[10px]" style={{ color: 'var(--color-muted)', letterSpacing: '0.04em' }}>
           Meridian — Where Great Engineering Writing Gets Found
         </p>
-        <p className="font-mono text-[10px]" style={{ color: 'rgba(100,102,102,0.6)', letterSpacing: '0.04em' }}>
+        <p className="font-mono text-[10px]" style={{ color: 'var(--color-muted)', letterSpacing: '0.04em' }}>
           © {new Date().getFullYear()} Meridian
         </p>
       </motion.div>

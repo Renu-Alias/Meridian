@@ -10,8 +10,11 @@ gsap.registerPlugin(ScrollTrigger);
 /* ── Monochrome canvas utilities ──────────────────────────────────────── */
 
 const BLACK = 'transparent';
-const SURFACE = '#EAECEC';
-const MUTED = '#999B99';
+const SURFACE = '#EAECEC'; // Light text color for drawings on dark background
+const MUTED = '#999B9B';
+const VERIFIED = '#00C896';
+const FLAGGED = '#FF6B6B';
+const HIGHLIGHT = '#FFB900';
 
 function clear(ctx: CanvasRenderingContext2D, w: number, h: number) {
   ctx.clearRect(0, 0, w, h);
@@ -44,9 +47,9 @@ function drawDiscovery(ctx: CanvasRenderingContext2D, w: number, h: number, p: n
   // central card
   const cw = 140, ch = 90;
   const cardGlow = Math.min(1, p * 1.8);
-  ctx.shadowColor = `rgba(234,236,236,${cardGlow * 0.08})`;
+  ctx.shadowColor = `rgba(0, 200, 150, ${cardGlow * 0.2})`; // Teal glow
   ctx.shadowBlur = 20 * cardGlow;
-  ctx.strokeStyle = `rgba(234,236,236,${0.2 + p * 0.3})`;
+  ctx.strokeStyle = `rgba(234, 236, 236, ${0.2 + p * 0.3})`;
   ctx.lineWidth = 1.5;
   roundRect(ctx, cx - cw / 2, cy - ch / 2, cw, ch, 10);
   ctx.stroke();
@@ -68,7 +71,7 @@ function drawDiscovery(ctx: CanvasRenderingContext2D, w: number, h: number, p: n
     const a = 0.3 + (i / count) * 0.5;
 
     // connector line
-    ctx.strokeStyle = `rgba(153,155,153,${a * 0.3})`;
+    ctx.strokeStyle = `rgba(0, 200, 150, ${a * 0.5})`; // Teal connector
     ctx.lineWidth = 0.5;
     ctx.setLineDash([3, 5]);
     ctx.beginPath();
@@ -80,15 +83,15 @@ function drawDiscovery(ctx: CanvasRenderingContext2D, w: number, h: number, p: n
     // tag pill
     ctx.font = '11px Inter, sans-serif';
     const tw = ctx.measureText(tags[i]).width + 18;
-    ctx.fillStyle = `rgba(234,236,236,${a * 0.08})`;
+    ctx.fillStyle = `rgba(234, 236, 236, ${a * 0.08})`;
     roundRect(ctx, tx - tw / 2, ty - 11, tw, 22, 11);
     ctx.fill();
-    ctx.strokeStyle = `rgba(234,236,236,${a * 0.15})`;
+    ctx.strokeStyle = `rgba(234, 236, 236, ${a * 0.15})`;
     ctx.lineWidth = 0.5;
     roundRect(ctx, tx - tw / 2, ty - 11, tw, 22, 11);
     ctx.stroke();
 
-    ctx.fillStyle = `rgba(234,236,236,${0.35 + a * 0.4})`;
+    ctx.fillStyle = `rgba(234, 236, 236, ${0.35 + a * 0.4})`;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.fillText(tags[i], tx, ty);
@@ -101,13 +104,13 @@ function drawLivingPosts(ctx: CanvasRenderingContext2D, w: number, h: number, p:
 
   // document outline
   const dw = 200, dh = 140;
-  ctx.strokeStyle = `rgba(234,236,236,${0.15 + p * 0.25})`;
+  ctx.strokeStyle = `rgba(234, 236, 236, ${0.15 + p * 0.25})`;
   ctx.lineWidth = 1;
   roundRect(ctx, cx - dw / 2, cy - dh / 2, dw, dh, 6);
   ctx.stroke();
 
   // header bar
-  ctx.fillStyle = `rgba(234,236,236,${0.06 + p * 0.06})`;
+  ctx.fillStyle = `rgba(234, 236, 236, ${0.06 + p * 0.06})`;
   roundRect(ctx, cx - dw / 2 + 12, cy - dh / 2 + 12, dw - 24, 14, 3);
   ctx.fill();
 
@@ -118,11 +121,11 @@ function drawLivingPosts(ctx: CanvasRenderingContext2D, w: number, h: number, p:
     const lw = 60 + Math.sin(i * 2.1) * 25;
     const isChanged = i < Math.floor(p * lines);
     ctx.fillStyle = isChanged
-      ? `rgba(234,236,236,${0.35 + p * 0.2})`
-      : `rgba(153,155,153,${0.12})`;
+      ? `rgba(0, 200, 150, ${0.4 + p * 0.3})` // Teal for changed lines
+      : `rgba(153,155,153,${0.2})`;
     ctx.fillRect(cx - dw / 2 + 18, ly, lw + (isChanged ? 10 : 0), 3);
     if (isChanged) {
-      ctx.fillStyle = `rgba(234,236,236,${0.1})`;
+      ctx.fillStyle = `rgba(0, 200, 150, ${0.2})`;
       ctx.fillRect(cx - dw / 2 + 18 + lw + 14, ly, 12, 3);
     }
   }
@@ -140,7 +143,7 @@ function drawLivingPosts(ctx: CanvasRenderingContext2D, w: number, h: number, p:
     ctx.fill();
     ctx.globalAlpha = 1;
 
-    ctx.fillStyle = vActive ? `rgba(234,236,236,${0.4})` : `rgba(153,155,153,${0.1})`;
+    ctx.fillStyle = vActive ? `rgba(234, 236, 236, ${0.6})` : `rgba(153,155,153,${0.3})`;
     ctx.font = '9px Inter, sans-serif';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'top';
@@ -173,7 +176,7 @@ function drawForkable(ctx: CanvasRenderingContext2D, w: number, h: number, p: nu
     const lx = x - spread;
     const rx = x + spread;
 
-    ctx.strokeStyle = `rgba(234,236,236,${0.08 + (level / 4) * 0.15})`;
+    ctx.strokeStyle = `rgba(234, 236, 236, ${0.1 + (level / 4) * 0.2})`;
     ctx.lineWidth = 1.2 - level * 0.2;
     ctx.beginPath();
     ctx.moveTo(x, y);
@@ -244,8 +247,8 @@ function drawRewards(ctx: CanvasRenderingContext2D, w: number, h: number, p: num
 
   // ring pulse
   const ringR = 60 + p * 30;
-  ctx.strokeStyle = `rgba(234,236,236,${0.04 + (1 - p) * 0.06})`;
-  ctx.lineWidth = 1;
+  ctx.strokeStyle = `rgba(255, 185, 0, ${0.2 + (1 - p) * 0.3})`; // Amber pulse
+  ctx.lineWidth = 1.5;
   ctx.beginPath();
   ctx.arc(cx, cy, ringR, 0, Math.PI * 2);
   ctx.stroke();
@@ -287,7 +290,7 @@ function drawPeerDiscovery(ctx: CanvasRenderingContext2D, w: number, h: number, 
   // highlight path
   if (p > 0.5) {
     const hp = (p - 0.5) * 2;
-    ctx.strokeStyle = `rgba(234,236,236,${hp * 0.2})`;
+    ctx.strokeStyle = `rgba(0, 200, 150, ${hp * 0.4})`; // Teal highlight
     ctx.lineWidth = 1.5;
     ctx.setLineDash([4, 6]);
     ctx.beginPath();
@@ -302,18 +305,18 @@ function drawPeerDiscovery(ctx: CanvasRenderingContext2D, w: number, h: number, 
   for (const node of visible) {
     const pulse = 1 + Math.sin(p * 6 + node.x * 0.1) * 0.08;
     const r = 18 * pulse;
-    ctx.fillStyle = `rgba(234,236,236,${0.04})`;
+    ctx.fillStyle = `rgba(234, 236, 236, ${0.04})`;
     ctx.beginPath();
     ctx.arc(node.x, node.y, r, 0, Math.PI * 2);
     ctx.fill();
-    ctx.strokeStyle = `rgba(234,236,236,${0.12})`;
+    ctx.strokeStyle = `rgba(234, 236, 236, ${0.12})`;
     ctx.lineWidth = 0.8;
     ctx.beginPath();
     ctx.arc(node.x, node.y, r, 0, Math.PI * 2);
     ctx.stroke();
 
     // initial dot
-    ctx.fillStyle = `rgba(234,236,236,${0.25})`;
+    ctx.fillStyle = `rgba(234, 236, 236, ${0.25})`;
     ctx.beginPath();
     ctx.arc(node.x, node.y, 3, 0, Math.PI * 2);
     ctx.fill();
@@ -346,7 +349,7 @@ function drawConstellation(ctx: CanvasRenderingContext2D, w: number, h: number, 
     const sx = cx + Math.cos(angle * 3.7 + i * 0.5) * Math.min(w, h) * 0.4;
     const sy = cy + Math.sin(angle * 2.3 + i * 0.7) * Math.min(w, h) * 0.35;
     const alpha = 0.1 + Math.sin(p * 4 + i * 0.3) * 0.15 + 0.3;
-    ctx.fillStyle = `rgba(234,236,236,${alpha})`;
+    ctx.fillStyle = `rgba(234, 236, 236, ${alpha})`;
     ctx.beginPath();
     ctx.arc(sx, sy, starR, 0, Math.PI * 2);
     ctx.fill();
@@ -354,7 +357,7 @@ function drawConstellation(ctx: CanvasRenderingContext2D, w: number, h: number, 
 
   // M-shape constellation lines
   const lineProgress = Math.min(1, p * 1.5);
-  ctx.strokeStyle = `rgba(234,236,236,${0.08 + lineProgress * 0.12})`;
+  ctx.strokeStyle = `rgba(234, 236, 236, ${0.08 + lineProgress * 0.15})`;
   ctx.lineWidth = 0.8;
   ctx.beginPath();
   ctx.moveTo(mPoints[0].x, mPoints[0].y);
@@ -476,7 +479,7 @@ function FeatureSection({ feature, index }: { feature: FeatureDef; index: number
         ctx2d.setTransform(window.devicePixelRatio || 1, 0, 0, window.devicePixelRatio || 1, 0, 0);
         
         // Scale and translate based on progress for a growing, dominant effect
-        const scale = 1 + progress * 0.4;
+        const scale = 1 + progress * 0.6; // Increased scale for more dominancy
         ctx2d.translate(w / 2, h / 2);
         ctx2d.scale(scale, scale);
         ctx2d.translate(-w / 2, -h / 2);
@@ -676,9 +679,9 @@ function FinalConstellation() {
             className="group inline-flex h-10 items-center gap-2 rounded-full px-6 text-sm font-semibold transition-all hover:scale-[1.03] active:scale-[0.98]"
             style={{
               fontFamily: 'Inter, sans-serif',
-              background: SURFACE,
-              color: BLACK,
-              boxShadow: '0 0 0 1px rgba(255,255,255,0.15), 0 4px 24px rgba(0,0,0,0.4)',
+              background: VERIFIED,
+              color: '#ffffff',
+              boxShadow: '0 4px 14px rgba(0,200,150,0.3)',
             }}
           >
             Start Writing
@@ -690,10 +693,9 @@ function FinalConstellation() {
             className="inline-flex h-10 items-center gap-2 rounded-full px-6 text-sm font-medium transition-all hover:scale-[1.03] active:scale-[0.98]"
             style={{
               fontFamily: 'Inter, sans-serif',
-              background: 'rgba(255,255,255,0.06)',
-              border: '1px solid rgba(255,255,255,0.14)',
-              backdropFilter: 'blur(12px)',
-              color: 'rgba(200,202,202,0.85)',
+              background: 'transparent',
+              border: '1px solid var(--color-muted)',
+              color: 'var(--color-surface)',
             }}
           >
             <Sparkles size={14} />
