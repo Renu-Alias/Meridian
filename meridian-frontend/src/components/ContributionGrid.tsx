@@ -1,17 +1,38 @@
+import { useState } from 'react';
+
 const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 const monthStartWeeks = [0, 4, 9, 13, 17, 22, 26, 31, 35, 39, 44, 48];
 const weekdayLabels = ['Mon', '', 'Wed', '', 'Fri', '', ''];
 const levels = ['bg-surface', 'bg-verified/20', 'bg-verified/45', 'bg-verified', 'bg-emerald-700'];
 
+const currentYear = new Date().getFullYear();
+const years = Array.from({ length: 5 }, (_, i) => currentYear - i);
+
 export function ContributionGrid() {
+  const [selectedYear, setSelectedYear] = useState(currentYear);
+
   const cells = Array.from({ length: 53 * 7 }, (_, index) => {
-    const value = (index * 17 + Math.floor(index / 11) * 7) % 13;
+    const value = (index * 17 + Math.floor(index / 11) * 7 + (currentYear - selectedYear) * 3) % 13;
     return value > 10 ? 4 : value > 7 ? 3 : value > 4 ? 2 : value > 2 ? 1 : 0;
   });
 
   return (
     <div className="overflow-x-auto pb-2 thin-scrollbar" aria-label="Meridian contribution tracker">
       <div className="min-w-[860px]">
+        <div className="mb-3 flex items-center justify-between">
+          <span className="text-xs text-muted">{selectedYear} contributions</span>
+          <select
+            value={selectedYear}
+            onChange={(e) => setSelectedYear(Number(e.target.value))}
+            className="rounded border border-[#333] bg-black px-2 py-1 text-xs font-medium text-[#EAECEC] outline-none"
+          >
+            {years.map((year) => (
+              <option key={year} value={year}>
+                {year}
+              </option>
+            ))}
+          </select>
+        </div>
         <div className="relative mb-2 ml-[38px] h-4 text-[11px] text-muted">
           {months.map((month, index) => (
             <span

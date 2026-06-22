@@ -484,7 +484,7 @@ function FeatureSection({ feature, index }: { feature: FeatureDef; index: number
         ctx2d.save();
         ctx2d.setTransform(window.devicePixelRatio || 1, 0, 0, window.devicePixelRatio || 1, 0, 0);
 
-        const speed = Math.min(1, progress * 2);
+        const speed = Math.min(1, progress * 1.2);
         feature.draw(ctx2d, w, h, speed);
         ctx2d.restore();
       },
