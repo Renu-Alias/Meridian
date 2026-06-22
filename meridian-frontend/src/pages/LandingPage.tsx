@@ -139,7 +139,7 @@ export function LandingPage() {
             linear-gradient(rgba(0,200,150,0.10) 1px, transparent 1px),
             linear-gradient(90deg, rgba(0,200,150,0.10) 1px, transparent 1px)
           `,
-          backgroundSize: '60px 60px',
+          backgroundSize: '80px 80px',
         }}
         aria-hidden="true"
       />
@@ -150,16 +150,16 @@ export function LandingPage() {
         <nav className="relative z-20 flex items-center justify-between px-8 pt-4">
           <BrandMark
             to="/"
-            nameClassName="text-base font-semibold leading-none text-[var(--color-surface)]"
+            nameClassName="text-xl font-semibold leading-none text-[var(--color-surface)]"
             className="group [font-family:Inter,sans-serif] [letter-spacing:0.01em]"
           />
           <div className="flex items-center gap-6">
-            <Link to="/discover" className="text-sm transition-colors hover:text-white" style={{ fontFamily: 'Inter, sans-serif', color: 'var(--color-muted)' }}>
+            <Link to="/discover" className="text-base transition-colors hover:text-white" style={{ fontFamily: 'Inter, sans-serif', color: 'var(--color-muted)' }}>
               Discover
             </Link>
             <Link
               to="/discover"
-              className="inline-flex h-8 items-center gap-1 rounded-full px-4 text-sm font-medium transition-all hover:bg-black/10"
+              className="inline-flex h-8 items-center gap-1 rounded-full px-4 text-base font-medium transition-all hover:bg-black/10"
               style={{
                 fontFamily: 'Inter, sans-serif',
                 background: 'transparent',

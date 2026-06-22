@@ -6,7 +6,7 @@ export function Logo({ className = '' }: { className?: string }) {
       src="/logo-icon.png"
       alt=""
       aria-hidden="true"
-      className={`block h-8 w-8 shrink-0 object-contain brightness-0 invert ${className}`}
+      className={`block h-12 w-12 shrink-0 object-contain brightness-0 invert ${className}`}
     />
   );
 }
@@ -21,13 +21,13 @@ type BrandMarkProps = {
 
 export function BrandMark({
   className = '',
-  to = '/discover',
+  to = '/',
   showSubtitle = false,
-  nameClassName = 'text-[15px] font-medium leading-none text-[#e7e9ea]',
-  subtitleClassName = 'mt-0.5 block text-[12px] font-medium text-[#536471]',
+  nameClassName = 'text-lg font-medium leading-none text-[#e7e9ea]',
+  subtitleClassName = 'mt-1 block text-sm font-medium text-[#536471]',
 }: BrandMarkProps) {
   return (
-    <Link to={to} className={`flex items-center gap-2.5 ${className}`} aria-label="Meridian home">
+    <Link to={to} className={`flex items-center gap-3 ${className}`} aria-label="Meridian home">
       <Logo />
       <span>
         <span className={`block ${nameClassName}`}>Meridian</span>
