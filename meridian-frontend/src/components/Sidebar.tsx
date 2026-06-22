@@ -32,7 +32,7 @@ export function Sidebar() {
           sidebarOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
         style={{
-          background: 'rgba(10,12,16,0.92)',
+          background: '#1C1B1B',
           borderRight: `1px solid ${colors.border}`,
           backdropFilter: 'blur(12px)',
         }}

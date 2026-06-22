@@ -29,7 +29,7 @@ export function HeaderBar() {
       className="sticky top-0 z-20 flex h-12 items-center justify-between border-b px-4"
       style={{
         borderColor: colors.border,
-        background: 'rgba(10,12,16,0.85)',
+        background: 'rgba(28,27,27,0.95)',
         backdropFilter: 'blur(10px)',
       }}
     >

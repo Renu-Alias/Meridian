@@ -123,7 +123,7 @@ export function ProfilePage() {
 
 export function ProfileShell() {
   return (
-    <div className="min-h-screen bg-black text-[#EAECEC]">
+    <div className="min-h-screen text-[#EAECEC]" style={{ background: '#1C1B1B' }}>
       <div className="mx-auto max-w-4xl px-6 py-8">
         <ProfileContent />
       </div>
