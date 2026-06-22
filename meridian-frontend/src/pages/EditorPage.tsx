@@ -1,113 +1,258 @@
-import Editor from '@monaco-editor/react';
-import { Image, Link as LinkIcon, Send, Sigma, X } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { useState } from 'react';
+import { Bold, Code2, ImageIcon, Italic, Link as LinkIcon, List, ListOrdered, Table, X } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
-const starterCode = `pub fn coordinate_meridian() {\n    // Initializing network parity\n    let state = SystemParity::new();\n}`;
+const colors = {
+  bg: '#1C1B1B',
+  card: '#14171C',
+  border: '#2f3336',
+  primary: '#e7e9ea',
+  secondary: '#71767b',
+  muted: '#536471',
+  mint: '#00C896',
+};
 
 export function EditorPage() {
+  const navigate = useNavigate();
+  const [title, setTitle] = useState('');
+  const [body, setBody] = useState('');
+  const [tags, setTags] = useState(['Rust', 'Wasm']);
+  const [impactScore, setImpactScore] = useState(75);
+
+  const removeTag = (tag: string) => {
+    setTags((prev) => prev.filter((t) => t !== tag));
+  };
+
   return (
-    <main className="relative z-10 min-h-screen p-4 text-[#EAECEC] sm:p-8" style={{ background: '#1C1B1B' }}>
-      <section className="mx-auto flex min-h-[calc(100vh-4rem)] max-w-7xl flex-col border border-[#333] bg-black shadow-panel">
-        <header className="flex h-16 items-center justify-between border-b border-[#333] px-5">
-          <div className="flex items-center gap-4 text-neutral-600">
-            <Link to="/feed" className="inline-flex items-center gap-2 font-mono">
-              <X size={18} />
-              Cancel
-            </Link>
-            <span className="h-6 w-px bg-surface" />
-            <span className="bg-surface px-3 py-1 font-mono text-sm">v1.0.0</span>
+    <main className="relative z-10 min-h-screen" style={{ background: colors.bg }}>
+      <div className="mx-auto flex min-h-screen max-w-6xl flex-col px-6 py-8">
+        {/* HEADER */}
+        <header className="flex flex-wrap items-start justify-between gap-4">
+          <div>
+            <h1 className="text-3xl font-bold" style={{ color: colors.primary }}>Publish New Patch</h1>
+            <p className="mt-1 text-sm" style={{ color: colors.secondary }}>Contribute to the collective engineering knowledge base.</p>
           </div>
-          <div className="flex items-center gap-5">
-            <button className="font-mono text-neutral-600">Drafts</button>
-            <button className="inline-flex h-10 items-center gap-2 bg-verified px-6 font-bold text-black">
-              Publish
-              <Send size={16} />
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => navigate('/feed')}
+              className="inline-flex h-9 items-center rounded-md px-4 text-sm font-semibold transition-colors hover:brightness-110"
+              style={{ border: `1px solid ${colors.border}`, color: colors.secondary }}
+            >
+              Cancel
+            </button>
+            <button
+              className="inline-flex h-9 items-center rounded-md px-5 text-sm font-bold transition-all hover:brightness-110"
+              style={{ background: colors.mint, color: '#000' }}
+            >
+              Publish Patch
             </button>
           </div>
         </header>
 
-        <div className="grid flex-1 lg:grid-cols-[1fr_400px]">
-          <section className="min-w-0 p-6 lg:p-8">
+        {/* METADATA SETTINGS CARD */}
+        <section
+          className="mt-6 rounded-xl border p-6"
+          style={{ background: colors.card, borderColor: colors.border }}
+        >
+          {/* Patch Title */}
+          <div>
+            <label className="text-sm font-semibold" style={{ color: colors.secondary }}>Patch Title</label>
             <input
-              className="w-full border-0 bg-transparent text-4xl font-black outline-none placeholder:text-[#d0c5c8]"
-              placeholder="Give your breakthrough a name..."
-              aria-label="Post title"
+              className="mt-1.5 block w-full rounded-lg border px-4 py-2.5 text-sm outline-none transition-colors focus:brightness-110"
+              style={{ background: '#000', borderColor: colors.border, color: colors.primary }}
+              placeholder="e.g., Optimized WebGL fragment shaders for low-power mobile devices"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
             />
-            <div className="my-12 h-px bg-surface" />
-            <textarea
-              className="min-h-[360px] w-full resize-none bg-transparent text-2xl leading-10 outline-none placeholder:text-[#d0c5c8]"
-              placeholder="Documentation starts here. Use Markdown to structure your engineering deep-dive, paste code blocks, or insert mathematical proofs..."
-              aria-label="Post body"
-            />
-            <div className="mt-8 overflow-hidden border border-black bg-black">
-              <Editor
-                height="180px"
-                defaultLanguage="rust"
-                defaultValue={starterCode}
-                theme="vs-dark"
-                options={{
-                  minimap: { enabled: false },
-                  fontSize: 15,
-                  lineNumbers: 'off',
-                  scrollBeyondLastLine: false,
-                  wordWrap: 'on',
-                }}
-              />
-            </div>
-          </section>
+          </div>
 
-          <aside className="border-t border-[#333] bg-[#f8fafa] p-6 lg:border-l lg:border-t-0">
-            <div className="flex items-center justify-between">
-              <h2 className="font-mono text-sm uppercase tracking-[0.18em] text-neutral-600">Stack Tags</h2>
-              <button className="text-2xl text-neutral-600" aria-label="Add tag">+</button>
-            </div>
-            <div className="mt-5 flex flex-wrap gap-2">
-              {['Rust', 'Distributed Systems'].map((tag) => (
-                <span key={tag} className="border border-[#333] bg-black px-3 py-2 font-mono text-sm">{tag} ×</span>
-              ))}
-              <button className="border border-dashed border-[#333] px-3 py-2 font-mono text-sm text-muted">+ Add Tag</button>
-            </div>
-
-            <h2 className="mt-12 font-mono text-sm uppercase tracking-[0.18em] text-neutral-600">Audience</h2>
-            <div className="mt-5 space-y-3">
-              {['Global Network', 'Organization Only', 'Private Draft'].map((item, index) => (
-                <label key={item} className="flex h-14 items-center justify-between border border-[#333] bg-black px-4 text-lg">
-                  {item}
-                  <input type="radio" name="audience" defaultChecked={index === 0} className="h-5 w-5 accent-black" />
-                </label>
-              ))}
-            </div>
-
-            <div className="mt-12 border border-verified/40 bg-verified/15 p-5">
-              <label className="flex gap-4">
-                <input type="checkbox" className="mt-1 h-5 w-5 accent-verified" />
-                <span>
-                  <span className="block text-xl font-bold">Mentored Track</span>
-                  <span className="mt-2 block leading-6">Flag this breakthrough for technical review by the Meridian Senior Fellows.</span>
-                </span>
-              </label>
-            </div>
-
-            <div className="mt-12 grid h-44 place-items-center border border-dashed border-[#333] bg-surface text-neutral-500">
-              <div className="text-center">
-                <Image className="mx-auto" />
-                <p className="mt-2">Cover Image</p>
+          {/* Stack Tags + Impact Score */}
+          <div className="mt-5 grid gap-5 md:grid-cols-2">
+            {/* Stack Tags */}
+            <div>
+              <label className="text-sm font-semibold" style={{ color: colors.secondary }}>Stack Tags</label>
+              <div
+                className="mt-1.5 flex flex-wrap items-center gap-1.5 rounded-lg border px-3 py-2"
+                style={{ background: '#000', borderColor: colors.border, minHeight: '42px' }}
+              >
+                {tags.map((tag) => (
+                  <span
+                    key={tag}
+                    className="inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-xs font-semibold"
+                    style={{ background: 'rgba(0,200,150,0.12)', color: colors.mint }}
+                  >
+                    {tag}
+                    <button onClick={() => removeTag(tag)} className="hover:brightness-150" aria-label={`Remove ${tag}`}>
+                      <X size={13} />
+                    </button>
+                  </span>
+                ))}
+                <span className="text-xs" style={{ color: colors.muted }}>Add tech...</span>
               </div>
             </div>
-          </aside>
-        </div>
 
-        <footer className="flex h-16 flex-wrap items-center gap-5 border-t border-[#333] px-6 text-sm text-neutral-600">
-          <button aria-label="Code block"><span className="font-mono text-xl">&lt;&gt;</span></button>
-          <button aria-label="Image"><Image size={19} /></button>
-          <button aria-label="Citation"><LinkIcon size={19} /></button>
-          <button aria-label="Formula"><Sigma size={19} /></button>
-          <span className="h-6 w-px bg-surface" />
-          <span>1,240 words</span>
-          <span>Saved at 14:02</span>
-          <span className="ml-auto hidden sm:inline">2 Active Collaborators</span>
-        </footer>
-      </section>
+            {/* Expected Impact Score */}
+            <div>
+              <label className="text-sm font-semibold" style={{ color: colors.secondary }}>Expected Impact Score (1-100)</label>
+              <div className="mt-1.5 flex items-center gap-4">
+                <input
+                  type="range"
+                  min={1}
+                  max={100}
+                  value={impactScore}
+                  onChange={(e) => setImpactScore(Number(e.target.value))}
+                  className="flex-1 accent-[#00C896]"
+                  style={{ height: '6px', cursor: 'pointer', accentColor: colors.mint }}
+                />
+                <span
+                  className="inline-flex items-center rounded-md border px-3 py-1 font-mono text-sm font-bold"
+                  style={{ borderColor: 'rgba(0,200,150,0.3)', color: colors.mint, background: 'rgba(0,200,150,0.06)' }}
+                >
+                  {impactScore}%
+                </span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* RICH MARKDOWN EDITOR */}
+        <section
+          className="mt-6 flex flex-1 flex-col rounded-xl border"
+          style={{ background: colors.card, borderColor: colors.border }}
+        >
+          {/* Toolbar */}
+          <div
+            className="flex flex-wrap items-center gap-1 border-b px-4 py-2"
+            style={{ borderColor: colors.border }}
+          >
+            {[Bold, Italic, LinkIcon].map((Icon, i) => (
+              <button
+                key={i}
+                className="grid h-8 w-8 place-items-center rounded transition-colors hover:bg-[#1a1d24]"
+                style={{ color: colors.secondary }}
+                aria-label={['Bold', 'Italic', 'Link'][i]}
+              >
+                <Icon size={16} />
+              </button>
+            ))}
+            <span className="mx-1 h-5 w-px" style={{ background: colors.border }} />
+            {[List, ListOrdered].map((Icon, i) => (
+              <button
+                key={i}
+                className="grid h-8 w-8 place-items-center rounded transition-colors hover:bg-[#1a1d24]"
+                style={{ color: colors.secondary }}
+                aria-label={['Unordered List', 'Ordered List'][i]}
+              >
+                <Icon size={16} />
+              </button>
+            ))}
+            <button
+              className="grid h-8 w-8 place-items-center rounded"
+              style={{ background: 'rgba(0,200,150,0.15)', color: colors.mint }}
+              aria-label="Code Block"
+            >
+              <Code2 size={16} />
+            </button>
+            {[ImageIcon, Table].map((Icon, i) => (
+              <button
+                key={i + 3}
+                className="grid h-8 w-8 place-items-center rounded transition-colors hover:bg-[#1a1d24]"
+                style={{ color: colors.secondary }}
+                aria-label={['Image', 'Table'][i]}
+              >
+                <Icon size={16} />
+              </button>
+            ))}
+            <span className="ml-auto text-xs" style={{ color: 'rgba(0,200,150,0.6)' }}>• Draft Saved</span>
+          </div>
+
+          {/* Textarea */}
+          <textarea
+            className="min-h-[200px] flex-1 resize-none bg-transparent px-6 py-5 text-base leading-7 outline-none"
+            style={{ color: colors.primary }}
+            placeholder="Describe your technical findings or architectural proposal here..."
+            value={body}
+            onChange={(e) => setBody(e.target.value)}
+          />
+
+          {/* LIVE INTEGRATED CODE BLOCK */}
+          <div
+            className="mx-5 mb-5 overflow-hidden rounded-lg border"
+            style={{ borderColor: colors.border }}
+          >
+            {/* Code block header */}
+            <div
+              className="flex items-center justify-between px-4 py-2 text-xs font-semibold"
+              style={{ background: '#0a0c10', borderBottom: `1px solid ${colors.border}`, color: colors.secondary }}
+            >
+              <div className="flex items-center gap-2">
+                <Code2 size={14} style={{ color: colors.mint }} />
+                <span>CODE BLOCK: performance_module.rs</span>
+              </div>
+              <span
+                className="rounded px-2 py-0.5 font-mono text-[11px]"
+                style={{ background: 'rgba(0,200,150,0.1)', color: colors.mint }}
+              >
+                Rust ▾
+              </span>
+            </div>
+            {/* Syntax area */}
+            <div className="flex font-mono text-[13px] leading-6" style={{ background: '#0a0c10' }}>
+              <div className="select-none px-3 py-3 text-right" style={{ color: colors.muted }}>
+                {[1, 2, 3, 4, 5].map((n) => (
+                  <div key={n}>{n}</div>
+                ))}
+              </div>
+              <pre className="flex-1 overflow-x-auto py-3 pr-4">
+                <code
+                  dangerouslySetInnerHTML={{
+                    __html: [
+                      '<span style="color:#c9d1d9">pub </span>',
+                      '<span style="color:#d2a8ff">fn</span>',
+                      '<span style="color:#c9d1d9"> </span>',
+                      '<span style="color:#ffa657">optimize_pipeline</span>',
+                      '<span style="color:#c9d1d9">(</span>',
+                      '<span style="color:#79c0ff">config</span>',
+                      '<span style="color:#c9d1d9">: &amp;</span>',
+                      '<span style="color:#79c0ff">mut</span>',
+                      '<span style="color:#c9d1d9"> </span>',
+                      '<span style="color:#ffa657">PipelineConfig</span>',
+                      '<span style="color:#c9d1d9">) {</span>',
+                      '\n  ',
+                      '<span style="color:#7ee787">// Initialize shader cache</span>',
+                      '\n  ',
+                      '<span style="color:#d2a8ff">let</span>',
+                      '<span style="color:#c9d1d9"> </span>',
+                      '<span style="color:#79c0ff">cache</span>',
+                      '<span style="color:#c9d1d9"> = </span>',
+                      '<span style="color:#ffa657">ShaderCache::new</span>',
+                      '<span style="color:#c9d1d9">(</span>',
+                      '<span style="color:#79c0ff">config</span>',
+                      '<span style="color:#c9d1d9">.</span>',
+                      '<span style="color:#79c0ff">device</span>',
+                      '<span style="color:#c9d1d9">);</span>',
+                      '<span style="color:#7ee787">// Warm with common kernels</span>',
+                      '\n\n  ',
+                      '<span style="color:#d2a8ff">macro_rules!</span>',
+                      '<span style="color:#79c0ff"> profile_scope </span>',
+                      '<span style="color:#c9d1d9">{</span>',
+                      '\n      ',
+                      '<span style="color:#ffa657">trace!</span>',
+                      '<span style="color:#c9d1d9">(</span>',
+                      '<span style="color:#a5d6ff">"pipeline_optimize"</span>',
+                      '<span style="color:#c9d1d9">, $</span>',
+                      '<span style="color:#79c0ff">label</span>',
+                      '<span style="color:#c9d1d9">);</span>',
+                      '\n  }',
+                      '\n}',
+                    ].join(''),
+                  }}
+                />
+              </pre>
+            </div>
+          </div>
+        </section>
+      </div>
     </main>
   );
 }
