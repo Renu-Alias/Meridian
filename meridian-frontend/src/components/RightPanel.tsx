@@ -1,4 +1,5 @@
 import { Edit3, GraduationCap } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { useUiStore } from '../store/uiStore';
 
 const colors = {
@@ -11,6 +12,7 @@ const colors = {
 };
 
 export function RightPanel() {
+  const navigate = useNavigate();
   const activeStack = useUiStore((state) => state.activeStack);
   const cells = Array.from({ length: 32 }, (_, index) => (index * 7) % 5);
 
@@ -49,20 +51,25 @@ export function RightPanel() {
       </section>
 
       {/* Trending */}
-      <section className="mt-4 rounded-xl" style={{ background: colors.card, border: `1px solid ${colors.border}` }}>
-        <h2 className="p-4 pb-0 text-sm font-bold" style={{ color: colors.primary }}>Trending in your Stack</h2>
-        {[
-          ['Architecture', 'eBPF-based Observability', '2.4k engineers discussing'],
-          ['DevOps', 'ArgoCD v2.10 Migration', '1.1k active patches'],
-          ['Languages', 'Zig for Python Extensions', '842 impact score'],
-        ].map(([category, title, meta]) => (
-          <article key={title} className="p-4" style={{ borderTop: `1px solid ${colors.border}` }}>
-            <p className="font-mono text-[11px] uppercase tracking-[0.15em]" style={{ color: colors.muted }}>{category}</p>
-            <h3 className="mt-1.5 text-sm font-bold" style={{ color: colors.primary }}>{title}</h3>
-            <p className="mt-0.5 text-xs" style={{ color: colors.secondary }}>{meta}</p>
-          </article>
-        ))}
-        <button className="w-full p-3 text-sm font-bold transition-colors hover:bg-[#1a1d24] rounded-b-xl" style={{ color: colors.verified, borderTop: `1px solid ${colors.border}` }}>
+      <section className="mt-4 overflow-hidden rounded-xl" style={{ background: colors.card, border: `1px solid ${colors.border}` }}>
+        <h2 className="px-4 pb-0 pt-4 text-sm font-bold" style={{ color: colors.primary }}>Trending in your Stack</h2>
+        <div className="mt-3">
+          {[
+            { category: 'Architecture', title: 'eBPF-based Observability', meta: '2.4k engineers discussing', icon: '🔍' },
+            { category: 'DevOps', title: 'ArgoCD v2.10 Migration', meta: '1.1k active patches', icon: '⚡' },
+            { category: 'Languages', title: 'Zig for Python Extensions', meta: '842 impact score', icon: '📐' },
+          ].map((item) => (
+            <div key={item.title} className="flex items-start gap-3 px-4 py-3.5" style={{ borderTop: `1px solid ${colors.border}` }}>
+              <span className="mt-0.5 shrink-0 text-base">{item.icon}</span>
+              <div className="min-w-0">
+                <p className="font-mono text-[10px] uppercase tracking-[0.15em]" style={{ color: colors.muted }}>{item.category}</p>
+                <h3 className="mt-0.5 text-sm font-bold leading-snug" style={{ color: colors.primary }}>{item.title}</h3>
+                <p className="mt-0.5 text-xs" style={{ color: colors.secondary }}>{item.meta}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+        <button onClick={() => navigate('/discover')} className="w-full p-3 text-sm font-bold transition-colors hover:bg-[#1a1d24]" style={{ color: colors.verified, borderTop: `1px solid ${colors.border}` }}>
           Show more
         </button>
       </section>

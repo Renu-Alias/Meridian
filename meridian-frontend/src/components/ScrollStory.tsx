@@ -337,19 +337,31 @@ function drawConstellation(ctx: CanvasRenderingContext2D, w: number, h: number, 
     { x: cx + s * 1.2, y: cy + s * 0.8 },
   ];
 
-  const starCount = 80;
-  const visible = Math.ceil(starCount * p);
+  const starCount = 180;
 
-  // stars
-  for (let i = 0; i < visible; i++) {
-    const t = i / starCount;
-    const angle = t * Math.PI * 2 + p * 0.5;
-    const r = 8 + Math.random() * 3; // deterministic
-    const starR = 0.5 + Math.random() * 1.2;
-    const sx = cx + Math.cos(angle * 3.7 + i * 0.5) * Math.min(w, h) * 0.4;
-    const sy = cy + Math.sin(angle * 2.3 + i * 0.7) * Math.min(w, h) * 0.35;
-    const alpha = 0.1 + Math.sin(p * 4 + i * 0.3) * 0.15 + 0.3;
-    ctx.fillStyle = `rgba(234, 236, 236, ${alpha})`;
+  // stars — all drawn simultaneously with per-star fade-in based on scroll progress
+  for (let i = 0; i < starCount; i++) {
+    const hx = Math.abs(Math.sin(i * 127.1 + 311.7) * 43758.5453123) % 1;
+    const hy = Math.abs(Math.sin(i * 269.5 + 183.3) * 43758.5453123) % 1;
+    const hSize = Math.abs(Math.sin(i * 419.2 + 57.1) * 43758.5453123) % 1;
+    const hDelay = Math.abs(Math.sin(i * 631.8 + 91.3) * 43758.5453123) % 1;
+    const hGlow = Math.abs(Math.sin(i * 823.7 + 136.9) * 43758.5453123) % 1;
+
+    const sx = cx + (hx - 0.5) * w * 0.88;
+    const sy = cy + (hy - 0.5) * h * 0.84;
+    const starR = 0.4 + hSize * 1.6;
+    const starAlpha = Math.min(1, Math.max(0, (p - hDelay * 0.85) * 1.8));
+    if (starAlpha <= 0) continue;
+
+    // glow
+    if (hGlow > 0.7) {
+      ctx.beginPath();
+      ctx.arc(sx, sy, starR * 2.5, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(234, 236, 236, ${starAlpha * 0.07})`;
+      ctx.fill();
+    }
+
+    ctx.fillStyle = `rgba(234, 236, 236, ${starAlpha * 0.55})`;
     ctx.beginPath();
     ctx.arc(sx, sy, starR, 0, Math.PI * 2);
     ctx.fill();
@@ -357,8 +369,8 @@ function drawConstellation(ctx: CanvasRenderingContext2D, w: number, h: number, 
 
   // M-shape constellation lines
   const lineProgress = Math.min(1, p * 1.5);
-  ctx.strokeStyle = `rgba(234, 236, 236, ${0.08 + lineProgress * 0.15})`;
-  ctx.lineWidth = 0.8;
+  ctx.strokeStyle = `rgba(234, 236, 236, ${0.06 + lineProgress * 0.11})`;
+  ctx.lineWidth = 0.7;
   ctx.beginPath();
   ctx.moveTo(mPoints[0].x, mPoints[0].y);
   for (let i = 1; i < mPoints.length; i++) {
@@ -369,18 +381,18 @@ function drawConstellation(ctx: CanvasRenderingContext2D, w: number, h: number, 
   // M-shape nodes
   for (let i = 0; i < mPoints.length; i++) {
     const mp = mPoints[i];
-    const glow = 1 + Math.sin(p * 3 + i * 1.2) * 0.15;
+    const glow = 1 + Math.sin(p * 3 + i * 1.2) * 0.12;
     ctx.fillStyle = SURFACE;
-    ctx.globalAlpha = 0.05 + lineProgress * 0.2;
+    ctx.globalAlpha = 0.04 + lineProgress * 0.15;
     ctx.beginPath();
-    ctx.arc(mp.x, mp.y, 4 * glow, 0, Math.PI * 2);
+    ctx.arc(mp.x, mp.y, 3.5 * glow, 0, Math.PI * 2);
     ctx.fill();
     ctx.globalAlpha = 1;
 
     ctx.fillStyle = SURFACE;
-    ctx.globalAlpha = 0.15 + lineProgress * 0.3;
+    ctx.globalAlpha = 0.1 + lineProgress * 0.22;
     ctx.beginPath();
-    ctx.arc(mp.x, mp.y, 2, 0, Math.PI * 2);
+    ctx.arc(mp.x, mp.y, 1.5, 0, Math.PI * 2);
     ctx.fill();
     ctx.globalAlpha = 1;
   }
@@ -478,13 +490,15 @@ function FeatureSection({ feature, index }: { feature: FeatureDef; index: number
         const h = canvas.offsetHeight;
 
         // Scale wrapper via CSS so canvas visually enlarges without clipping
-        const scale = 1 + progress * 0.5;
+        const raw = Math.min(1, progress * 1.0);
+        // ease-in-out cubic for smooth gliding feel
+        const speed = raw < 0.5 ? 2 * raw * raw : 1 - Math.pow(-2 * raw + 2, 2) / 2;
+        const scale = 1 + speed * 0.5;
         canvasWrapper.style.transform = `scale(${scale})`;
 
         ctx2d.save();
         ctx2d.setTransform(window.devicePixelRatio || 1, 0, 0, window.devicePixelRatio || 1, 0, 0);
 
-        const speed = Math.min(1, progress * 1.0);
         feature.draw(ctx2d, w, h, speed);
         ctx2d.restore();
       },
@@ -507,7 +521,7 @@ function FeatureSection({ feature, index }: { feature: FeatureDef; index: number
     <section
       ref={sectionRef}
       className="relative"
-      style={{ height: '120vh', background: 'transparent' }}
+      style={{ height: '220vh', background: 'transparent' }}
     >
       <div
         ref={contentRef}
@@ -533,7 +547,7 @@ function FeatureSection({ feature, index }: { feature: FeatureDef; index: number
             initial={{ opacity: 0, x: -10 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.5, delay: 0.1 }}
+            transition={{ duration: 0.4, delay: 0 }}
             className="font-mono text-xs tracking-widest"
             style={{ color: MUTED }}
           >
@@ -543,7 +557,7 @@ function FeatureSection({ feature, index }: { feature: FeatureDef; index: number
             initial={{ opacity: 0, y: 18 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.6, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
+            transition={{ duration: 0.5, delay: 0.05, ease: [0.22, 1, 0.36, 1] }}
             className="mt-2 text-3xl font-bold leading-tight sm:text-4xl"
             style={{ color: SURFACE, fontFamily: 'Inter, sans-serif', letterSpacing: '-0.03em' }}
           >
@@ -553,7 +567,7 @@ function FeatureSection({ feature, index }: { feature: FeatureDef; index: number
             initial={{ opacity: 0, y: 12 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.5, delay: 0.35, ease: [0.22, 1, 0.36, 1] }}
+            transition={{ duration: 0.4, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
             className="mt-4 text-base leading-relaxed"
             style={{ color: SURFACE, opacity: 0.7, fontFamily: 'Inter, sans-serif' }}
           >
@@ -563,7 +577,7 @@ function FeatureSection({ feature, index }: { feature: FeatureDef; index: number
             initial={{ opacity: 0, y: 12 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.5, delay: 0.5, ease: [0.22, 1, 0.36, 1] }}
+            transition={{ duration: 0.4, delay: 0.15, ease: [0.22, 1, 0.36, 1] }}
             className="mt-3 text-sm leading-relaxed"
             style={{ color: MUTED, fontFamily: 'Inter, sans-serif' }}
           >
@@ -638,17 +652,6 @@ function FinalConstellation() {
 
       {/* Content overlay */}
       <div className="relative z-10 flex flex-col items-center gap-6 text-center">
-        <motion.span
-          initial={{ opacity: 0, y: 16 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6, delay: 0.1 }}
-          className="font-mono text-xs tracking-widest"
-          style={{ color: MUTED }}
-        >
-          THE CONSTELLATION
-        </motion.span>
-
         <motion.h2
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}

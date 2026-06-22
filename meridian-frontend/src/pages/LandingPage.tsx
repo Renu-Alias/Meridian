@@ -120,31 +120,31 @@ function TerminalPreview() {
 export function LandingPage() {
   return (
     <main className="relative w-full" style={{ background: '#0d0f14' }} aria-label="Meridian hero">
+      {/* Dot-grid background — covers full page */}
+      <div
+        className="pointer-events-none fixed inset-0 z-0"
+        style={{
+          backgroundImage: 'radial-gradient(rgba(0,200,150,0.08) 1px, transparent 1px)',
+          backgroundSize: '24px 24px',
+        }}
+        aria-hidden="true"
+      />
+
+      {/* Faint grid lines overlay — covers full page */}
+      <div
+        className="pointer-events-none fixed inset-0 z-0"
+        style={{
+          backgroundImage: `
+            linear-gradient(rgba(0,200,150,0.03) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(0,200,150,0.03) 1px, transparent 1px)
+          `,
+          backgroundSize: '60px 60px',
+        }}
+        aria-hidden="true"
+      />
+
       {/* ── Hero Section — dot-grid background + 2-column layout */}
       <section className="relative min-h-screen w-full overflow-hidden">
-        {/* Dot-grid background */}
-        <div
-          className="absolute inset-0 z-0 pointer-events-none"
-          style={{
-            backgroundImage: 'radial-gradient(rgba(0,200,150,0.08) 1px, transparent 1px)',
-            backgroundSize: '24px 24px',
-          }}
-          aria-hidden="true"
-        />
-
-        {/* Faint grid lines overlay */}
-        <div
-          className="absolute inset-0 z-0 pointer-events-none"
-          style={{
-            backgroundImage: `
-              linear-gradient(rgba(0,200,150,0.03) 1px, transparent 1px),
-              linear-gradient(90deg, rgba(0,200,150,0.03) 1px, transparent 1px)
-            `,
-            backgroundSize: '60px 60px',
-          }}
-          aria-hidden="true"
-        />
-
         {/* Top nav */}
         <nav className="relative z-20 flex items-center justify-between px-8 pt-4">
           <Link to="/" className="flex items-center gap-2.5 group">
@@ -184,7 +184,7 @@ export function LandingPage() {
         </nav>
 
         {/* Hero Content — 2-column grid */}
-        <div className="relative z-10 mx-auto flex min-h-[calc(100vh-100px)] max-w-7xl flex-col gap-12 px-8 pt-14 md:flex-row md:items-stretch">
+        <div className="relative z-10 mx-auto flex min-h-[calc(100vh-130px)] max-w-7xl flex-col gap-12 px-8 pt-14 md:flex-row md:items-stretch">
           {/* Left column: Typography + CTAs */}
           <div className="flex w-full flex-col md:w-1/2 md:pr-4">
             <motion.div custom={0.2} variants={fadeUp} initial="hidden" animate="visible">
@@ -203,16 +203,17 @@ export function LandingPage() {
               Discover stack-matched articles, fork ideas, publish living posts, and earn from impact — not algorithms.
             </motion.p>
 
-            <motion.div custom={0.9} variants={fadeUp} initial="hidden" animate="visible" className="mt-8 flex flex-col items-start gap-4 sm:flex-row">
-              <Link to="/editor/new" id="cta-start-writing" className="group inline-flex h-11 items-center gap-2 rounded-lg px-6 text-sm font-semibold transition-all hover:brightness-110 active:scale-[0.98]" style={{ fontFamily: 'Inter, sans-serif', background: 'var(--color-verified)', color: '#000', letterSpacing: '0.01em' }} aria-label="Start writing on Meridian">
-                Start Writing <ArrowRight size={15} className="transition-transform group-hover:translate-x-0.5" />
-              </Link>
-              <Link to="/feed" id="cta-explore-posts" className="inline-flex h-11 items-center gap-2 rounded-lg px-6 text-sm font-medium transition-all hover:bg-white/5 active:scale-[0.98]" style={{ fontFamily: 'Inter, sans-serif', border: '1px solid rgba(255,255,255,0.15)', color: 'var(--color-surface)', letterSpacing: '0.01em' }} aria-label="Explore posts on Meridian">
-                <BookOpen size={15} /> Explore Posts
-              </Link>
-            </motion.div>
+            <div className="mt-auto">
+              <motion.div custom={0.9} variants={fadeUp} initial="hidden" animate="visible" className="flex flex-col items-start gap-4 sm:flex-row">
+                <Link to="/editor/new" id="cta-start-writing" className="group inline-flex h-11 items-center gap-2 rounded-lg px-6 text-sm font-semibold transition-all hover:brightness-110 active:scale-[0.98]" style={{ fontFamily: 'Inter, sans-serif', background: 'var(--color-verified)', color: '#000', letterSpacing: '0.01em' }} aria-label="Start writing on Meridian">
+                  Start Writing <ArrowRight size={15} className="transition-transform group-hover:translate-x-0.5" />
+                </Link>
+                <Link to="/feed" id="cta-explore-posts" className="inline-flex h-11 items-center gap-2 rounded-lg px-6 text-sm font-medium transition-all hover:bg-white/5 active:scale-[0.98]" style={{ fontFamily: 'Inter, sans-serif', border: '1px solid rgba(255,255,255,0.15)', color: 'var(--color-surface)', letterSpacing: '0.01em' }} aria-label="Explore posts on Meridian">
+                  <BookOpen size={15} /> Explore Posts
+                </Link>
+              </motion.div>
 
-            <motion.div custom={1.1} variants={fadeUp} initial="hidden" animate="visible" className="mt-auto flex items-center gap-10 pt-8" style={{ borderTop: '1px solid rgba(255,255,255,0.1)' }}>
+              <motion.div custom={1.1} variants={fadeUp} initial="hidden" animate="visible" className="mt-10 flex items-center gap-10 pt-8" style={{ borderTop: '1px solid rgba(255,255,255,0.1)' }}>
               {[
                 { value: '12k+', label: 'ENGINEERS' },
                 { value: '8k+', label: 'POSTS' },
@@ -224,6 +225,7 @@ export function LandingPage() {
                 </div>
               ))}
             </motion.div>
+            </div>
           </div>
 
           {/* Right column: Terminal preview */}
