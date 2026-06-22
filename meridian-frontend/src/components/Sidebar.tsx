@@ -42,8 +42,8 @@ export function Sidebar() {
         <NavLink to="/" className="flex items-center gap-3 px-2">
           <Logo />
           <span>
-            <span className="block text-xl font-bold leading-none" style={{ color: colors.primary }}>Meridian</span>
-            <span className="mt-0.5 block font-mono text-[9px] uppercase tracking-[0.28em]" style={{ color: colors.muted }}>Engineer Network</span>
+            <span className="block text-[15px] font-medium leading-none" style={{ color: colors.primary }}>Meridian</span>
+            <span className="mt-0.5 block text-[12px] font-medium" style={{ color: colors.muted }}>Engineer Network</span>
           </span>
         </NavLink>
         <button className="lg:hidden absolute right-4 top-6" aria-label="Close navigation" onClick={toggleSidebar}>
@@ -67,6 +67,8 @@ export function Sidebar() {
                 color: isActive ? colors.primary : colors.secondary,
                 borderLeftColor: isActive ? colors.activeBorder : 'transparent',
                 background: isActive ? colors.activeBg : 'transparent',
+                fontFamily: "Inter, sans-serif",
+                fontWeight: 500,
               })}
             >
               <Icon size={19} aria-hidden="true" />
