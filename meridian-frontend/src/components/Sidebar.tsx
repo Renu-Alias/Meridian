@@ -9,6 +9,7 @@ const links = [
   { to: '/notifications', label: 'Notifications', icon: Bell },
   { to: '/wallet', label: 'Wallet', icon: WalletCards },
   { to: '/profile/alex', label: 'Profile', icon: User },
+  { to: '/editor/new', label: 'Write', icon: Edit3 },
   { to: '/settings', label: 'Settings', icon: Settings },
 ];
 
@@ -73,16 +74,6 @@ export function Sidebar() {
             </NavLink>
           ))}
         </nav>
-
-        {/* Write button */}
-        <NavLink
-          to="/editor/new"
-          className="mt-6 inline-flex h-10 w-full max-w-[180px] items-center justify-center gap-2 self-start rounded-full text-sm font-bold transition-all hover:brightness-110"
-          style={{ background: colors.activeBorder, color: '#000' }}
-        >
-          <Edit3 size={15} aria-hidden="true" />
-          Write
-        </NavLink>
 
         {/* User area */}
         <div className="mt-auto border-t pt-5" style={{ borderColor: colors.border }}>

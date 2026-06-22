@@ -14,8 +14,8 @@ import { WalletPage } from './pages/WalletPage';
 
 function AppShell() {
   return (
-    <div className="min-h-screen text-surface" style={{ background: '#1C1B1B' }}>
-      <div className="relative z-10 grid min-h-screen grid-cols-[260px_minmax(0,1fr)_320px]">
+    <div className="relative z-10 min-h-screen text-surface" style={{ background: '#1C1B1B' }}>
+      <div className="grid min-h-screen grid-cols-[260px_minmax(0,1fr)_320px]">
         <Sidebar />
         <main className="min-w-0 flex-1">
           <HeaderBar />

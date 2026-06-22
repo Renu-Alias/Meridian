@@ -20,7 +20,7 @@ export function FeedPage() {
   return (
     <div>
       {/* Composer */}
-      <section className="border-b px-4 py-3 sm:px-5" style={{ borderColor: colors.border }}>
+      <section className="border-b px-4 py-3 sm:px-5" style={{ borderColor: colors.border, background: 'rgb(28, 27, 27)' }}>
         <div className="flex gap-3">
           <img
             src="https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=120&q=80"
