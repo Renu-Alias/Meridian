@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { BarChart3, Bookmark, Code2, Heart, Image, MessageCircle, MoreHorizontal, Paperclip, Repeat2, Share2, Video } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { Badge } from '../components/Badge';
@@ -16,6 +17,34 @@ const colors = {
 
 export function FeedPage() {
   const { data: posts = [] } = useQuery({ queryKey: ['feed'], queryFn: fetchFeed });
+  const [postText, setPostText] = useState('');
+  const [liked, setLiked] = useState<Set<string>>(new Set());
+  const [saved, setSaved] = useState<Set<string>>(new Set());
+  const [forked, setForked] = useState<Set<string>>(new Set());
+  const [replyingTo, setReplyingTo] = useState<string | null>(null);
+  const [replyText, setReplyText] = useState('');
+
+  const toggleLiked = (id: string) => {
+    setLiked((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  };
+  const toggleSaved = (id: string) => {
+    setSaved((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  };
+  const toggleForked = (id: string) => {
+    setForked((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  };
 
   return (
     <div>
@@ -32,12 +61,14 @@ export function FeedPage() {
             style={{ color: colors.primary, '--tw-placeholder-color': colors.muted } as React.CSSProperties}
             placeholder="What's the latest patch?"
             aria-label="Create a post"
+            value={postText}
+            onChange={(e) => setPostText(e.target.value)}
           />
         </div>
         <div className="mt-3 flex items-center justify-between pl-[56px]">
           <div className="flex gap-4" style={{ color: colors.verified }}>
-            {[Code2, Paperclip, Image, Video, BarChart3].map((Icon, index) => (
-              <button key={index} aria-label="Add content" className="hover:opacity-70 transition-opacity">
+            {([['Code', Code2], ['Clip', Paperclip], ['Image', Image], ['Video', Video], ['Stats', BarChart3]] as const).map(([label, Icon]) => (
+              <button key={label} aria-label={`Add ${label}`} className="hover:opacity-70 transition-opacity" onClick={() => setPostText((prev) => prev + ` [attach ${label}]`)}>
                 <Icon size={18} />
               </button>
             ))}
@@ -45,6 +76,7 @@ export function FeedPage() {
           <button
             className="h-9 rounded-full px-5 text-[15px] font-bold transition-all hover:brightness-110"
             style={{ background: colors.verified, color: '#000' }}
+            onClick={() => { setPostText(''); }}
           >
             Post
           </button>
@@ -73,30 +105,18 @@ export function FeedPage() {
                       <Badge status={post.status} />
                     </div>
                   </div>
-                  <button className="grid h-8 w-8 shrink-0 place-items-center rounded-full transition-colors hover:bg-[#1a1d24]" style={{ color: colors.muted }} aria-label="More actions">
+                  <button className="grid h-8 w-8 shrink-0 place-items-center rounded-full transition-colors hover:bg-[#1a1d24]" style={{ color: colors.muted }} aria-label="More actions" onClick={() => { navigator.clipboard.writeText(window.location.origin + '/post/' + post.id); }}>
                     <MoreHorizontal size={18} />
                   </button>
                 </div>
 
-                {/* Version & impact */}
+                {/* Impact */}
                 <div className="mt-0.5 flex flex-wrap items-center gap-2 text-[13px]">
-                  {post.version && (
-                    <span className="rounded-full px-2.5 py-0.5 font-mono text-xs font-bold" style={{ background: 'rgba(0,200,150,0.12)', color: colors.verified }}>
-                      {post.version}
-                    </span>
-                  )}
                   <span style={{ color: colors.verified }}>{post.patched}</span>
                   <span style={{ color: colors.muted }}>
                     Impact: <b style={{ color: colors.primary }}>{post.impactScore}</b>
                   </span>
                 </div>
-
-                {/* Lineage */}
-                {post.lineage && (
-                  <p className="mt-1 font-mono text-[11px] leading-4" style={{ color: colors.muted }}>
-                    Fork lineage: {post.lineage.join(' / ')}
-                  </p>
-                )}
 
                 {/* Excerpt */}
                 <p className="mt-1.5 max-w-[620px] text-[15px] leading-5" style={{ color: colors.primary }}>
@@ -130,23 +150,23 @@ export function FeedPage() {
 
                 {/* Actions */}
                 <div className="mt-2.5 flex max-w-[600px] items-center justify-between text-[13px]" style={{ color: colors.muted }}>
-                  <button className="inline-flex items-center gap-1.5 transition-colors hover:text-sky-500">
+                  <button className="inline-flex items-center gap-1.5 transition-colors hover:text-sky-500" onClick={() => { setReplyingTo(replyingTo === post.id ? null : post.id); setReplyText(''); }}>
                     <MessageCircle size={17} />
                     {post.comments}
                   </button>
-                  <button className="inline-flex items-center gap-1.5 transition-colors hover:text-[#00C896]">
-                    <Repeat2 size={17} />
-                    {post.forks}
+                  <button className="inline-flex items-center gap-1.5 transition-colors hover:text-[#00C896]" onClick={() => toggleForked(post.id)}>
+                    <Repeat2 size={17} style={{ color: forked.has(post.id) ? colors.verified : undefined }} />
+                    {post.forks + (forked.has(post.id) ? 1 : 0)}
                   </button>
-                  <button className="inline-flex items-center gap-1.5 transition-colors hover:text-rose-500">
-                    <Heart size={17} />
-                    {post.likes}
+                  <button className="inline-flex items-center gap-1.5 transition-colors hover:text-rose-500" onClick={() => toggleLiked(post.id)}>
+                    <Heart size={17} fill={liked.has(post.id) ? '#f43f5e' : 'none'} />
+                    {post.likes + (liked.has(post.id) ? 1 : 0)}
                   </button>
-                  <button className="inline-flex items-center gap-1.5 transition-colors hover:text-surface">
-                    <Bookmark size={17} />
-                    Save
+                  <button className="inline-flex items-center gap-1.5 transition-colors hover:text-surface" onClick={() => toggleSaved(post.id)}>
+                    <Bookmark size={17} fill={saved.has(post.id) ? '#e7e9ea' : 'none'} />
+                    {saved.has(post.id) ? 'Saved' : 'Save'}
                   </button>
-                  <button className="hidden items-center gap-1.5 transition-colors hover:text-sky-500 sm:inline-flex">
+                  <button className="hidden items-center gap-1.5 transition-colors hover:text-sky-500 sm:inline-flex" onClick={() => { navigator.clipboard.writeText(window.location.origin + '/post/' + post.id); alert('Link copied!'); }}>
                     <Share2 size={17} />
                     Share
                   </button>
@@ -155,6 +175,26 @@ export function FeedPage() {
                     {compactNumber(post.impressions)}
                   </span>
                 </div>
+
+                {/* Inline reply */}
+                {replyingTo === post.id && (
+                  <div className="mt-3 flex gap-3 pl-12">
+                    <textarea
+                      className="min-h-[40px] flex-1 resize-none rounded-lg border bg-transparent p-2 text-sm leading-5 outline-none"
+                      style={{ borderColor: colors.border, color: colors.primary }}
+                      placeholder="Write a reply..."
+                      value={replyText}
+                      onChange={(e) => setReplyText(e.target.value)}
+                    />
+                    <button
+                      className="h-fit rounded-full px-4 py-1.5 text-xs font-bold transition-all hover:brightness-110"
+                      style={{ background: colors.verified, color: '#000' }}
+                      onClick={() => { setReplyText(''); setReplyingTo(null); }}
+                    >
+                      Reply
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
           </article>

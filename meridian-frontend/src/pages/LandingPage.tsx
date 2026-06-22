@@ -212,8 +212,8 @@ export function LandingPage() {
               </Link>
             </motion.div>
 
-            <div className="w-3/4" style={{ width:'600px',borderTop: '2px solid rgba(255, 255, 255, 0.12)' }} />
-            <motion.div custom={1.1} variants={fadeUp} initial="hidden" animate="visible" className="flex items-center gap-10" style={{ marginTop: '20px' }}>
+            <div className="w-3/4" style={{ width:'628px',marginTop:'20px',borderTop: '2px solid rgba(255, 255, 255, 0.12)' }} />
+            <motion.div custom={1.1} variants={fadeUp} initial="hidden" animate="visible" className="flex items-center gap-8 ml-2" style={{ marginTop: '20px' }}>
               {[
                 { value: '12k+', label: 'ENGINEERS' },
                 { value: '8k+', label: 'POSTS' },

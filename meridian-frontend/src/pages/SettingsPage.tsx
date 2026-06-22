@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Bell, Eye, Key, Shield, User } from 'lucide-react';
 
 const sections = [
@@ -41,12 +42,13 @@ const sections = [
 ];
 
 export function SettingsPage() {
+  const [editing, setEditing] = useState<string | null>(null);
   return (
     <div className="mx-auto max-w-4xl p-6 lg:p-8">
       <h1 className="mb-8 text-3xl font-black">Settings</h1>
       <div className="space-y-6">
         {sections.map(({ icon: Icon, title, fields }) => (
-          <section key={title} className="border border-[#333] bg-black">
+          <section key={title} className="border border-[#333] bg-[#14171C]">
             <div className="flex items-center gap-3 border-b border-[#333] px-6 py-4">
               <Icon size={18} className="text-verified" />
               <h2 className="text-lg font-bold">{title}</h2>
@@ -57,8 +59,8 @@ export function SettingsPage() {
                   <span className="text-sm text-neutral-500">{label}</span>
                   <div className="flex items-center gap-3">
                     <span className="text-sm font-medium">{value}</span>
-                    <button className="rounded-md border border-[#333] px-3 py-1 text-xs font-medium transition-colors hover:bg-[#1a1d24]">
-                      Edit
+                    <button className="rounded-md border border-[#333] px-3 py-1 text-xs font-medium transition-colors hover:bg-[#1a1d24]" onClick={() => setEditing(editing === label ? null : label)}>
+                      {editing === label ? 'Done' : 'Edit'}
                     </button>
                   </div>
                 </div>

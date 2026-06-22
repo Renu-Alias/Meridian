@@ -63,7 +63,7 @@ export function HeaderBar() {
         <Link to="/settings" className="grid h-8 w-8 place-items-center rounded-md transition-colors hover:bg-[#1a1d24]" style={{ color: colors.muted }} aria-label="Settings">
           <Settings size={18} />
         </Link>
-        <button className="grid h-8 w-8 place-items-center rounded-md transition-colors hover:bg-[#1a1d24]" style={{ color: colors.muted }} aria-label="Help">
+        <button className="grid h-8 w-8 place-items-center rounded-md transition-colors hover:bg-[#1a1d24]" style={{ color: colors.muted }} aria-label="Help" onClick={() => alert('Help center coming soon')}>
           <HelpCircle size={18} />
         </button>
       </div>

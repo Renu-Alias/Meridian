@@ -18,7 +18,7 @@ export function WalletPage() {
     <div className="mx-auto max-w-5xl p-6 lg:p-8">
       <div className="grid gap-4 md:grid-cols-3">
         {stats.map(([label, value, Icon]) => (
-          <section key={label} className="border border-[#333] bg-black p-5">
+          <section key={label} className="border border-[#333] bg-[#14171C] p-5">
             <div className="flex items-center justify-between">
               <p className="font-mono text-xs uppercase tracking-[0.22em] text-muted">{label}</p>
               <Icon size={20} className="text-emerald-700" />
@@ -28,13 +28,13 @@ export function WalletPage() {
         ))}
       </div>
 
-      <section className="mt-6 border border-[#333] bg-black p-6">
+      <section className="mt-6 border border-[#333] bg-[#14171C] p-6">
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-2xl font-bold">Monthly impact analytics</h2>
             <p className="mt-1 text-sm text-neutral-500">Earnings from bookmarks, internal shares, and Used This At Work reactions.</p>
           </div>
-          <button className="hidden h-10 rounded-full bg-black px-5 font-bold text-white sm:block">Request payout</button>
+          <button className="hidden h-10 rounded-full px-5 font-bold text-black sm:block" style={{ background: '#00C896' }} onClick={() => alert('Payout request flow coming soon')}>Request payout</button>
         </div>
         <div className="mt-8 flex h-56 items-end gap-2 border-b border-l border-[#333] px-3">
           {data.trend.map((point, index) => (
@@ -49,7 +49,7 @@ export function WalletPage() {
         </div>
       </section>
 
-      <section className="mt-6 overflow-hidden border border-[#333] bg-black">
+      <section className="mt-6 overflow-hidden border border-[#333] bg-[#14171C]">
         <div className="border-b border-[#333] p-5">
           <h2 className="text-2xl font-bold">Earnings by post</h2>
         </div>
