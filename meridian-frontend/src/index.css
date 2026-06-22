@@ -28,7 +28,7 @@ body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
-  background: var(--color-primary);
+  background: #1C1B1B;
   color: var(--color-surface);
   font-family: var(--font-twitter);
 }
