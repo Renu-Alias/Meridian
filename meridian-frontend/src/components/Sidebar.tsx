@@ -1,7 +1,7 @@
 import { Bell, Compass, Edit3, Home, Settings, User, WalletCards, X } from 'lucide-react';
 import { NavLink } from 'react-router-dom';
+import { BrandMark } from './Logo';
 import { useUiStore } from '../store/uiStore';
-import { Logo } from './Logo';
 
 const links = [
   { to: '/feed', label: 'Feed', icon: Home },
@@ -39,13 +39,7 @@ export function Sidebar() {
         }}
       >
         {/* Logo area */}
-        <NavLink to="/" className="flex items-center gap-3 px-2">
-          <Logo />
-          <span>
-            <span className="block text-[15px] font-medium leading-none" style={{ color: colors.primary }}>Meridian</span>
-            <span className="mt-0.5 block text-[12px] font-medium" style={{ color: colors.muted }}>Engineer Network</span>
-          </span>
-        </NavLink>
+        <BrandMark to="/discover" showSubtitle className="px-2" />
         <button className="lg:hidden absolute right-4 top-6" aria-label="Close navigation" onClick={toggleSidebar}>
           <X size={18} style={{ color: colors.secondary }} />
         </button>

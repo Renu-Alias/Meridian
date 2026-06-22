@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Filter } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
+import { useUiStore } from '../store/uiStore';
 import { fetchNotifications } from '../services/mockApi';
 
 const accentClass = {
@@ -14,6 +15,7 @@ export function NotificationsPage() {
   const { data: notifications = [] } = useQuery({ queryKey: ['notifications'], queryFn: fetchNotifications });
   const categories = ['All', 'Patches', 'Q&A', 'Forks', 'Payouts', 'Mentions'];
   const [activeCat, setActiveCat] = useState('All');
+  const showToast = useUiStore((s) => s.showToast);
 
   return (
     <div className="mx-auto max-w-4xl p-6 lg:p-8">
@@ -22,7 +24,7 @@ export function NotificationsPage() {
           <p className="font-mono text-xs uppercase tracking-[0.28em] text-muted">Activity center</p>
           <h2 className="mt-2 text-3xl font-black">Patch decisions, answers, forks, and payouts</h2>
         </div>
-        <button className="inline-flex h-10 items-center gap-2 rounded-full border border-black px-4 font-bold" onClick={() => alert('Advanced filters coming soon')}>
+        <button className="inline-flex h-10 items-center gap-2 rounded-full border border-black px-4 font-bold" onClick={() => showToast('Advanced filters coming soon')}>
           <Filter size={16} />
           Filter
         </button>

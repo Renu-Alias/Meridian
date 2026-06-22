@@ -3,6 +3,7 @@ import { HeaderBar } from './components/HeaderBar';
 import { RightPanel } from './components/RightPanel';
 import { Sidebar } from './components/Sidebar';
 import { SpaceBackground } from './components/SpaceBackground';
+import { Toast } from './components/Toast';
 import { DiscoverPage } from './pages/DiscoverPage';
 import { EditorPage } from './pages/EditorPage';
 import { FeedPage } from './pages/FeedPage';
@@ -31,6 +32,7 @@ function AppShell() {
           </Routes>
         </main>
         <RightPanel />
+        <Toast />
       </div>
     </div>
   );

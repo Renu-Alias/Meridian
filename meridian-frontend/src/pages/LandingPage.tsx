@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { ArrowRight, BookOpen } from 'lucide-react';
+import { BrandMark } from '../components/Logo';
 import { ScrollStory } from '../components/ScrollStory';
 
 /* ─────────────────────────────────────────────────────────────────────────
@@ -147,23 +148,11 @@ export function LandingPage() {
       <section className="relative w-full overflow-hidden">
         {/* Top nav */}
         <nav className="relative z-20 flex items-center justify-between px-8 pt-4">
-          <Link to="/" className="flex items-center gap-2.5 group">
-            <span
-              className="grid h-9 w-9 place-items-center rounded-lg"
-              style={{
-                background: 'rgba(255,255,255,0.06)',
-                border: '1px solid rgba(255,255,255,0.12)',
-                backdropFilter: 'blur(8px)',
-              }}
-            >
-              <svg width="17" height="17" viewBox="0 0 16 16" fill="none">
-                <path d="M2 13V3l6 7 6-7v10" stroke="var(--color-surface)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-            </span>
-            <span className="text-base font-semibold transition-colors" style={{ fontFamily: 'Inter, sans-serif', letterSpacing: '0.01em', color: 'var(--color-surface)' }}>
-              Meridian
-            </span>
-          </Link>
+          <BrandMark
+            to="/"
+            nameClassName="text-base font-semibold leading-none text-[var(--color-surface)]"
+            className="group [font-family:Inter,sans-serif] [letter-spacing:0.01em]"
+          />
           <div className="flex items-center gap-6">
             <Link to="/discover" className="text-sm transition-colors hover:text-white" style={{ fontFamily: 'Inter, sans-serif', color: 'var(--color-muted)' }}>
               Discover

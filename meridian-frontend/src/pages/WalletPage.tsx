@@ -1,11 +1,13 @@
 import { ArrowUpRight, CreditCard, WalletCards } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
+import { useUiStore } from '../store/uiStore';
 import { fetchWallet } from '../services/mockApi';
 import { currency } from '../utils/format';
 
 export function WalletPage() {
   const { data } = useQuery({ queryKey: ['wallet'], queryFn: fetchWallet });
+  const showToast = useUiStore((s) => s.showToast);
   if (!data) return <div className="p-8">Loading wallet...</div>;
   const max = Math.max(...data.trend);
   const stats: Array<[string, number, LucideIcon]> = [
@@ -34,7 +36,7 @@ export function WalletPage() {
             <h2 className="text-2xl font-bold">Monthly impact analytics</h2>
             <p className="mt-1 text-sm text-neutral-500">Earnings from bookmarks, internal shares, and Used This At Work reactions.</p>
           </div>
-          <button className="hidden h-10 rounded-full px-5 font-bold text-black sm:block" style={{ background: '#00C896' }} onClick={() => alert('Payout request flow coming soon')}>Request payout</button>
+          <button className="hidden h-10 rounded-full px-5 font-bold text-black sm:block" style={{ background: '#00C896' }} onClick={() => showToast('Payout request flow coming soon')}>Request payout</button>
         </div>
         <div className="mt-8 flex h-56 items-end gap-2 border-b border-l border-[#333] px-3">
           {data.trend.map((point, index) => (

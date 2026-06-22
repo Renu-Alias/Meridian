@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { BarChart3, Bookmark, Code2, Heart, Image, MessageCircle, MoreHorizontal, Paperclip, Repeat2, Share2, Video } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { Badge } from '../components/Badge';
+import { useUiStore } from '../store/uiStore';
 import { fetchFeed } from '../services/mockApi';
 import { compactNumber } from '../utils/format';
 
@@ -17,6 +18,7 @@ const colors = {
 
 export function FeedPage() {
   const { data: posts = [] } = useQuery({ queryKey: ['feed'], queryFn: fetchFeed });
+  const showToast = useUiStore((s) => s.showToast);
   const [postText, setPostText] = useState('');
   const [liked, setLiked] = useState<Set<string>>(new Set());
   const [saved, setSaved] = useState<Set<string>>(new Set());
@@ -49,7 +51,7 @@ export function FeedPage() {
   return (
     <div>
       {/* Composer */}
-      <section className="border border-zinc-900 bg-[#1C1B1B] p-4 sm:p-5 shadow-lg" style={{ borderColor: colors.border, background: 'rgb(28, 27, 27)' }}>
+      <section className="border border-zinc-900 bg-[#1C1B1B] px-4 pb-4 pt-7 sm:px-5 sm:pb-5 shadow-lg" style={{ borderColor: colors.border, background: 'rgb(28, 27, 27)' }}>
         <div className="flex gap-3">
           <img
             src="https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=120&q=80"
@@ -166,7 +168,7 @@ export function FeedPage() {
                     <Bookmark size={17} fill={saved.has(post.id) ? '#e7e9ea' : 'none'} />
                     {saved.has(post.id) ? 'Saved' : 'Save'}
                   </button>
-                  <button className="hidden items-center gap-1.5 transition-colors hover:text-sky-500 sm:inline-flex" onClick={() => { navigator.clipboard.writeText(window.location.origin + '/post/' + post.id); alert('Link copied!'); }}>
+                  <button className="hidden items-center gap-1.5 transition-colors hover:text-sky-500 sm:inline-flex" onClick={() => { navigator.clipboard.writeText(window.location.origin + '/post/' + post.id); showToast('Link copied!', 'success'); }}>
                     <Share2 size={17} />
                     Share
                   </button>

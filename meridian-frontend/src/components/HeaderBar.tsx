@@ -1,5 +1,6 @@
 import { HelpCircle, Menu, Search, Settings } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
+import { BrandMark } from './Logo';
 import { useUiStore } from '../store/uiStore';
 
 const titles: Record<string, string> = {
@@ -21,6 +22,7 @@ const colors = {
 export function HeaderBar() {
   const location = useLocation();
   const toggleSidebar = useUiStore((state) => state.toggleSidebar);
+  const showToast = useUiStore((state) => state.showToast);
   const isEditor = location.pathname.startsWith('/editor');
   const title = isEditor ? 'Write' : titles[location.pathname] ?? 'Discover';
 
@@ -43,7 +45,8 @@ export function HeaderBar() {
         >
           <Menu size={17} />
         </button>
-        <h1 className="text-lg font-bold" style={{ color: colors.primary }}>{title}</h1>
+        <BrandMark to="/discover" className="lg:hidden" nameClassName="text-base font-semibold leading-none text-[#e7e9ea]" />
+        <h1 className="hidden text-lg font-bold lg:block" style={{ color: colors.primary }}>{title}</h1>
       </div>
 
       <div
@@ -63,7 +66,7 @@ export function HeaderBar() {
         <Link to="/settings" className="grid h-8 w-8 place-items-center rounded-md transition-colors hover:bg-[#1a1d24]" style={{ color: colors.muted }} aria-label="Settings">
           <Settings size={18} />
         </Link>
-        <button className="grid h-8 w-8 place-items-center rounded-md transition-colors hover:bg-[#1a1d24]" style={{ color: colors.muted }} aria-label="Help" onClick={() => alert('Help center coming soon')}>
+        <button className="grid h-8 w-8 place-items-center rounded-md transition-colors hover:bg-[#1a1d24]" style={{ color: colors.muted }} aria-label="Help" onClick={() => showToast('Help center coming soon')}>
           <HelpCircle size={18} />
         </button>
       </div>

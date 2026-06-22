@@ -1,6 +1,8 @@
 import { Flame, MessageSquare, Repeat2, TrendingUp } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
+import { useNavigate } from 'react-router-dom';
 import { Badge } from '../components/Badge';
+import { useUiStore } from '../store/uiStore';
 import { fetchDiscover } from '../services/mockApi';
 
 const colors = {
@@ -14,6 +16,8 @@ const colors = {
 
 export function DiscoverPage() {
   const { data } = useQuery({ queryKey: ['discover'], queryFn: fetchDiscover });
+  const navigate = useNavigate();
+  const showToast = useUiStore((s) => s.showToast);
   if (!data) return <div className="p-8" style={{ color: colors.secondary }}>Loading discovery graph...</div>;
 
   return (
@@ -68,7 +72,7 @@ export function DiscoverPage() {
               <p className="mt-1.5 text-sm font-medium" style={{ color: colors.verified }}>{card.status}</p>
               <div className="mt-4 flex items-center justify-between">
                 <span className="font-mono text-xs" style={{ color: colors.muted }}>{card.ripples} Ripples</span>
-                <button className="text-sm font-bold transition-all group-hover:brightness-110" style={{ color: colors.verified }} onClick={() => alert('Full post view coming soon')}>
+                <button className="text-sm font-bold transition-all group-hover:brightness-110" style={{ color: colors.verified }} onClick={() => navigate('/feed')}>
                   Read More →
                 </button>
               </div>
@@ -106,7 +110,7 @@ export function DiscoverPage() {
       <section className="mt-8">
         <div className="flex items-center justify-between">
           <h2 className="text-2xl font-bold" style={{ color: colors.primary }}>Find a Mentor</h2>
-          <button className="text-sm font-bold" style={{ color: colors.verified }} onClick={() => alert('Expert directory coming soon')}>View All Experts →</button>
+          <button className="text-sm font-bold" style={{ color: colors.verified }} onClick={() => showToast('Expert directory coming soon')}>View All Experts →</button>
         </div>
         <div className="mt-5 grid gap-4 md:grid-cols-3">
           {data.mentors.map(([name, role, tagA, tagB]) => (
@@ -121,7 +125,7 @@ export function DiscoverPage() {
               <button
                 className="mt-4 h-10 w-full rounded-full text-sm font-bold transition-all"
                 style={{ border: `1px solid ${colors.verified}`, color: colors.verified, background: 'transparent' }}
-                onClick={() => alert(`Connect request sent to ${name}`)}
+                onClick={() => showToast(`Connect request sent to ${name}`, 'success')}
               >
                 Connect
               </button>

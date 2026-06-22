@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Bold, Code2, ImageIcon, Italic, Link as LinkIcon, List, ListOrdered, Table, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { BrandMark } from '../components/Logo';
 
 const colors = {
   bg: '#1C1B1B',
@@ -25,6 +26,9 @@ export function EditorPage() {
 
   return (
     <main className="relative z-10 min-h-screen" style={{ background: colors.bg }}>
+      <nav className="border-b px-6 py-3" style={{ borderColor: colors.border, background: 'rgba(28,27,27,0.95)' }}>
+        <BrandMark to="/discover" />
+      </nav>
       <div className="mx-auto flex min-h-screen max-w-6xl flex-col px-6 py-8">
         {/* HEADER */}
         <header className="flex flex-wrap items-start justify-between gap-4">
