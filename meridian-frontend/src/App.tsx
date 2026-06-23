@@ -9,6 +9,7 @@ import { EditorPage } from './pages/EditorPage';
 import { FeedPage } from './pages/FeedPage';
 import { LandingPage } from './pages/LandingPage';
 import { NotificationsPage } from './pages/NotificationsPage';
+import { PostDetailPage } from './pages/PostDetailPage';
 import { ProfilePage, ProfileShell } from './pages/ProfilePage';
 import { SettingsPage } from './pages/SettingsPage';
 import { WalletPage } from './pages/WalletPage';
@@ -22,6 +23,7 @@ function AppShell() {
           <HeaderBar />
           <Routes>
             <Route path="/feed" element={<FeedPage />} />
+            <Route path="/post/:id" element={<PostDetailPage />} />
             <Route path="/discover" element={<DiscoverPage />} />
             <Route path="/notifications" element={<NotificationsPage />} />
             <Route path="/wallet" element={<WalletPage />} />

@@ -95,6 +95,13 @@ export const posts: Post[] = [
   },
 ];
 
+export const fetchPost = async (id: string) => {
+  await wait();
+  const post = posts.find((p) => p.id === id);
+  if (!post) throw new Error('Post not found');
+  return post;
+};
+
 export const fetchFeed = async () => {
   await wait();
   return posts;
