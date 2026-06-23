@@ -1,0 +1,17 @@
+- Set up FastAPI project scaffolding with config, database, and core application structure
+- Created SQLAlchemy data models for User, StackProfile, Technology, Post, PostVersion, Patch, Citation, ClaimFlag, QAThread, Reaction, Fork, Wallet, Transaction, MentorshipSubmission, SkillsGraphEntry, CredibilityScore, and Notification
+- Created Pydantic schemas for all API request/response serialization with full type validation
+- Built auth system with JWT token creation, OAuth endpoints (GitHub OAuth integration, email/password registration), and token verification middleware
+- Built User & Stack Profile CRUD APIs with endpoint for viewing public profiles, updating profile, managing stack tags, and listing approved technologies
+- Built Post CRUD & Tagging APIs supporting full CRUD, publish flow, and technology tag management with autoparse of skills from post body
+- Built Feed & Stack-Matched Discovery APIs with relevance scoring (keyword overlap and sentence-transformers embedding similarity) for personalized stack-based feeds
+- Built Claim Verification system with inline citations, community claim flagging, and auto-updating author credibility score based on verified-to-flagged ratio
+- Built Living Posts system with patch submission (PR-style), author review/approve/reject workflow, automatic version history tracking on approved patches
+- Built Collaborative Forking system with one-click fork creation, preserved attribution chain, fork listing with author metadata, and merge-suggestion tracking
+- Built Structured Q&A system per post with threaded questions, author answers, auto-generated FAQ from resolved threads, and independent Q&A indexing
+- Built Skills Graph / Portfolio system with auto-parsed skill extraction from post content, depth tracking, and public profile display endpoint
+- Built Impact-Based Monetization system with reaction-triggered wallet credits (bookmark/share/used-at-work), balance tracking, transaction ledger, and payout request flow
+- Built Mentored Publishing system with draft submission, mentor matching, review workspace with approve/changes-requested workflow, and reviewer credit display
+- Built Notification system with per-category listing, read/unread tracking, and bulk mark-read endpoint
+- Configured Celery background task worker for async payout processing, stack matching, and notification delivery
+- Set up SQLite database with auto table creation and WAL mode for development; PostgreSQL-ready via config change

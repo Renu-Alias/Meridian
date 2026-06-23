@@ -36,7 +36,7 @@ class Post(Base):
     tags = relationship("Technology", secondary=post_tags)
     versions = relationship("PostVersion", back_populates="post", cascade="all, delete-orphan", foreign_keys="PostVersion.post_id")
     patches = relationship("Patch", back_populates="post", cascade="all, delete-orphan", foreign_keys="Patch.post_id")
-    forks = relationship("Post", back_populates="fork_of", remote_side="Post.id", cascade="all, delete-orphan")
+    forks = relationship("Post", back_populates="fork_of")
     fork_of = relationship("Post", back_populates="forks", remote_side="Post.id")
     citations = relationship("Citation", back_populates="post", cascade="all, delete-orphan")
     claim_flags = relationship("ClaimFlag", back_populates="post", cascade="all, delete-orphan")
