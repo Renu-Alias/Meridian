@@ -35,7 +35,7 @@ Posts are intelligently matched to engineers based on their current tech stack, 
 ### 2. ⏱️ Living Posts — Your Writing Doesn't Expire
 > *"Your best posts don't go stale."*
  
-Technical content has a shelf life. Surfaced lets the community submit *patches* to outdated posts — like a pull request but for writing. Articles stay accurate, keep ranking, and keep helping.
+Technical content has a shelf life. Meridian lets the community submit *patches* to outdated posts — like a pull request but for writing. Articles stay accurate, keep ranking, and keep helping.
  
 - Community-submitted corrections and updates
 - Author approves/rejects patches via a PR-style interface
@@ -85,7 +85,7 @@ Each post has a structured Q&A section — not a comment section, but threaded q
 ### 7. 🧭 Writing as Your Portfolio
 > *"Your writing becomes your engineering CV."*
  
-Every post you publish is parsed for technologies, concepts, and depth — auto-building a verified skills profile. Recruiters search Surfaced not for resumes, but for *thinkers*.
+Every post you publish is parsed for technologies, concepts, and depth — auto-building a verified skills profile. Recruiters search Meridian not for resumes, but for *thinkers*.
  
 - Auto-generated skills graph from post content
 - Public author profile with verified expertise tags
