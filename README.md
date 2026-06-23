@@ -73,6 +73,8 @@ weighted by the contributor's own standing. Game the leaderboard by writing bett
 - Global leaderboard with **rank tiers:**
   `Newcomer → Contributor → Engineer → Senior → Architect → Fellow`
 - Rank influences **post visibility** — higher ranked authors surface higher in discovery feeds
+
+---
  
 ### 5. 🧪 Claim Verification
 > *"Every claim is linked to a proof."*
