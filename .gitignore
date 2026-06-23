@@ -9,3 +9,8 @@ __pycache__/
 *.db
 *.db-shm
 *.db-wal
+
+# Logs
+*.log
+server_err.log
+server_out.log
