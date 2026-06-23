@@ -61,6 +61,8 @@ weighted by the contributor's own standing. Game the leaderboard by writing bett
 
 - **Point system driven by peer impact:**
 
+<div align="center">
+
 | Action | Points |
 |---|---|
 | Someone forks your post | +10 |
@@ -69,11 +71,12 @@ weighted by the contributor's own standing. Game the leaderboard by writing bett
 | Your patch gets accepted on another's post | +8 |
 | Your mentee publishes successfully | +12 |
 
+</div>
+
 - Points from high-ranked engineers carry **more weight** — preventing gaming
 - Global leaderboard with **rank tiers:**
   `Newcomer → Contributor → Engineer → Senior → Architect → Fellow`
 - Rank influences **post visibility** — higher ranked authors surface higher in discovery feeds
-
 ---
  
 ### 5. 🧪 Claim Verification
