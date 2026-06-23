@@ -1,6 +1,7 @@
 import { useState } from 'react';
-import { Bold, Code2, ImageIcon, Italic, Link as LinkIcon, List, ListOrdered, Table, X } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { Bold, Code2, ImageIcon, Italic, GitBranch, Link as LinkIcon, List, ListOrdered, Table, X } from 'lucide-react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useUiStore } from '../store/uiStore';
 import { BrandMark } from '../components/Logo';
 
 const colors = {
@@ -15,9 +16,15 @@ const colors = {
 
 export function EditorPage() {
   const navigate = useNavigate();
-  const [title, setTitle] = useState('');
-  const [body, setBody] = useState('');
-  const [tags, setTags] = useState(['Rust', 'Wasm']);
+  const showToast = useUiStore((s) => s.showToast);
+  const [searchParams] = useSearchParams();
+  const forkId = searchParams.get('fork');
+  const initialTitle = searchParams.get('title') || '';
+  const initialBody = searchParams.get('body') || '';
+
+  const [title, setTitle] = useState(initialTitle);
+  const [body, setBody] = useState(initialBody);
+  const [tags, setTags] = useState(forkId ? ['Fork'] : ['Rust', 'Wasm']);
   const [impactScore, setImpactScore] = useState(75);
 
   const removeTag = (tag: string) => {
@@ -33,8 +40,12 @@ export function EditorPage() {
         {/* HEADER */}
         <header className="flex flex-wrap items-start justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-bold" style={{ color: colors.primary }}>Publish New Patch</h1>
-            <p className="mt-1 text-sm" style={{ color: colors.secondary }}>Contribute to the collective engineering knowledge base.</p>
+            <h1 className="text-3xl font-bold" style={{ color: colors.primary }}>
+              {forkId ? (
+                <span className="inline-flex items-center gap-2"><GitBranch size={28} style={{ color: colors.mint }} /> Fork Post</span>
+              ) : 'Publish New Patch'}
+            </h1>
+            <p className="mt-1 text-sm" style={{ color: colors.secondary }}>{forkId ? 'Adapt and evolve an existing post into your own version.' : 'Contribute to the collective engineering knowledge base.'}</p>
           </div>
           <div className="flex items-center gap-3">
             <button
@@ -47,8 +58,9 @@ export function EditorPage() {
             <button
               className="inline-flex h-9 items-center rounded-md px-5 text-sm font-bold transition-all hover:brightness-110"
               style={{ background: colors.mint, color: '#000' }}
+              onClick={() => { navigate('/feed'); showToast(forkId ? 'Fork published!' : 'Patch published!', 'success'); }}
             >
-              Publish Patch
+              {forkId ? 'Publish Fork' : 'Publish Patch'}
             </button>
           </div>
         </header>

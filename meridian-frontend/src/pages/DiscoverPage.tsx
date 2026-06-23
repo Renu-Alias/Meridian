@@ -1,4 +1,5 @@
-import { Flame, MessageSquare, Repeat2, TrendingUp } from 'lucide-react';
+import { useState } from 'react';
+import { Flame, MessageSquare, Repeat2, TrendingUp, X } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { Badge } from '../components/Badge';
@@ -18,6 +19,7 @@ export function DiscoverPage() {
   const { data } = useQuery({ queryKey: ['discover'], queryFn: fetchDiscover });
   const navigate = useNavigate();
   const showToast = useUiStore((s) => s.showToast);
+  const [showExperts, setShowExperts] = useState(false);
   if (!data) return <div className="p-8" style={{ color: colors.secondary }}>Loading discovery graph...</div>;
 
   return (
@@ -110,7 +112,7 @@ export function DiscoverPage() {
       <section className="mt-8">
         <div className="flex items-center justify-between">
           <h2 className="text-2xl font-bold" style={{ color: colors.primary }}>Find a Mentor</h2>
-          <button className="text-sm font-bold" style={{ color: colors.verified }} onClick={() => showToast('Expert directory coming soon')}>View All Experts →</button>
+          <button className="text-sm font-bold" style={{ color: colors.verified }} onClick={() => setShowExperts(true)}>View All Experts →</button>
         </div>
         <div className="mt-5 grid gap-4 md:grid-cols-3">
           {data.mentors.map(([name, role, tagA, tagB]) => (
@@ -133,6 +135,29 @@ export function DiscoverPage() {
           ))}
         </div>
       </section>
+      {showExperts && (
+        <>
+          <div className="fixed inset-0 z-30 bg-black/50" onClick={() => setShowExperts(false)} />
+          <div className="fixed left-1/2 top-1/2 z-40 w-full max-w-lg -translate-x-1/2 -translate-y-1/2 rounded-xl border p-6 shadow-2xl" style={{ background: '#14171c', borderColor: '#2f3336' }}>
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-bold" style={{ color: colors.primary }}>All Experts</h3>
+              <button onClick={() => setShowExperts(false)} className="grid h-8 w-8 place-items-center rounded-full hover:bg-[#1a1d24]" style={{ color: colors.muted }}><X size={18} /></button>
+            </div>
+            <div className="mt-4 space-y-3">
+              {data.mentors.map(([name, role, tagA, tagB]) => (
+                <div key={name} className="flex items-center gap-4 rounded-lg p-4" style={{ border: `1px solid ${colors.border}` }}>
+                  <div className="h-10 w-10 shrink-0 rounded-full" style={{ background: 'rgba(0,200,150,0.1)' }} />
+                  <div className="min-w-0 flex-1">
+                    <p className="font-bold" style={{ color: colors.primary }}>{name}</p>
+                    <p className="text-sm" style={{ color: colors.secondary }}>{role}</p>
+                  </div>
+                  <button className="h-9 rounded-full px-4 text-xs font-bold text-black" style={{ background: colors.verified }} onClick={() => { showToast(`Connect request sent to ${name}`, 'success'); setShowExperts(false); }}>Connect</button>
+                </div>
+              ))}
+            </div>
+          </div>
+        </>
+      )}
     </div>
   );
 }

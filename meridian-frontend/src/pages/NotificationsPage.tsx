@@ -11,10 +11,14 @@ const accentClass = {
   muted: 'bg-muted',
 };
 
+const filterOptions = ['All', 'Unread', 'Today', 'This Week', 'Older'];
+
 export function NotificationsPage() {
   const { data: notifications = [] } = useQuery({ queryKey: ['notifications'], queryFn: fetchNotifications });
   const categories = ['All', 'Patches', 'Q&A', 'Forks', 'Payouts', 'Mentions'];
   const [activeCat, setActiveCat] = useState('All');
+  const [filterOpen, setFilterOpen] = useState(false);
+  const [activeFilter, setActiveFilter] = useState('All');
   const showToast = useUiStore((s) => s.showToast);
 
   return (
@@ -24,10 +28,24 @@ export function NotificationsPage() {
           <p className="font-mono text-xs uppercase tracking-[0.28em] text-muted">Activity center</p>
           <h2 className="mt-2 text-3xl font-black">Patch decisions, answers, forks, and payouts</h2>
         </div>
-        <button className="inline-flex h-10 items-center gap-2 rounded-full border border-black px-4 font-bold" onClick={() => showToast('Advanced filters coming soon')}>
-          <Filter size={16} />
-          Filter
-        </button>
+        <div className="relative">
+          <button className="inline-flex h-10 items-center gap-2 rounded-full border border-black px-4 font-bold" onClick={() => setFilterOpen(!filterOpen)}>
+            <Filter size={16} />
+            {activeFilter}
+          </button>
+          {filterOpen && (
+            <>
+              <div className="fixed inset-0 z-10" onClick={() => setFilterOpen(false)} />
+              <div className="absolute right-0 top-12 z-20 w-40 rounded-lg border py-1 shadow-xl" style={{ background: '#14171c', borderColor: '#2f3336' }}>
+                {filterOptions.map((opt) => (
+                  <button key={opt} className={`flex w-full items-center px-4 py-2 text-left text-sm transition-colors hover:bg-[#1a1d24] ${activeFilter === opt ? 'font-bold' : ''}`} style={{ color: activeFilter === opt ? '#00C896' : '#e7e9ea' }} onClick={() => { setActiveFilter(opt); setFilterOpen(false); }}>
+                    {opt}
+                  </button>
+                ))}
+              </div>
+            </>
+          )}
+        </div>
       </div>
 
       <div className="mt-6 flex gap-2 overflow-x-auto pb-2 thin-scrollbar">

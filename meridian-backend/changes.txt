@@ -15,3 +15,15 @@
 - Built Notification system with per-category listing, read/unread tracking, and bulk mark-read endpoint
 - Configured Celery background task worker for async payout processing, stack matching, and notification delivery
 - Set up SQLite database with auto table creation and WAL mode for development; PostgreSQL-ready via config change
+- Frontend: Reordered Feed action buttons — Like (Heart) now appears first before Comment
+- Frontend: Fixed three-dots menu on feed posts — now opens a dropdown with Copy link, Interested (thumbs up), Not Interested (thumbs down), Unfollow, and Report post
+- Frontend: Fork button on feed posts now navigates to editor with pre-populated content (title, body) and shows "Fork Post" heading
+- Frontend: EditorPage reads fork query params and pre-fills title/body; Publish button now shows toast and navigates to feed
+- Frontend: Feed composer "Post" button now shows toast on publish instead of silently clearing
+- Frontend: WalletPage "Request payout" button now opens a confirmation modal instead of "coming soon" toast
+- Frontend: NotificationsPage "Filter" button now opens a dropdown with All/Unread/Today/This Week/Older options
+- Frontend: DiscoverPage "View All Experts" now opens a modal listing all mentors with Connect buttons
+- Frontend: HeaderBar Help button now opens a help popover with Quick Start Guide, API docs, Keyboard Shortcuts, and Report an Issue
+- Added model_config from_attributes to all ORM-backed Pydantic schemas to fix 500 error on profile page
+- Fixed rate-limit test to use 3 distinct reaction types (toggle logic runs before rate-limit check)
+- Added from app.models import * in test to register all models before create_all

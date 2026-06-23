@@ -1,6 +1,7 @@
 import { useState } from 'react';
-import { BarChart3, Bookmark, Code2, Heart, Image, MessageCircle, MoreHorizontal, Paperclip, Repeat2, Share2, Video } from 'lucide-react';
+import { BarChart3, Bookmark, Code2, Heart, Image, MessageCircle, MoreHorizontal, Paperclip, Repeat2, Share2, ThumbsDown, ThumbsUp, UserMinus, Video } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
+import { useNavigate } from 'react-router-dom';
 import { Badge } from '../components/Badge';
 import { useUiStore } from '../store/uiStore';
 import { fetchFeed } from '../services/mockApi';
@@ -18,13 +19,14 @@ const colors = {
 
 export function FeedPage() {
   const { data: posts = [] } = useQuery({ queryKey: ['feed'], queryFn: fetchFeed });
+  const navigate = useNavigate();
   const showToast = useUiStore((s) => s.showToast);
   const [postText, setPostText] = useState('');
   const [liked, setLiked] = useState<Set<string>>(new Set());
   const [saved, setSaved] = useState<Set<string>>(new Set());
-  const [forked, setForked] = useState<Set<string>>(new Set());
   const [replyingTo, setReplyingTo] = useState<string | null>(null);
   const [replyText, setReplyText] = useState('');
+  const [openMenu, setOpenMenu] = useState<string | null>(null);
 
   const toggleLiked = (id: string) => {
     setLiked((prev) => {
@@ -35,13 +37,6 @@ export function FeedPage() {
   };
   const toggleSaved = (id: string) => {
     setSaved((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id); else next.add(id);
-      return next;
-    });
-  };
-  const toggleForked = (id: string) => {
-    setForked((prev) => {
       const next = new Set(prev);
       if (next.has(id)) next.delete(id); else next.add(id);
       return next;
@@ -78,7 +73,7 @@ export function FeedPage() {
           <button
             className="h-9 rounded-full px-5 text-[15px] font-bold transition-all hover:brightness-110"
             style={{ background: colors.verified, color: '#000' }}
-            onClick={() => { setPostText(''); }}
+            onClick={() => { if (postText.trim()) { showToast('Post published!', 'success'); setPostText(''); } }}
           >
             Post
           </button>
@@ -107,9 +102,35 @@ export function FeedPage() {
                       <Badge status={post.status} />
                     </div>
                   </div>
-                  <button className="grid h-8 w-8 shrink-0 place-items-center rounded-full transition-colors hover:bg-[#1a1d24]" style={{ color: colors.muted }} aria-label="More actions" onClick={() => { navigator.clipboard.writeText(window.location.origin + '/post/' + post.id); }}>
-                    <MoreHorizontal size={18} />
-                  </button>
+                  <div className="relative shrink-0">
+                    <button className="grid h-8 w-8 place-items-center rounded-full transition-colors hover:bg-[#1a1d24]" style={{ color: colors.muted }} aria-label="More actions" onClick={(e) => { e.stopPropagation(); setOpenMenu(openMenu === post.id ? null : post.id); }}>
+                      <MoreHorizontal size={18} />
+                    </button>
+                    {openMenu === post.id && (
+                      <>
+                        <div className="fixed inset-0 z-10" onClick={() => setOpenMenu(null)} />
+                        <div className="absolute right-0 top-10 z-20 w-48 rounded-lg border py-1 shadow-xl" style={{ background: '#14171c', borderColor: '#2f3336' }}>
+                          <button className="flex w-full items-center gap-2 px-4 py-2.5 text-left text-sm transition-colors hover:bg-[#1a1d24]" style={{ color: '#e7e9ea' }} onClick={() => { navigator.clipboard.writeText(window.location.origin + '/post/' + post.id); showToast('Link copied!', 'success'); setOpenMenu(null); }}>
+                            <Share2 size={15} /> Copy link
+                          </button>
+                          <div className="mx-2 my-1 border-t" style={{ borderColor: '#2f3336' }} />
+                          <button className="flex w-full items-center gap-2 px-4 py-2.5 text-left text-sm transition-colors hover:bg-[#1a1d24]" style={{ color: '#e7e9ea' }} onClick={() => { showToast('Marked as Interested', 'success'); setOpenMenu(null); }}>
+                            <ThumbsUp size={15} /> Interested
+                          </button>
+                          <button className="flex w-full items-center gap-2 px-4 py-2.5 text-left text-sm transition-colors hover:bg-[#1a1d24]" style={{ color: '#e7e9ea' }} onClick={() => { showToast('Marked as Not Interested', 'success'); setOpenMenu(null); }}>
+                            <ThumbsDown size={15} /> Not Interested
+                          </button>
+                          <div className="mx-2 my-1 border-t" style={{ borderColor: '#2f3336' }} />
+                          <button className="flex w-full items-center gap-2 px-4 py-2.5 text-left text-sm transition-colors hover:bg-[#1a1d24]" style={{ color: '#e7e9ea' }} onClick={() => { showToast('Unfollowed', 'success'); setOpenMenu(null); }}>
+                            <UserMinus size={15} /> Unfollow
+                          </button>
+                          <button className="flex w-full items-center gap-2 px-4 py-2.5 text-left text-sm transition-colors hover:bg-[#1a1d24]" style={{ color: '#e7e9ea' }} onClick={() => { showToast('Reported', 'success'); setOpenMenu(null); }}>
+                            <BarChart3 size={15} /> Report post
+                          </button>
+                        </div>
+                      </>
+                    )}
+                  </div>
                 </div>
 
                 {/* Impact */}
@@ -152,17 +173,17 @@ export function FeedPage() {
 
                 {/* Actions */}
                 <div className="mt-2.5 flex max-w-[600px] items-center justify-between text-[13px]" style={{ color: colors.muted }}>
+                  <button className="inline-flex items-center gap-1.5 transition-colors hover:text-rose-500" onClick={() => toggleLiked(post.id)}>
+                    <Heart size={17} fill={liked.has(post.id) ? '#f43f5e' : 'none'} />
+                    {post.likes + (liked.has(post.id) ? 1 : 0)}
+                  </button>
                   <button className="inline-flex items-center gap-1.5 transition-colors hover:text-sky-500" onClick={() => { setReplyingTo(replyingTo === post.id ? null : post.id); setReplyText(''); }}>
                     <MessageCircle size={17} />
                     {post.comments}
                   </button>
-                  <button className="inline-flex items-center gap-1.5 transition-colors hover:text-[#00C896]" onClick={() => toggleForked(post.id)}>
-                    <Repeat2 size={17} style={{ color: forked.has(post.id) ? colors.verified : undefined }} />
-                    {post.forks + (forked.has(post.id) ? 1 : 0)}
-                  </button>
-                  <button className="inline-flex items-center gap-1.5 transition-colors hover:text-rose-500" onClick={() => toggleLiked(post.id)}>
-                    <Heart size={17} fill={liked.has(post.id) ? '#f43f5e' : 'none'} />
-                    {post.likes + (liked.has(post.id) ? 1 : 0)}
+                  <button className="inline-flex items-center gap-1.5 transition-colors hover:text-[#00C896]" onClick={() => navigate(`/editor/new?fork=${post.id}&title=${encodeURIComponent(post.title || post.excerpt)}&body=${encodeURIComponent(post.excerpt)}`)}>
+                    <Repeat2 size={17} />
+                    {post.forks}
                   </button>
                   <button className="inline-flex items-center gap-1.5 transition-colors hover:text-surface" onClick={() => toggleSaved(post.id)}>
                     <Bookmark size={17} fill={saved.has(post.id) ? '#e7e9ea' : 'none'} />

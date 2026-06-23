@@ -1,4 +1,5 @@
-import { ArrowUpRight, CreditCard, WalletCards } from 'lucide-react';
+import { useState } from 'react';
+import { ArrowUpRight, CreditCard, WalletCards, X } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { useUiStore } from '../store/uiStore';
@@ -8,6 +9,7 @@ import { currency } from '../utils/format';
 export function WalletPage() {
   const { data } = useQuery({ queryKey: ['wallet'], queryFn: fetchWallet });
   const showToast = useUiStore((s) => s.showToast);
+  const [showPayout, setShowPayout] = useState(false);
   if (!data) return <div className="p-8">Loading wallet...</div>;
   const max = Math.max(...data.trend);
   const stats: Array<[string, number, LucideIcon]> = [
@@ -36,7 +38,7 @@ export function WalletPage() {
             <h2 className="text-2xl font-bold">Monthly impact analytics</h2>
             <p className="mt-1 text-sm text-neutral-500">Earnings from bookmarks, internal shares, and Used This At Work reactions.</p>
           </div>
-          <button className="hidden h-10 rounded-full px-5 font-bold text-black sm:block" style={{ background: '#00C896' }} onClick={() => showToast('Payout request flow coming soon')}>Request payout</button>
+          <button className="hidden h-10 rounded-full px-5 font-bold text-black sm:block" style={{ background: '#00C896' }} onClick={() => setShowPayout(true)}>Request payout</button>
         </div>
         <div className="mt-8 flex h-56 items-end gap-2 border-b border-l border-[#333] px-3">
           {data.trend.map((point, index) => (
@@ -80,6 +82,22 @@ export function WalletPage() {
           </table>
         </div>
       </section>
+      {showPayout && (
+        <>
+          <div className="fixed inset-0 z-30 bg-black/50" onClick={() => setShowPayout(false)} />
+          <div className="fixed left-1/2 top-1/3 z-40 w-full max-w-sm -translate-x-1/2 -translate-y-1/3 rounded-xl border p-6 shadow-2xl" style={{ background: '#14171c', borderColor: '#2f3336' }}>
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-bold" style={{ color: '#e7e9ea' }}>Request Payout</h3>
+              <button onClick={() => setShowPayout(false)} className="grid h-8 w-8 place-items-center rounded-full hover:bg-[#1a1d24]" style={{ color: '#71767b' }}><X size={18} /></button>
+            </div>
+            <p className="mt-3 text-sm" style={{ color: '#71767b' }}>Request a payout of <b style={{ color: '#e7e9ea' }}>{currency(data.balance)}</b> to your connected Stripe account.</p>
+            <div className="mt-5 flex gap-3">
+              <button onClick={() => setShowPayout(false)} className="flex-1 h-10 rounded-full text-sm font-bold" style={{ border: '1px solid #2f3336', color: '#71767b' }}>Cancel</button>
+              <button onClick={() => { setShowPayout(false); showToast(`Payout of ${currency(data.balance)} requested!`, 'success'); }} className="flex-1 h-10 rounded-full text-sm font-bold text-black" style={{ background: '#00C896' }}>Confirm Payout</button>
+            </div>
+          </div>
+        </>
+      )}
     </div>
   );
 }
