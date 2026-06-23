@@ -52,14 +52,31 @@ A GitHub-style forking model for blog posts. Fork someone's article, improve it,
 - Merge suggestions back to the original author
 ---
  
-### 4. 💰 Impact-Based Monetization
-> *"Get paid per engineer who actually applies your idea."*
- 
-Writers earn micro-payments not on reads, but when readers bookmark, share internally, or mark a post as *"used this at work"*. Reward impact, not clickbait.
- 
-- Stripe-powered micro-payment wallet
-- "Used at work" reaction triggers writer earnings
-- Monthly payout dashboard with impact analytics
+### 4. 🏆 Impact-Based Reputation & Global Ranking
+> *"Your rank reflects your real-world impact, not your follower count."*
+
+Writers earn points when the community engages with their work in meaningful ways —
+forks, reposts, and real-world usage. Points fuel a global engineer reputation rank,
+weighted by the contributor's own standing. Game the leaderboard by writing better, not louder.
+
+- **Point system driven by peer impact:**
+
+<div align="center">
+
+| Action | Points |
+|---|---|
+| Someone forks your post | +10 |
+| Someone reposts your post | +5 |
+| "Used at work" reaction on your post | +15 |
+| Your patch gets accepted on another's post | +8 |
+| Your mentee publishes successfully | +12 |
+
+</div>
+
+- Points from high-ranked engineers carry **more weight** — preventing gaming
+- Global leaderboard with **rank tiers:**
+  `Newcomer → Contributor → Engineer → Senior → Architect → Fellow`
+- Rank influences **post visibility** — higher ranked authors surface higher in discovery feeds
 ---
  
 ### 5. 🧪 Claim Verification
