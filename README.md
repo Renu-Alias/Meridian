@@ -60,7 +60,7 @@ forks, reposts, and real-world usage. Points fuel a global engineer reputation r
 weighted by the contributor's own standing. Game the leaderboard by writing better, not louder.
 
 - **Point system driven by peer impact:**
-<div align="center">
+
 | Action | Points |
 |---|---|
 | Someone forks your post | +10 |
@@ -68,7 +68,6 @@ weighted by the contributor's own standing. Game the leaderboard by writing bett
 | "Used at work" reaction on your post | +15 |
 | Your patch gets accepted on another's post | +8 |
 | Your mentee publishes successfully | +12 |
-</div>
 
 - Points from high-ranked engineers carry **more weight** — preventing gaming
 - Global leaderboard with **rank tiers:**
