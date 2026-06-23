@@ -1,14 +1,52 @@
+# Python
 venv/
-venv/
+.venv/
+env/
 __pycache__/
 *.pyc
-.env
-.pytest_cache/
-.mypy_cache/
+*.pyo
+*.egg-info/
+.eggs/
+*.egg
+dist/
+build/
+*.manifest
+*.spec
+pip-log.txt
+pip-delete-this-directory.txt
 
+# Frontend
+node_modules/
+dist/
+.vite/
+
+# Database
 *.db
 *.db-shm
 *.db-wal
+
+# IDE / Editor
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Environment
+.env
+
+# Testing / Coverage
+.pytest_cache/
+.mypy_cache/
+.coverage
+coverage/
+htmlcov/
+.tox/
+.nox/
 
 # Logs
 *.log
