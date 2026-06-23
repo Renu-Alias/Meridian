@@ -1,9 +1,12 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Request
 from sqlalchemy.orm import Session
 
+from app.config import settings
 from app.database import get_db
 from app.models.user import User
+from app.models.wallet import Wallet
 from app.services.auth import get_current_user
+from app.services.stripe_service import create_account_link, create_connect_account, process_payout_to_stripe
 from app.services.wallet_service import ensure_wallet
 
 router = APIRouter(prefix="/wallet", tags=["wallet"])
@@ -37,24 +40,58 @@ def get_wallet(
     }
 
 
-@router.post("/payout")
-def request_payout(
+@router.post("/connect/stripe")
+def connect_stripe(
     user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    from app.models.wallet import Transaction
-    wallet = ensure_wallet(user.id, db)
-    if wallet.balance <= 0:
-        return {"detail": "No balance to payout"}
-    amount = wallet.balance
-    wallet.balance = 0
-    wallet.pending += amount
-    txn = Transaction(
-        wallet_id=wallet.id,
-        amount=amount,
-        transaction_type="payout_request",
-        description="Payout requested",
+    account_id = create_connect_account(user, db)
+    link_url = create_account_link(
+        account_id=account_id,
+        refresh_url="http://localhost:5173/wallet",
+        return_url="http://localhost:5173/wallet?stripe=connected",
     )
-    db.add(txn)
-    db.commit()
-    return {"detail": "Payout requested", "amount": amount}
+    return {"account_id": account_id, "onboarding_url": link_url}
+
+
+@router.post("/payout")
+def request_payout(
+    amount: float = 0,
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    wallet = ensure_wallet(user.id, db)
+    if amount <= 0:
+        amount = wallet.balance
+    result = process_payout_to_stripe(wallet, amount, db)
+    return {"detail": "Payout processed", **result}
+
+
+@router.post("/stripe-webhook")
+async def stripe_webhook(request: Request, db: Session = Depends(get_db)):
+    import stripe
+    from app.models.wallet import Transaction
+    payload = await request.body()
+    sig_header = request.headers.get("stripe-signature", "")
+    if not settings.STRIPE_WEBHOOK_SECRET:
+        return {"status": "skipped"}
+    try:
+        event = stripe.Webhook.construct_event(payload, sig_header, settings.STRIPE_WEBHOOK_SECRET)
+    except ValueError:
+        return {"error": "Invalid payload"}, 400
+    except stripe.error.SignatureVerificationError:
+        return {"error": "Invalid signature"}, 400
+    if event["type"] == "transfer.paid":
+        transfer = event["data"]["object"]
+        wallet = db.query(Wallet).filter(Wallet.stripe_account_id == transfer["destination"]).first()
+        if wallet:
+            txn = Transaction(
+                wallet_id=wallet.id,
+                amount=float(transfer["amount"]) / 100,
+                transaction_type="stripe_payout",
+                description="Stripe payout completed",
+                stripe_payout_id=transfer["id"],
+            )
+            db.add(txn)
+            db.commit()
+    return {"status": "received"}

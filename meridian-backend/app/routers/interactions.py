@@ -1,3 +1,5 @@
+from datetime import datetime, timedelta
+
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
@@ -6,6 +8,7 @@ from app.models.interaction import Reaction
 from app.models.post import Post
 from app.models.user import User
 from app.services.auth import get_current_user
+from app.services.notifications import create_wallet_notification
 from app.services.wallet_service import credit_wallet
 
 router = APIRouter(prefix="/posts/{post_id}/reactions", tags=["interactions"])
@@ -15,6 +18,27 @@ REACTION_WEIGHTS = {
     "share_internal": 0.10,
     "used_at_work": 0.50,
 }
+
+MAX_REACTIONS_PER_POST = 3
+USED_AT_WORK_COOLDOWN_HOURS = 24
+
+
+def _check_rate_limits(post_id: str, reaction_type: str, user_id: str, db: Session):
+    total = db.query(Reaction).filter(
+        Reaction.post_id == post_id,
+        Reaction.user_id == user_id,
+    ).count()
+    if total >= MAX_REACTIONS_PER_POST:
+        raise HTTPException(status_code=429, detail=f"Max {MAX_REACTIONS_PER_POST} reactions per post")
+    if reaction_type == "used_at_work":
+        recent = db.query(Reaction).filter(
+            Reaction.post_id == post_id,
+            Reaction.user_id == user_id,
+            Reaction.reaction_type == "used_at_work",
+            Reaction.created_at >= datetime.utcnow() - timedelta(hours=USED_AT_WORK_COOLDOWN_HOURS),
+        ).first()
+        if recent:
+            raise HTTPException(status_code=429, detail="Can only use 'Used This At Work' once per 24 hours per post")
 
 
 @router.post("")
@@ -36,6 +60,7 @@ def add_reaction(
         db.delete(existing)
         db.commit()
         return {"detail": "Reaction removed", "active": False}
+    _check_rate_limits(post_id, reaction_type, user.id, db)
     reaction = Reaction(post_id=post_id, user_id=user.id, reaction_type=reaction_type)
     db.add(reaction)
     if reaction_type in REACTION_WEIGHTS:
@@ -49,6 +74,7 @@ def add_reaction(
                 description=f"{reaction_type} reaction on '{post.title}'",
                 db=db,
             )
+            create_wallet_notification(db, post.author_id, amount, post.title)
     reaction_count = db.query(Reaction).filter(Reaction.post_id == post_id, Reaction.reaction_type == reaction_type).count()
     post.impact_score = (post.impact_score or 0) + 1
     db.commit()

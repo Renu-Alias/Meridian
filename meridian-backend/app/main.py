@@ -1,15 +1,24 @@
 from contextlib import asynccontextmanager
 
+from alembic.config import Config as AlembicConfig
+from alembic import command
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.database import Base, engine
-from app.routers import auth, feed, interactions, mentorship, notifications, posts, users, wallet
+from app.database import SessionLocal
+from app.routers import account, auth, feed, interactions, mentorship, notifications, posts, qa_search, recruiter, users, wallet
+from app.seed import seed_technologies
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    Base.metadata.create_all(bind=engine)
+    alembic_cfg = AlembicConfig("alembic.ini")
+    command.upgrade(alembic_cfg, "head")
+    db = SessionLocal()
+    try:
+        seed_technologies(db)
+    finally:
+        db.close()
     yield
 
 
@@ -31,6 +40,9 @@ app.include_router(interactions.router)
 app.include_router(wallet.router)
 app.include_router(mentorship.router)
 app.include_router(notifications.router)
+app.include_router(recruiter.router)
+app.include_router(account.router)
+app.include_router(qa_search.router)
 
 
 @app.get("/health")

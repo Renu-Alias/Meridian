@@ -1,10 +1,12 @@
+from datetime import datetime
+
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from app.database import get_db
 from app.models.mentorship import MentorshipSubmission
 from app.models.post import Post
-from app.models.user import User
+from app.models.user import StackProfile, User
 from app.routers.posts import _author_brief
 from app.schemas.mentorship import (
     MentorshipReview,
@@ -32,6 +34,21 @@ def submit_to_mentored_track(
     post.is_mentored = True
     sub = MentorshipSubmission(post_id=post_id, author_id=user.id, domain=req.domain)
     db.add(sub)
+    db.flush()
+    mentors = db.query(User).filter(User.is_mentor == True, User.id != user.id).all()
+    domain_lower = req.domain.lower() if req.domain else ""
+    best_mentor = None
+    best_score = 0
+    for mentor in mentors:
+        m_stack = [s.technology for s in db.query(StackProfile).filter(StackProfile.user_id == mentor.id).all()]
+        score = sum(1 for t in m_stack if domain_lower in t.lower())
+        if score > best_score:
+            best_score = score
+            best_mentor = mentor
+    if best_mentor:
+        sub.mentor_id = best_mentor.id
+        sub.status = "pending_review"
+        sub.matched_at = datetime.utcnow()
     db.commit()
     db.refresh(sub)
     return MentorshipSubmissionRead(

@@ -32,6 +32,13 @@ from app.schemas.post import (
 from app.schemas.qa import QAThreadAnswer, QAThreadCreate, QAThreadRead
 from app.services.auth import get_current_user
 from app.services.matching import parse_skills_from_post
+from app.services.notifications import (
+    create_fork_notification,
+    create_patch_notification,
+    create_patch_reviewed_notification,
+    create_qa_answered_notification,
+    create_qa_notification,
+)
 
 router = APIRouter(prefix="/posts", tags=["posts"])
 
@@ -242,6 +249,7 @@ def submit_patch(
     db.add(patch)
     db.commit()
     db.refresh(patch)
+    create_patch_notification(db, post.author_id, user.display_name, post.title, post.id)
     return PatchRead(
         id=patch.id,
         post_id=patch.post_id,
@@ -310,6 +318,7 @@ def review_patch(
         db.add(new_version)
     db.commit()
     db.refresh(patch)
+    create_patch_reviewed_notification(db, patch.submitter_id, req.status, post.title, post.id)
     sub = db.query(User).filter(User.id == patch.submitter_id).first()
     return PatchRead(
         id=patch.id,
@@ -365,6 +374,7 @@ def fork_post(
     db.add(fork_link)
     db.commit()
     db.refresh(fork)
+    create_fork_notification(db, original.author_id, user.display_name, original.title, fork.id)
     return _post_to_read(fork, db)
 
 
@@ -399,6 +409,7 @@ def ask_question(
     db.add(thread)
     db.commit()
     db.refresh(thread)
+    create_qa_notification(db, post.author_id, user.display_name, post.id)
     return QAThreadRead(
         id=thread.id,
         post_id=thread.post_id,
@@ -453,6 +464,7 @@ def answer_question(
     thread.is_indexed = True
     db.commit()
     db.refresh(thread)
+    create_qa_answered_notification(db, thread.questioner_id, post.title, post.id)
     questioner = db.query(User).filter(User.id == thread.questioner_id).first()
     return QAThreadRead(
         id=thread.id,

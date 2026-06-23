@@ -13,6 +13,7 @@ class CitationCreate(BaseModel):
 
 
 class CitationRead(BaseModel):
+    model_config = {"from_attributes": True}
     id: str
     anchor_text: str
     url: str
@@ -37,6 +38,7 @@ class PostUpdate(BaseModel):
 
 
 class AuthorBrief(BaseModel):
+    model_config = {"from_attributes": True}
     id: str
     username: str
     display_name: str
@@ -44,6 +46,7 @@ class AuthorBrief(BaseModel):
 
 
 class PostRead(BaseModel):
+    model_config = {"from_attributes": True}
     id: str
     title: str
     body: str

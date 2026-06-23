@@ -5,6 +5,7 @@ from pydantic import BaseModel, EmailStr
 
 
 class StackProfileRead(BaseModel):
+    model_config = {"from_attributes": True}
     id: str
     technology: str
     source: str
@@ -19,6 +20,7 @@ class UserCreate(BaseModel):
 
 
 class UserRead(BaseModel):
+    model_config = {"from_attributes": True}
     id: str
     email: str
     username: str

@@ -15,6 +15,7 @@ class QAThreadAnswer(BaseModel):
 
 
 class QAThreadRead(BaseModel):
+    model_config = {"from_attributes": True}
     id: str
     post_id: str
     questioner: AuthorBrief
