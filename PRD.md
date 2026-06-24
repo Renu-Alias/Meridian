@@ -134,7 +134,7 @@ Each USP below is broken into description, user stories, functional requirements
 **Dependencies:** Post versioning system (shared with USP 2), lineage/graph data model.
  
 ---
-## 4.4 USP 4 — Impact-Based Reputation & Global Ranking
+### 4.4 USP 4 — Impact-Based Reputation & Global Ranking
 
 **Description:** A point-based reputation system rewards engineers for the real-world
 impact of their writing. Points are earned when others fork, repost, or mark a post
