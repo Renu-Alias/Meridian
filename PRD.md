@@ -134,185 +134,70 @@ Each USP below is broken into description, user stories, functional requirements
 **Dependencies:** Post versioning system (shared with USP 2), lineage/graph data model.
  
 ---
- 
-# PRD — Impact-Based Reputation & Global Ranking
+## 4.4 USP 4 — Impact-Based Reputation & Global Ranking
 
-**Feature ID:** USP-04  
-**Status:** Draft  
-**Author:** —  
-**Last Updated:** June 2026
-
----
-
-## 1. Overview
-
-Engineers on blogging platforms are rewarded for popularity — follower counts, view
-numbers, and algorithmic boosts. Surfaced replaces vanity metrics with a
-**peer-validated reputation system** where points and global rank are earned purely
-through the real-world impact of your writing.
+**Description:** A point-based reputation system rewards engineers for the real-world
+impact of their writing. Points are earned when others fork, repost, or mark a post
+as "used at work", and fuel a global rank that influences post visibility and
+author credibility across the platform.
 
 ---
 
-## 2. Problem Statement
+### User Stories
 
-- High-quality technical writing is indistinguishable from mediocre writing at a glance
-- New visitors have no reliable signal for author credibility
-- Writers have no meaningful long-term incentive beyond external validation
-- Existing platforms reward consistency and self-promotion over genuine contribution
-
----
-
-## 3. Goals
-
-- Provide a **transparent, gamified reputation system** that rewards meaningful peer engagement
-- Give readers an **instant credibility signal** when evaluating authors
-- Create a **sustainable, non-monetary incentive** for writers to keep contributing
-- Discourage low-effort or gaming behaviour through **weighted point mechanics**
-
----
-
-## 4. Non-Goals
-
-- No monetary payouts or wallet system
-- No premium memberships or paid rank boosts
-- No advertiser-influenced ranking
-- Rank is **not** based on views, reads, or follower counts
-
----
-
-## 5. User Stories
-
-### Writer
-- As a writer, I want to earn points when others find my work useful, so that my
+* As a writer, I want to earn points when others find my work useful, so that my
   reputation reflects my real contribution to the community.
-- As a writer, I want to see a breakdown of how I earned my points, so that I
+* As a writer, I want to see a breakdown of how I earned my points, so that I
   understand what kind of writing resonates most.
-- As a writer, I want my rank to increase my post visibility, so that contributing
-  more leads to a wider audience.
-
-### Reader
-- As a reader, I want to see an author's rank and tier before reading their post,
-  so that I can quickly assess their credibility.
-- As a reader, I want to mark a post as "used at work", so that I can reward writers
-  whose work had a direct impact on me.
-
-### Recruiter *(opt-in)*
-- As a recruiter, I want to filter authors by rank tier, so that I can identify
-  high-impact engineers on the platform.
+* As a reader, I want to see an author's rank and tier before reading their post,
+  so that I can quickly assess their credibility at a glance.
+* As a reader, I want to mark a post as "used at work", so that I can reward writers
+  whose work had a direct impact on me professionally.
 
 ---
 
-## 6. Point System
+### Functional Requirements
 
-### 6.1 Point Events
-
-| Action | Points Awarded | Notes |
-|---|---|---|
-| Someone forks your post | +10 | Weighted by forker's rank |
-| Someone reposts your post | +5 | Weighted by reposter's rank |
-| "Used at work" reaction on your post | +15 | One per user per post |
-| Your patch gets accepted on another's post | +8 | Flat, unweighted |
-| Your mentee publishes successfully | +12 | Mentored Track only |
-
-### 6.2 Weighted Points Formula
-
-Points awarded are scaled by the acting user's rank multiplier:
-
-| Rank Tier | Multiplier |
-|---|---|
-| Newcomer | 0.5× |
-| Contributor | 1.0× |
-| Engineer | 1.5× |
-| Senior | 2.0× |
-| Architect | 2.5× |
-| Fellow | 3.0× |
-
-**Example:** A fork from a `Senior` engineer awards `10 × 2.0 = 20 points` instead of 10.
-
-### 6.3 Rank Tiers
-
-| Tier | Points Required | Perks |
-|---|---|---|
-| Newcomer | 0 | Basic access |
-| Contributor | 100 | Unlocks patch submissions |
-| Engineer | 500 | Priority in discovery feeds |
-| Senior | 1,500 | Mentor track access |
-| Architect | 5,000 | Featured author eligibility |
-| Fellow | 15,000 | Platform advisory input |
+* FR-4.1: System shall award points to a writer whenever another user forks,
+  reposts, or reacts with "used at work" on their post, with point values
+  scaled by the acting user's rank multiplier.
+* FR-4.2: System shall maintain a point ledger per user, logging every point
+  event with action type, source user, base points, multiplier applied,
+  and timestamp.
+* FR-4.3: System shall assign each user a rank tier based on their cumulative
+  points, progressing through: Newcomer → Contributor → Engineer →
+  Senior → Architect → Fellow.
+* FR-4.4: System shall display a rank tier badge on every author profile and
+  post card, with a breakdown tooltip showing total points and top
+  point sources.
+* FR-4.5: System shall maintain a paginated global leaderboard, refreshed every
+  24 hours, filterable by rank tier, tech stack tag, and time period
+  (weekly, monthly, all-time).
+* FR-4.6: System shall boost discovery feed visibility for higher-ranked authors,
+  proportional to their current rank tier.
 
 ---
 
-## 7. Feature Requirements
+### Acceptance Criteria
 
-### 7.1 Point Ledger
-- Every point event is logged with: timestamp, action type, source user, points awarded, multiplier applied
-- Writers can view a full history of point events in their dashboard
-- Points are **never deducted** (no downvotes or penalties)
-
-### 7.2 Global Leaderboard
-- Paginated leaderboard showing top authors by total points
-- Filterable by rank tier, tech stack tag, and time period (all-time, monthly, weekly)
-- Leaderboard refreshes every 24 hours
-
-### 7.3 Author Profile Badge
-- Rank tier badge displayed on every post card and author profile
-- Hovering the badge shows a breakdown: total points, top point sources
-
-### 7.4 Notifications
-- Writers receive in-app notifications for every point event
-- Weekly digest email summarising points earned and rank progress
+* A "used at work" reaction on a post correctly awards +15 points (adjusted by
+  multiplier) to the post author, limited to one reaction per user per post.
+* A fork from a `Senior`-tier user awards `10 × 2.0 = 20 points` to the
+  original author, not a flat 10.
+* An author's rank tier badge updates within 24 hours of crossing a points
+  threshold.
+* The global leaderboard returns correct results when filtered by stack tag
+  and time period.
+* Every point event appears in the author's point ledger with full event metadata.
 
 ---
 
-## 8. Technical Notes
+### Dependencies
 
-### Backend (Python / FastAPI)
-- `PointEvent` model: `user_id`, `action`, `source_user_id`, `base_points`,
-  `multiplier`, `final_points`, `created_at`
-- Rank recalculation job runs via **Celery** every 24 hours
-- Point totals cached in **Redis** for fast leaderboard queries
-- API endpoints:
-  - `POST /points/award` — internal; triggered by fork/repost/reaction events
-  - `GET /points/ledger/{user_id}` — returns point history
-  - `GET /leaderboard` — returns paginated global rank
-
-### Frontend (React)
-- `<RankBadge />` component — reusable across post cards and profiles
-- `<Leaderboard />` page with filter controls
-- `<PointLedger />` component in author dashboard
-- Optimistic UI updates for "Used at work" reaction
-
----
-
-## 9. Success Metrics
-
-| Metric | Target (6 months post-launch) |
-|---|---|
-| % of readers using "Used at work" reaction | > 15% |
-| Avg. points earned per active author/month | > 50 |
-| Author retention (posts 3+ months after signup) | > 40% |
-| Leaderboard page visits per week | > 1,000 |
-
----
-
-## 10. Open Questions
-
-- Should points have an **expiry** or decay over time to keep the leaderboard dynamic?
-- Should the leaderboard be **opt-out** (public by default) or **opt-in**?
-- Do rank tiers unlock platform governance rights (e.g. Fellows can vote on policy)?
-- Should patch acceptances on your *own* posts award points to the patch submitter only,
-  or also to the original author?
-
----
-
-## 11. Dependencies
-
-| Dependency | Reason |
-|---|---|
-| USP-02 Living Posts | Patch acceptance point event |
-| USP-03 Collaborative Forking | Fork point event |
-| USP-08 Mentored Publishing | Mentee publish point event |
-| Celery + Redis | Async rank recalculation and caching |
+* USP-02 Living Posts — patch acceptance triggers a point event for the patch submitter
+* USP-03 Collaborative Forking — fork action triggers a point event for the original author
+* USP-08 Mentored Publishing — successful mentee publish triggers a point event for the mentor
+* Celery + Redis — async rank recalculation every 24 hours and leaderboard caching
 ---
  
 ### 4.5 USP 5 — Claim Verification
