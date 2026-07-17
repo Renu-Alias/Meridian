@@ -1,4 +1,5 @@
 import os
+import sys
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -20,13 +21,25 @@ class Settings:
     LINKEDIN_CLIENT_ID: str = os.getenv("LINKEDIN_CLIENT_ID", "")
     LINKEDIN_CLIENT_SECRET: str = os.getenv("LINKEDIN_CLIENT_SECRET", "")
 
-    STRIPE_SECRET_KEY: str = os.getenv("STRIPE_SECRET_KEY", "")
-    STRIPE_WEBHOOK_SECRET: str = os.getenv("STRIPE_WEBHOOK_SECRET", "")
-
     SENTENCE_TRANSFORMER_MODEL: str = os.getenv(
         "SENTENCE_TRANSFORMER_MODEL",
         "all-MiniLM-L6-v2",
     )
 
+    CORS_ORIGINS: list[str] = os.getenv(
+        "CORS_ORIGINS",
+        "http://localhost:5173,http://localhost:4173",
+    ).split(",")
+
+    FRONTEND_URL: str = os.getenv("FRONTEND_URL", "http://localhost:5173")
+
+    @property
+    def is_production(self) -> bool:
+        return os.getenv("ENV", "development").lower() == "production"
+
 
 settings = Settings()
+
+if settings.is_production and settings.SECRET_KEY == "dev-secret-key-change-in-production":
+    print("FATAL: SECRET_KEY must be changed in production. Set the SECRET_KEY environment variable.", file=sys.stderr)
+    sys.exit(1)

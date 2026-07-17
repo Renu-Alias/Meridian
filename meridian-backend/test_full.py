@@ -55,9 +55,10 @@ r = req("POST", f"/posts/{pid}/reactions?reaction_type=used_at_work", token=toke
 ok(r, "reaction")
 print("5. Reaction added")
 
-# 6. Verify wallet credited
+# 6. Verify wallet credited (no Stripe field present)
 wallet = ok(req("GET", "/wallet", token=token), "wallet")
 assert wallet["balance"] > 0, f"Expected balance > 0, got {wallet['balance']}"
+assert "stripe_account_id" not in wallet, "Stripe field should not be present"
 print(f"6. Wallet: ${wallet['balance']}")
 
 # 7. Feed shows post
@@ -121,10 +122,16 @@ recruit = ok(req("GET", "/recruiter/search?technology=Rust"), "recruiter")
 # Our user has recruiter_visible=False by default, so results may be empty
 print(f"19. Recruiter search: {len(recruit)} results")
 
-# 20. Stripe connect (mock mode)
-stripe = ok(req("POST", "/wallet/connect/stripe", token=token), "stripe")
-assert "account_id" in stripe
-print(f"20. Stripe connect: {stripe['account_id']}")
+# 20. Global ranking endpoint
+ranking_posts = ok(req("GET", "/ranking/posts?limit=10"), "ranking_posts")
+assert isinstance(ranking_posts, list)
+assert len(ranking_posts) >= 1
+assert ranking_posts[0]["impact_score"] >= 0
+print(f"20. Ranking posts: {len(ranking_posts)} entries, top impact={ranking_posts[0]['impact_score']}")
+
+ranking_authors = ok(req("GET", "/ranking/authors?limit=10"), "ranking_authors")
+assert isinstance(ranking_authors, list)
+print(f"20b. Ranking authors: {len(ranking_authors)} entries")
 
 # 21. Data export
 export = ok(req("GET", "/account/export", token=token), "export")

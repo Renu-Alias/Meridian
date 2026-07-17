@@ -15,7 +15,6 @@ class Wallet(Base):
     balance = Column(Float, default=0.0)
     pending = Column(Float, default=0.0)
     lifetime_paid = Column(Float, default=0.0)
-    stripe_account_id = Column(String, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
@@ -32,7 +31,6 @@ class Transaction(Base):
     amount = Column(Float, nullable=False)
     transaction_type = Column(String, nullable=False)
     description = Column(Text, default="")
-    stripe_payout_id = Column(String, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
 
     wallet = relationship("Wallet", back_populates="transactions")

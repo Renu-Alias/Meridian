@@ -58,6 +58,7 @@ def add_reaction(
     ).first()
     if existing:
         db.delete(existing)
+        post.impact_score = max(0, (post.impact_score or 0) - 1)
         db.commit()
         return {"detail": "Reaction removed", "active": False}
     _check_rate_limits(post_id, reaction_type, user.id, db)

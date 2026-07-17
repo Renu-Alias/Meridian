@@ -24,10 +24,7 @@ _SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=_engine)
 
 def get_db():
     db = _SessionLocal()
-    try:
-        return db
-    finally:
-        db.close()
+    return db
 
 
 @celery_app.task
@@ -42,7 +39,7 @@ def process_payout(wallet_id: str, amount: float):
                 wallet_id=wallet.id,
                 amount=amount,
                 transaction_type="payout_completed",
-                description="Payout processed",
+                description="Payout finalized",
             )
             db.add(txn)
             db.commit()

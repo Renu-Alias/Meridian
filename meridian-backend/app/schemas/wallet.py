@@ -18,6 +18,7 @@ class WalletRead(BaseModel):
     balance: float
     pending: float
     lifetime_paid: float
-    stripe_account_id: Optional[str] = None
     transactions: list[TransactionRead] = []
     updated_at: datetime
+
+    model_config = {"from_attributes": True}

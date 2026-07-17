@@ -2,9 +2,12 @@ from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
+from app.config import settings
 from app.database import get_db
 from app.models.user import StackProfile, Technology, User
 from app.services.auth import create_access_token, get_current_user
+
+FRONTEND = settings.FRONTEND_URL.rstrip("/")
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
@@ -36,7 +39,6 @@ def register(req: RegisterRequest, db: Session = Depends(get_db)):
 @router.post("/github")
 def github_oauth(code: str, db: Session = Depends(get_db)):
     import httpx
-    from app.config import settings
     token_resp = httpx.post(
         "https://github.com/login/oauth/access_token",
         json={
@@ -109,7 +111,6 @@ def github_import(
 @router.post("/linkedin")
 def linkedin_oauth(code: str, db: Session = Depends(get_db)):
     import httpx
-    from app.config import settings
     token_resp = httpx.post(
         "https://www.linkedin.com/oauth/v2/accessToken",
         data={
@@ -117,7 +118,7 @@ def linkedin_oauth(code: str, db: Session = Depends(get_db)):
             "code": code,
             "client_id": settings.LINKEDIN_CLIENT_ID,
             "client_secret": settings.LINKEDIN_CLIENT_SECRET,
-            "redirect_uri": "http://localhost:5173/auth/linkedin/callback",
+            "redirect_uri": f"{FRONTEND}/auth/linkedin/callback",
         },
         headers={"Accept": "application/json"},
     )

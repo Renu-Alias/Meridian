@@ -31,6 +31,7 @@ from app.schemas.post import (
 )
 from app.schemas.qa import QAThreadAnswer, QAThreadCreate, QAThreadRead
 from app.services.auth import get_current_user
+from app.services.credibility import compute_credibility_score
 from app.services.matching import parse_skills_from_post
 from app.services.notifications import (
     create_fork_notification,
@@ -223,6 +224,7 @@ def flag_claim(
         db.add(score)
     score.flagged_claims += 1
     db.commit()
+    compute_credibility_score(post.author_id, db)
     db.refresh(flag)
     return ClaimFlagRead(
         id=flag.id,

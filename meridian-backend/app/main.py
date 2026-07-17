@@ -5,8 +5,9 @@ from alembic import command
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from app.config import settings
 from app.database import SessionLocal
-from app.routers import account, auth, feed, interactions, mentorship, notifications, posts, qa_search, recruiter, users, wallet
+from app.routers import account, auth, feed, interactions, mentorship, notifications, posts, qa_search, ranking, recruiter, users, wallet
 from app.seed import seed_technologies
 
 
@@ -26,7 +27,7 @@ app = FastAPI(title="Meridian API", version="0.1.0", lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=settings.CORS_ORIGINS,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -43,6 +44,7 @@ app.include_router(notifications.router)
 app.include_router(recruiter.router)
 app.include_router(account.router)
 app.include_router(qa_search.router)
+app.include_router(ranking.router)
 
 
 @app.get("/health")
