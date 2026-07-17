@@ -6,6 +6,7 @@ from app.config import settings
 from app.database import get_db
 from app.models.user import StackProfile, Technology, User
 from app.services.auth import create_access_token, get_current_user
+from app.services.password import hash_password, verify_password
 
 FRONTEND = settings.FRONTEND_URL.rstrip("/")
 
@@ -16,6 +17,12 @@ class RegisterRequest(BaseModel):
     email: str
     username: str
     display_name: str
+    password: str = ""
+
+
+class LoginRequest(BaseModel):
+    email: str
+    password: str
 
 
 class AuthResponse(BaseModel):
@@ -28,10 +35,24 @@ class AuthResponse(BaseModel):
 def register(req: RegisterRequest, db: Session = Depends(get_db)):
     if db.query(User).filter((User.email == req.email) | (User.username == req.username)).first():
         raise HTTPException(status_code=409, detail="Email or username already taken")
-    user = User(email=req.email, username=req.username, display_name=req.display_name)
+    user = User(
+        email=req.email,
+        username=req.username,
+        display_name=req.display_name,
+        password_hash=hash_password(req.password) if req.password else "",
+    )
     db.add(user)
     db.commit()
     db.refresh(user)
+    token = create_access_token(user.id)
+    return AuthResponse(access_token=token, user_id=user.id)
+
+
+@router.post("/login")
+def login(req: LoginRequest, db: Session = Depends(get_db)):
+    user = db.query(User).filter(User.email == req.email).first()
+    if not user or not user.password_hash or not verify_password(req.password, user.password_hash):
+        raise HTTPException(status_code=401, detail="Invalid email or password")
     token = create_access_token(user.id)
     return AuthResponse(access_token=token, user_id=user.id)
 

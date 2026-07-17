@@ -40,3 +40,13 @@
 - Wallet payout simplified to internal transfer (balance -> pending) without Stripe
 - Added /ranking/posts?limit=n endpoint — global ranking by impact_score descending
 - Added /ranking/authors?limit=n endpoint — author ranking by credibility_score descending
+- Added password_hash to User model + password service (hashlib pbkdf2_hmac) + POST /auth/login endpoint with 401 on mismatch
+- Added POST /auth/register now accepts optional password field
+- Added DELETE /posts/{post_id} — post author can delete their own post
+- Added GET /search/posts?q=&limit= — full-text search on published post title/body/excerpt, sorted by impact_score
+- Added GET /search/qa?q=&limit= — renamed from /qa/search, same behavior
+- Added PUT /posts/{id}/flags/{flag_id}/resolve — post author can verify/resolve claim flags, triggers credibility score recalculation
+- Added pagination to GET /feed (offset, limit params, returns {total, offset, limit, items})
+- Added pagination to GET /notifications (offset, limit params, returns {total, offset, limit, items})
+- Added reaction_type validation — rejects invalid types with 400
+- Fixed None safety in credibility score calculations (verified_claims, flagged_claims could be None in DB)

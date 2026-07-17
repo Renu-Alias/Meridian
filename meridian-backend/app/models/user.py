@@ -24,6 +24,7 @@ class User(Base):
     linkedin_id = Column(String, unique=True, nullable=True)
     linkedin_username = Column(String, nullable=True)
     recruiter_visible = Column(Boolean, default=False)
+    password_hash = Column(String, default="")
     is_mentor = Column(Boolean, default=False)
     is_active = Column(Boolean, default=True)
     created_at = Column(DateTime, default=datetime.utcnow)

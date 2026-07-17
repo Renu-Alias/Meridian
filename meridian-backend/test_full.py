@@ -61,10 +61,11 @@ assert wallet["balance"] > 0, f"Expected balance > 0, got {wallet['balance']}"
 assert "stripe_account_id" not in wallet, "Stripe field should not be present"
 print(f"6. Wallet: ${wallet['balance']}")
 
-# 7. Feed shows post
+# 7. Feed shows post (paginated)
 feed = ok(req("GET", "/feed", token=token), "feed")
-assert len(feed) >= 1
-print(f"7. Feed: {len(feed)} posts")
+assert isinstance(feed, dict), f"Expected paginated dict, got {type(feed)}"
+assert len(feed["items"]) >= 1, f"Expected items, got {feed}"
+print(f"7. Feed: {feed['total']} total, {len(feed['items'])} on page")
 
 # 8. Profile with skills
 profile = ok(req("GET", "/users/profile/tester"), "profile")
@@ -108,14 +109,14 @@ assert len(faq) >= 1
 print(f"16. FAQ: {len(faq)} entries")
 
 # 17. Q&A search
-qa_search = ok(req("GET", "/qa/search?q=edition"), "qa_search")
+qa_search = ok(req("GET", "/search/qa?q=edition"), "qa_search")
 assert len(qa_search) >= 1
 print(f"17. Q&A search: {len(qa_search)} results")
 
-# 18. Notifications created
+# 18. Notifications created (paginated)
 notifs = ok(req("GET", "/notifications", token=token), "notifs")
-assert len(notifs) >= 1, f"Expected notifications, got {len(notifs)}"
-print(f"18. {len(notifs)} notification(s)")
+assert isinstance(notifs, dict) and len(notifs["items"]) >= 1, f"Expected notifications, got {notifs}"
+print(f"18. {notifs['total']} notification(s)")
 
 # 19. Recruiter search
 recruit = ok(req("GET", "/recruiter/search?technology=Rust"), "recruiter")
@@ -147,8 +148,43 @@ r = req("POST", f"/posts/{pid}/reactions?reaction_type=upvote", token=token)
 assert "error" in r and r["error"] == 429, f"Expected 429 rate limit (3 max), got {r}"
 print("22. Rate limiting: 429 when exceeding 3 reactions per post")
 
-# 23. Account deletion (cleanup)
-del_result = ok(req("DELETE", "/account/delete", token=token), "delete")
-print(f"23. Account deleted")
+# 23. Login with email+password
+reg2 = ok(req("POST", "/auth/register", {"email":"b@t.com","username":"tester2","display_name":"Tester2","password":"secret123"}), "register2")
+assert reg2["access_token"]
+print("23. Registered with password")
 
-print("\n=== ALL 23 TESTS PASSED ===")
+login = ok(req("POST", "/auth/login", {"email":"b@t.com","password":"secret123"}), "login")
+assert login["access_token"]
+print("23b. Login OK")
+
+bad = req("POST", "/auth/login", {"email":"b@t.com","password":"wrong"})
+assert "error" in bad and bad["error"] == 401, f"Expected 401 for bad password, got {bad}"
+print("23c. Bad password rejected (401)")
+
+# 24. Post search (before deletion so post exists)
+search = ok(req("GET", "/search/posts?q=Rust"), "search_posts")
+assert isinstance(search, list) and len(search) >= 1
+print(f"24. Post search: {len(search)} result(s)")
+
+# 25. Claim resolution
+cflag = ok(req("POST", f"/posts/{pid}/flags", {"reason":"test flag"}, token), "flag")
+assert cflag["status"] == "open"
+resolve = ok(req("PUT", f"/posts/{pid}/flags/{cflag['id']}/resolve", {"status":"verified"}, token), "resolve")
+assert resolve["status"] == "verified"
+print(f"25. Claim flagged & resolved (verified)")
+
+# 26. Post deletion
+del_post = ok(req("DELETE", f"/posts/{pid}", token=token), "delete_post")
+print("26. Post deleted")
+
+# 27. Reaction type validation
+bad_reaction = req("POST", f"/posts/{pid}/reactions?reaction_type=invalid_type", token=token)
+assert "error" in bad_reaction and bad_reaction["error"] == 400, f"Expected 400 for invalid reaction, got {bad_reaction}"
+print("27. Invalid reaction type rejected (400)")
+
+# 28. Account deletion (cleanup)
+token2 = login["access_token"]
+del_result = ok(req("DELETE", "/account/delete", token=token2), "delete2")
+print("28. Account deleted")
+
+print("\n=== ALL TESTS PASSED ===")

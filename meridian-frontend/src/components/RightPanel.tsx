@@ -91,6 +91,7 @@ export function RightPanel() {
         <button
           className="mt-5 h-10 w-full rounded-full text-sm font-bold transition-all"
           style={{ border: `1px solid ${colors.verified}`, color: colors.verified, background: 'transparent' }}
+          onClick={() => navigate('/discover')}
         >
           Become a Mentor
         </button>

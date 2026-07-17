@@ -3,7 +3,7 @@ import { useState } from 'react';
 const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 const monthStartWeeks = [0, 4, 9, 13, 17, 22, 26, 31, 35, 39, 44, 48];
 const weekdayLabels = ['Mon', '', 'Wed', '', 'Fri', '', ''];
-const levels = ['bg-surface', 'bg-verified/20', 'bg-verified/45', 'bg-verified', 'bg-emerald-700'];
+const levels = ['bg-[#1a1d24]', 'bg-verified/20', 'bg-verified/45', 'bg-verified', 'bg-emerald-700'];
 
 const currentYear = new Date().getFullYear();
 const years = Array.from({ length: 5 }, (_, i) => currentYear - i);

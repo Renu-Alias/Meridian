@@ -13,6 +13,8 @@ from app.services.wallet_service import credit_wallet
 
 router = APIRouter(prefix="/posts/{post_id}/reactions", tags=["interactions"])
 
+VALID_REACTION_TYPES = {"bookmark", "share_internal", "used_at_work", "upvote", "downvote"}
+
 REACTION_WEIGHTS = {
     "bookmark": 0.05,
     "share_internal": 0.10,
@@ -48,6 +50,8 @@ def add_reaction(
     user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
+    if reaction_type not in VALID_REACTION_TYPES:
+        raise HTTPException(status_code=400, detail=f"Invalid reaction type. Valid: {sorted(VALID_REACTION_TYPES)}")
     post = db.query(Post).filter(Post.id == post_id).first()
     if not post:
         raise HTTPException(status_code=404, detail="Post not found")

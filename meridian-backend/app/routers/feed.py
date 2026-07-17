@@ -15,6 +15,8 @@ router = APIRouter(prefix="/feed", tags=["feed"])
 @router.get("")
 def get_feed(
     filter: str = "for_your_stack",
+    offset: int = Query(0, ge=0),
+    limit: int = Query(20, ge=1, le=100),
     db: Session = Depends(get_db),
     user: User = Depends(get_current_user),
 ):
@@ -30,7 +32,9 @@ def get_feed(
         posts = [p for _, p in scored]
     elif filter == "trending":
         posts.sort(key=lambda p: p.impact_score or 0, reverse=True)
-    return [_post_to_read(p, db) for p in posts]
+    total = len(posts)
+    page = posts[offset:offset + limit]
+    return {"total": total, "offset": offset, "limit": limit, "items": [_post_to_read(p, db) for p in page]}
 
 
 @router.get("/discover")

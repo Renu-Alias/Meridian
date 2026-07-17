@@ -106,6 +106,11 @@ class ClaimFlagRead(BaseModel):
     created_at: datetime
 
 
+class ClaimFlagResolve(BaseModel):
+    status: str = "resolved"
+    resolution_note: str = ""
+
+
 class ForkRead(BaseModel):
     id: str
     source_post_id: str

@@ -226,7 +226,7 @@ export function PostDetailPage() {
             <Heart size={20} fill={liked ? '#f43f5e' : 'none'} stroke={liked ? '#f43f5e' : 'currentColor'} />
             <span>{post.likes + (liked ? 1 : 0)}</span>
           </button>
-          <button className="inline-flex items-center gap-2 text-sm transition-colors hover:text-sky-500">
+          <button className="inline-flex items-center gap-2 text-sm transition-colors hover:text-sky-500" onClick={() => showToast(`${post.comments} comments on this post`, 'info')}>
             <MessageCircle size={20} />
             <span>{post.comments}</span>
           </button>
@@ -290,7 +290,7 @@ export function PostDetailPage() {
                     <span className="text-xs" style={{ color: colors.muted }}>{comment.time}</span>
                   </div>
                   <p className="mt-1 text-sm leading-5" style={{ color: colors.primary }}>{comment.body}</p>
-                  <button className="mt-1.5 inline-flex items-center gap-1 text-xs transition-colors hover:text-rose-500" style={{ color: colors.muted }}>
+                  <button className="mt-1.5 inline-flex items-center gap-1 text-xs transition-colors hover:text-rose-500" style={{ color: colors.muted }} onClick={() => showToast('Liked comment!', 'success')}>
                     <Heart size={14} /> {comment.likes}
                   </button>
                 </div>

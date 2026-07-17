@@ -44,6 +44,7 @@ def upgrade() -> None:
         sa.Column("linkedin_id", sa.String(), nullable=True),
         sa.Column("linkedin_username", sa.String(), nullable=True),
         sa.Column("recruiter_visible", sa.Boolean(), nullable=True, server_default="0"),
+        sa.Column("password_hash", sa.String(), nullable=True, server_default=""),
         sa.Column("is_mentor", sa.Boolean(), nullable=True, server_default="0"),
         sa.Column("is_active", sa.Boolean(), nullable=True, server_default="1"),
         sa.Column("created_at", sa.DateTime(), nullable=True),

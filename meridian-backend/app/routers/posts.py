@@ -21,6 +21,7 @@ from app.schemas.post import (
     CitationRead,
     ClaimFlagCreate,
     ClaimFlagRead,
+    ClaimFlagResolve,
     ForkRead,
     PatchCreate,
     PatchRead,
@@ -188,6 +189,22 @@ def publish_post(
     return _post_to_read(post, db)
 
 
+@router.delete("/{post_id}")
+def delete_post(
+    post_id: str,
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    post = db.query(Post).filter(Post.id == post_id).first()
+    if not post:
+        raise HTTPException(status_code=404, detail="Post not found")
+    if post.author_id != user.id:
+        raise HTTPException(status_code=403, detail="Not your post")
+    db.delete(post)
+    db.commit()
+    return {"detail": "Post deleted"}
+
+
 @router.post("/{post_id}/citations", response_model=CitationRead)
 def add_citation(
     post_id: str,
@@ -222,7 +239,7 @@ def flag_claim(
     if not score:
         score = CredibilityScore(user_id=post.author_id)
         db.add(score)
-    score.flagged_claims += 1
+    score.flagged_claims = (score.flagged_claims or 0) + 1
     db.commit()
     compute_credibility_score(post.author_id, db)
     db.refresh(flag)
@@ -230,6 +247,44 @@ def flag_claim(
         id=flag.id,
         post_id=flag.post_id,
         flager=_author_brief(user),
+        citation_id=flag.citation_id,
+        reason=flag.reason,
+        status=flag.status,
+        created_at=flag.created_at,
+    )
+
+
+@router.put("/{post_id}/flags/{flag_id}/resolve", response_model=ClaimFlagRead)
+def resolve_flag(
+    post_id: str,
+    flag_id: str,
+    req: ClaimFlagResolve,
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    flag = db.query(ClaimFlag).filter(ClaimFlag.id == flag_id, ClaimFlag.post_id == post_id).first()
+    if not flag:
+        raise HTTPException(status_code=404, detail="Flag not found")
+    post = db.query(Post).filter(Post.id == post_id).first()
+    if not post or post.author_id != user.id:
+        raise HTTPException(status_code=403, detail="Only the post author can resolve flags")
+    flag.status = req.status
+    flag.resolved_at = datetime.utcnow()
+    from app.models.skills import CredibilityScore
+    score = db.query(CredibilityScore).filter(CredibilityScore.user_id == post.author_id).first()
+    if score:
+        score.resolved_flags = (score.resolved_flags or 0) + 1
+    if req.status == "verified":
+        if score:
+            score.verified_claims = (score.verified_claims or 0) + 1
+    db.commit()
+    compute_credibility_score(post.author_id, db)
+    db.refresh(flag)
+    flager = db.query(User).filter(User.id == flag.flager_id).first()
+    return ClaimFlagRead(
+        id=flag.id,
+        post_id=flag.post_id,
+        flager=_author_brief(flager) if flager else _author_brief(User(id="", username="unknown", display_name="Unknown", avatar_url="")),
         citation_id=flag.citation_id,
         reason=flag.reason,
         status=flag.status,

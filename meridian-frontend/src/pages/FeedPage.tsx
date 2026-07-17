@@ -212,7 +212,7 @@ export function FeedPage() {
                     <button
                       className="h-fit rounded-full px-4 py-1.5 text-xs font-bold transition-all hover:brightness-110"
                       style={{ background: colors.verified, color: '#000' }}
-                      onClick={() => { setReplyText(''); setReplyingTo(null); }}
+                      onClick={() => { if (replyText.trim()) { showToast('Reply posted!', 'success'); } setReplyText(''); setReplyingTo(null); }}
                     >
                       Reply
                     </button>

@@ -11,9 +11,11 @@ def compute_credibility_score(user_id: str, db: Session) -> CredibilityScore:
     if not score:
         score = CredibilityScore(user_id=user_id)
         db.add(score)
-    total = score.verified_claims + score.flagged_claims
+    verified = score.verified_claims or 0
+    flagged = score.flagged_claims or 0
+    total = verified + flagged
     if total > 0:
-        score.score = round((score.verified_claims / total) * 100, 1)
+        score.score = round((verified / total) * 100, 1)
     else:
         score.score = 100.0
     db.commit()
