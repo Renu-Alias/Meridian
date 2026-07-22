@@ -65,7 +65,7 @@ function TerminalPreview() {
           if (!line.content && !line.type) return <div key={i} className="h-4" />;
           if (line.type === 'cursor') {
             return (
-              <span key={i} className="inline-block animate-pulse font-bold" style={{ color: '#00C896' }}>
+              <span key={i} className="inline-block animate-pulse font-bold" style={{ color: '#2DD4A3' }}>
                 _
               </span>
             );
@@ -74,8 +74,8 @@ function TerminalPreview() {
             return (
               <div key={i} className="flex items-center gap-2 whitespace-nowrap">
                 <span style={{ color: '#6a9955' }}>{line.content}</span>
-                <span className="inline-flex items-center gap-1.5" style={{ color: '#00C896' }}>
-                  <span className="h-1.5 w-1.5 animate-pulse rounded-full" style={{ background: '#00C896' }} />
+                <span className="inline-flex items-center gap-1.5" style={{ color: '#2DD4A3' }}>
+                  <span className="h-1.5 w-1.5 animate-pulse rounded-full" style={{ background: '#2DD4A3' }} />
                   "living"
                 </span>
               </div>
@@ -95,7 +95,7 @@ function TerminalPreview() {
               ) : line.type === 'code' ? (
                 <span style={{ color: '#d4d4d4' }}>{'  '}{line.content}</span>
               ) : line.type === 'diff' ? (
-                <span style={{ color: '#00C896' }}>{'  '}{line.content}</span>
+                <span style={{ color: '#2DD4A3' }}>{'  '}{line.content}</span>
               ) : (
                 <span style={{ color: '#c9d1d9' }}>{line.content}</span>
               )}
@@ -110,7 +110,7 @@ function TerminalPreview() {
         <span>UTF-8</span>
         <span>Markdown</span>
         <span className="ml-auto flex items-center gap-1">
-          <span className="h-2 w-2 rounded-full" style={{ background: '#00C896' }} />
+          <span className="h-2 w-2 rounded-full" style={{ background: '#2DD4A3' }} />
           Live Preview
         </span>
       </div>

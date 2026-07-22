@@ -1,20 +1,31 @@
+import { useState } from 'react';
 import { Edit3, GraduationCap } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useUiStore } from '../store/uiStore';
 
 const colors = {
-  card: '#14171c',
+  card: '#151515',
   border: '#2f3336',
   primary: '#e7e9ea',
   secondary: '#71767b',
   muted: '#536471',
-  verified: '#00C896',
+  verified: '#2DD4A3',
 };
 
 export function RightPanel() {
   const navigate = useNavigate();
   const activeStack = useUiStore((state) => state.activeStack);
-  const cells = Array.from({ length: 32 }, (_, index) => (index * 7) % 5);
+  const [hoveredCell, setHoveredCell] = useState<number | null>(null);
+
+  const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+  const weekCount = 8;
+  const cells = days.flatMap((day, dayIdx) =>
+    Array.from({ length: weekCount }, (_, weekIdx) => ({
+      day,
+      week: weekIdx,
+      level: ((dayIdx * weekCount + weekIdx) * 7) % 5,
+    }))
+  );
 
   return (
     <aside className="hidden w-[330px] shrink-0 border-l p-5 xl:block" style={{ borderColor: colors.border, background: 'transparent' }}>
@@ -28,7 +39,7 @@ export function RightPanel() {
         </div>
         <div className="mt-4 flex flex-wrap gap-2">
           {activeStack.slice(0, 3).map((tag) => (
-            <span key={tag} className="rounded-md px-3 py-1 text-sm font-medium" style={{ background: 'rgba(0,200,150,0.1)', color: colors.verified, borderBottom: `2px solid ${colors.verified}` }}>
+            <span key={tag} className="rounded-full px-3 py-1 text-sm font-medium" style={{ background: 'rgba(45,212,163,0.12)', color: colors.verified }}>
               {tag}
             </span>
           ))}
@@ -37,16 +48,32 @@ export function RightPanel() {
           <span>Stack Velocity</span>
           <span className="font-sans text-sm font-bold normal-case tracking-normal" style={{ color: colors.verified }}>+12% this week</span>
         </div>
-        <div className="mt-3 grid gap-1" style={{ gridTemplateColumns: 'repeat(16, minmax(0, 1fr))' }}>
-          {cells.map((level, index) => (
+        <div className="mt-3 grid gap-1" style={{ gridTemplateColumns: `repeat(${weekCount}, minmax(0, 1fr))` }}>
+          {cells.map((cell, index) => (
             <span
               key={index}
-              className="h-3 w-3 rounded-sm"
+              className="relative h-3 w-3 rounded-sm"
+              onMouseEnter={() => setHoveredCell(index)}
+              onMouseLeave={() => setHoveredCell(null)}
               style={{
-                background: level > 3 ? colors.verified : level > 1 ? 'rgba(0,200,150,0.3)' : colors.border,
+                background: cell.level > 3 ? colors.verified : cell.level > 1 ? 'rgba(45,212,163,0.3)' : '#1a1d24',
+                cursor: 'default',
               }}
-            />
+            >
+              {hoveredCell === index && (
+                <span className="absolute bottom-full left-1/2 z-10 mb-2 -translate-x-1/2 whitespace-nowrap rounded bg-[#1a1d24] px-2 py-1 text-[11px] shadow-lg" style={{ color: colors.primary, border: `1px solid ${colors.border}` }}>
+                  {cell.day} · Activity: {cell.level > 3 ? 'High' : cell.level > 1 ? 'Medium' : 'Low'}
+                </span>
+              )}
+            </span>
           ))}
+        </div>
+        <div className="mt-2 flex items-center justify-end gap-2 text-[10px]" style={{ color: colors.muted }}>
+          <span>Less</span>
+          {[0, 1, 2, 3, 4].map((l) => (
+            <span key={l} className="h-3 w-3 rounded-sm" style={{ background: l > 3 ? colors.verified : l > 1 ? 'rgba(45,212,163,0.3)' : '#1a1d24' }} />
+          ))}
+          <span>More</span>
         </div>
       </section>
 
@@ -79,7 +106,7 @@ export function RightPanel() {
         <h2 className="text-sm font-bold" style={{ color: colors.primary }}>Mentorship Opportunities</h2>
         {['Help with Kubernetes CRDs', 'Code Review: Rust WASM'].map((item) => (
           <div key={item} className="mt-4 flex items-center gap-3">
-            <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full" style={{ background: 'rgba(0,200,150,0.1)' }}>
+            <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full" style={{ background: 'rgba(45,212,163,0.12)' }}>
               <GraduationCap size={18} style={{ color: colors.verified }} />
             </span>
             <div className="min-w-0">
@@ -89,8 +116,8 @@ export function RightPanel() {
           </div>
         ))}
         <button
-          className="mt-5 h-10 w-full rounded-full text-sm font-bold transition-all"
-          style={{ border: `1px solid ${colors.verified}`, color: colors.verified, background: 'transparent' }}
+          className="mt-5 h-10 w-full rounded-full text-sm font-bold transition-all hover:brightness-110"
+          style={{ background: colors.verified, color: '#0a0a0a' }}
           onClick={() => navigate('/discover')}
         >
           Become a Mentor

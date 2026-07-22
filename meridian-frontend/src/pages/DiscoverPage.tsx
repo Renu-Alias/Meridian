@@ -12,7 +12,7 @@ const colors = {
   primary: '#e7e9ea',
   secondary: '#71767b',
   muted: '#536471',
-  verified: '#00C896',
+  verified: '#2DD4A3',
 };
 
 export function DiscoverPage() {
@@ -31,10 +31,10 @@ export function DiscoverPage() {
       </div>
       <div className="mt-2 flex flex-wrap items-center gap-3">
         <h2 className="text-3xl font-black" style={{ color: colors.primary }}>Stack-Matched for You</h2>
-        <span className="rounded-full px-3 py-1 font-mono text-xs font-bold" style={{ background: 'rgba(0,200,150,0.1)', color: colors.verified }}>
+        <span className="rounded-full px-3 py-1 font-mono text-xs font-bold" style={{ background: 'rgba(45,212,163,0.14)', color: colors.verified }}>
           Go · Kubernetes
         </span>
-        <span className="rounded-full px-3 py-1 font-mono text-xs" style={{ background: '#14171c', color: colors.secondary, border: `1px solid ${colors.border}` }}>
+        <span className="rounded-full px-3 py-1 font-mono text-xs" style={{ background: 'rgba(45,212,163,0.14)', color: colors.verified }}>
           Distributed Systems
         </span>
       </div>
@@ -121,12 +121,12 @@ export function DiscoverPage() {
               <h3 className="mt-3 font-bold" style={{ color: colors.primary }}>{name}</h3>
               <p className="text-sm" style={{ color: colors.secondary }}>{role}</p>
               <div className="mt-3 flex justify-center gap-2">
-                <span className="rounded-md px-2 py-1 text-xs font-medium" style={{ background: 'rgba(255,255,255,0.06)', color: colors.secondary }}>{tagA}</span>
-                <span className="rounded-md px-2 py-1 text-xs font-medium" style={{ background: 'rgba(255,255,255,0.06)', color: colors.secondary }}>{tagB}</span>
+                <span className="rounded-full px-3 py-1 text-xs font-semibold" style={{ background: 'rgba(45,212,163,0.14)', color: colors.verified }}>{tagA}</span>
+                <span className="rounded-full px-3 py-1 text-xs font-semibold" style={{ background: 'rgba(45,212,163,0.14)', color: colors.verified }}>{tagB}</span>
               </div>
               <button
                 className="mt-4 h-10 w-full rounded-full text-sm font-bold transition-all"
-                style={{ border: `1px solid ${colors.verified}`, color: colors.verified, background: 'transparent' }}
+                style={{ background: colors.verified, color: '#0a0a0a' }}
                 onClick={() => showToast(`Connect request sent to ${name}`, 'success')}
               >
                 Connect

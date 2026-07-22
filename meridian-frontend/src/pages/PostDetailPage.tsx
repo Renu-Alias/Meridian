@@ -12,9 +12,9 @@ const colors = {
   secondary: '#71767b',
   muted: '#536471',
   border: '#2f3336',
-  card: '#14171c',
+  card: '#151515',
   cardHover: '#1a1d24',
-  verified: '#00C896',
+  verified: '#2DD4A3',
 };
 
 type Comment = {
@@ -36,8 +36,8 @@ const mockComments: Record<string, Comment[]> = {
     { id: 'c3', author: 'Alex R.', handle: '@arivera.dev', avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=120&q=80', body: 'The static analysis integration looks promising. How does it handle cross-repo dependencies?', time: '1h ago', likes: 8 },
   ],
   'raft-go': [
-    { id: 'c4', author: 'Sarah C.', handle: '@schen_dev', avatar: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&w=120&q=80', body: 'Brilliant simplification of the Raft protocol. The leader election section is exceptionally clear.', time: '30m ago', likes: 31 },
-    { id: 'c5', author: 'Marcus T.', handle: '@mthorne_ops', avatar: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&w=120&q=80', body: 'Have you considered adding a section on log compaction? That would make this a complete reference.', time: '15m ago', likes: 12 },
+    { id: 'c4', author: 'Sarah C.', handle: '@schen_dev', avatar: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&w=160&q=80', body: 'Brilliant simplification of the Raft protocol. The leader election section is exceptionally clear.', time: '30m ago', likes: 31 },
+    { id: 'c5', author: 'Marcus T.', handle: '@mthorne_ops', avatar: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&w=160&q=80', body: 'Have you considered adding a section on log compaction? That would make this a complete reference.', time: '15m ago', likes: 12 },
   ],
 };
 
@@ -94,7 +94,7 @@ export function PostDetailPage() {
   return (
     <article>
       {/* Header */}
-      <div className="sticky top-0 z-10 backdrop-blur-md" style={{ background: 'rgba(28,27,27,0.85)', borderBottom: `1px solid ${colors.border}` }}>
+      <div className="sticky top-0 z-10 backdrop-blur-md" style={{ background: 'rgba(10,10,10,0.85)', borderBottom: `1px solid ${colors.border}` }}>
         <div className="flex items-center gap-5 px-4 py-2 sm:px-5">
           <button className="grid h-9 w-9 place-items-center rounded-full transition-colors hover:bg-[#1a1d24]" style={{ color: colors.primary }} onClick={() => navigate(-1)} aria-label="Go back">
             <ArrowLeft size={20} />
@@ -129,7 +129,7 @@ export function PostDetailPage() {
             {openMenu && (
               <>
                 <div className="fixed inset-0 z-10" onClick={() => setOpenMenu(false)} />
-                <div className="absolute right-0 top-10 z-20 w-48 rounded-lg border py-1 shadow-xl" style={{ background: '#14171c', borderColor: '#2f3336' }}>
+                <div className="absolute right-0 top-10 z-20 w-48 rounded-lg border py-1 shadow-xl" style={{ background: '#151515', borderColor: '#2f3336' }}>
                   <button className="flex w-full items-center gap-2 px-4 py-2.5 text-left text-sm transition-colors hover:bg-[#1a1d24]" style={{ color: '#e7e9ea' }} onClick={() => { navigator.clipboard.writeText(window.location.origin + '/post/' + post.id); showToast('Link copied!', 'success'); setOpenMenu(false); }}>
                     <Share2 size={15} /> Copy link
                   </button>
@@ -183,8 +183,8 @@ export function PostDetailPage() {
         {/* Tags */}
         <div className="mt-5 flex flex-wrap gap-2">
           {post.tags.map((tag) => (
-            <span key={tag} className="rounded-md px-3 py-1 text-sm font-medium" style={{ background: 'rgba(0,200,150,0.08)', color: colors.verified }}>
-              [{tag}]
+            <span key={tag} className="rounded-full px-3 py-1 text-sm font-semibold" style={{ background: 'rgba(45,212,163,0.14)', color: colors.verified }}>
+              {tag}
             </span>
           ))}
         </div>
@@ -199,7 +199,7 @@ export function PostDetailPage() {
               'v1.0 initial submission'
             ]).map((entry, i) => (
               <li key={i} className="flex items-start gap-2 text-sm">
-                <span className="mt-0.5 grid h-4 w-4 shrink-0 place-items-center rounded-full text-[10px] font-bold" style={{ background: 'rgba(0,200,150,0.15)', color: colors.verified }}>{i + 1}</span>
+                <span className="mt-0.5 grid h-4 w-4 shrink-0 place-items-center rounded-full text-[10px] font-bold" style={{ background: 'rgba(45,212,163,0.15)', color: colors.verified }}>{i + 1}</span>
                 {entry}
               </li>
             ))}
@@ -207,7 +207,7 @@ export function PostDetailPage() {
         </details>
 
         {/* Impact stats */}
-        <div className="mt-5 grid grid-cols-3 gap-4 rounded-lg border py-4" style={{ borderColor: colors.border }}>
+        <div className="mt-5 grid grid-cols-3 gap-4 rounded-xl border py-4" style={{ borderColor: colors.border, background: colors.card }}>
           {[
             ['Likes', post.likes],
             ['Comments', post.comments],
@@ -220,29 +220,32 @@ export function PostDetailPage() {
           ))}
         </div>
 
-        {/* Actions */}
-        <div className="mt-5 flex max-w-[600px] items-center justify-between border-y py-3" style={{ borderColor: colors.border, color: colors.muted }}>
-          <button className="inline-flex items-center gap-2 text-sm transition-colors hover:text-rose-500" onClick={() => { setLiked(!liked); }}>
+        {/* Actions — primary vs secondary hierarchy */}
+        <div className="mt-5 flex max-w-[600px] items-center gap-1 border-y py-3" style={{ borderColor: colors.border, color: colors.muted }}>
+          {/* Primary */}
+          <button className="flex items-center gap-2 rounded-full px-3 py-1.5 text-sm font-semibold transition-colors hover:bg-rose-500/10 hover:text-rose-500" onClick={() => { setLiked(!liked); }}>
             <Heart size={20} fill={liked ? '#f43f5e' : 'none'} stroke={liked ? '#f43f5e' : 'currentColor'} />
             <span>{post.likes + (liked ? 1 : 0)}</span>
           </button>
-          <button className="inline-flex items-center gap-2 text-sm transition-colors hover:text-sky-500" onClick={() => showToast(`${post.comments} comments on this post`, 'info')}>
+          <button className="flex items-center gap-2 rounded-full px-3 py-1.5 text-sm font-semibold transition-colors hover:bg-sky-500/10 hover:text-sky-500" onClick={() => showToast(`${post.comments} comments on this post`, 'info')}>
             <MessageCircle size={20} />
             <span>{post.comments}</span>
           </button>
-          <button className="inline-flex items-center gap-2 text-sm transition-colors hover:text-[#00C896]" onClick={() => navigate(`/editor/new?fork=${post.id}&title=${encodeURIComponent(post.title)}&body=${encodeURIComponent(post.excerpt)}`)}>
+          <button className="flex items-center gap-2 rounded-full px-3 py-1.5 text-sm font-semibold transition-colors hover:bg-[#2DD4A3]/10 hover:text-[#2DD4A3]" onClick={() => navigate(`/editor/new?fork=${post.id}&title=${encodeURIComponent(post.title)}&body=${encodeURIComponent(post.excerpt)}`)}>
             <Repeat2 size={20} />
             <span>{post.forks}</span>
           </button>
-          <button className="inline-flex items-center gap-2 text-sm transition-colors hover:text-surface" onClick={() => { setSaved(!saved); showToast(saved ? 'Removed from bookmarks' : 'Bookmarked!', 'success'); }}>
-            <Bookmark size={20} fill={saved ? '#e7e9ea' : 'none'} />
+
+          {/* Secondary */}
+          <button className="ml-auto flex items-center gap-2 rounded-full px-2.5 py-1.5 text-sm opacity-60 transition-all hover:opacity-100 hover:text-surface" onClick={() => { setSaved(!saved); showToast(saved ? 'Removed from bookmarks' : 'Bookmarked!', 'success'); }}>
+            <Bookmark size={18} fill={saved ? '#e7e9ea' : 'none'} />
           </button>
-          <button className="inline-flex items-center gap-2 text-sm transition-colors hover:text-sky-500" onClick={() => { navigator.clipboard.writeText(window.location.origin + '/post/' + post.id); showToast('Link copied!', 'success'); }}>
-            <Share2 size={20} />
-            <span>Share</span>
+          <button className="flex items-center gap-2 rounded-full px-2.5 py-1.5 text-sm opacity-60 transition-all hover:opacity-100 hover:text-sky-500" onClick={() => { navigator.clipboard.writeText(window.location.origin + '/post/' + post.id); showToast('Link copied!', 'success'); }}>
+            <Share2 size={18} />
           </button>
-          <span className="inline-flex items-center gap-1.5 text-sm">
-            <BarChart3 size={20} />
+          {/* Muted: view count */}
+          <span className="ml-2 flex items-center gap-1.5 text-sm">
+            <BarChart3 size={18} />
             {post.impressions.toLocaleString()}
           </span>
         </div>
@@ -254,7 +257,7 @@ export function PostDetailPage() {
             alt=""
             className="h-10 w-10 rounded-full object-cover grayscale"
           />
-          <div className="flex flex-1 items-center gap-3 rounded-lg border px-4 py-2" style={{ borderColor: colors.border }}>
+          <div className="flex flex-1 items-center gap-3 rounded-xl border px-4 py-2" style={{ borderColor: colors.border, background: colors.card }}>
             <input
               className="flex-1 bg-transparent text-sm outline-none"
               style={{ color: colors.primary, '--tw-placeholder-color': colors.muted } as React.CSSProperties}

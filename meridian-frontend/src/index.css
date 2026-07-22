@@ -15,7 +15,7 @@
   --color-primary: #000000;
   --color-surface: #EAECEC;
   --color-muted: #999B9B;
-  --color-verified: #00C896;
+  --color-verified: #2DD4A3;
   --color-flagged: #FF6B6B;
   --color-highlight: #FFB900;
 }
@@ -28,7 +28,7 @@ body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
-  background: #1C1B1B;
+  background: #0a0a0a;
   color: var(--color-surface);
   font-family: var(--font-twitter);
 }
@@ -65,7 +65,7 @@ button {
 }
 
 .citation-marker {
-  border-bottom: 2px solid #00C896;
+  border-bottom: 2px solid #2DD4A3;
   background: rgba(0, 200, 150, 0.08);
   padding: 0 2px;
 }

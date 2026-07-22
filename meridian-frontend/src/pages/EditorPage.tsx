@@ -11,7 +11,7 @@ const colors = {
   primary: '#e7e9ea',
   secondary: '#71767b',
   muted: '#536471',
-  mint: '#00C896',
+  mint: '#2DD4A3',
 };
 
 export function EditorPage() {
@@ -117,7 +117,7 @@ export function EditorPage() {
                   max={100}
                   value={impactScore}
                   onChange={(e) => setImpactScore(Number(e.target.value))}
-                  className="flex-1 accent-[#00C896]"
+                  className="flex-1 accent-[#2DD4A3]"
                   style={{ height: '6px', cursor: 'pointer', accentColor: colors.mint }}
                 />
                 <span

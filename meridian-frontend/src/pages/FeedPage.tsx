@@ -12,9 +12,9 @@ const colors = {
   secondary: '#71767b',
   muted: '#536471',
   border: '#2f3336',
-  card: '#14171c',
+  card: '#151515',
   cardHover: '#1a1d24',
-  verified: '#00C896',
+  verified: '#2DD4A3',
 };
 
 export function FeedPage() {
@@ -44,9 +44,9 @@ export function FeedPage() {
   };
 
   return (
-    <div>
+    <div className="space-y-4">
       {/* Composer */}
-      <section className="border border-zinc-900 bg-[#1C1B1B] px-4 pb-4 pt-7 sm:px-5 sm:pb-5 shadow-lg" style={{ borderColor: colors.border, background: 'rgb(28, 27, 27)' }}>
+      <section className="rounded-2xl border px-4 pb-4 pt-7 sm:px-5 sm:pb-5 shadow-lg" style={{ borderColor: colors.border, background: colors.card }}>
         <div className="flex gap-3">
           <img
             src="https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=120&q=80"
@@ -63,9 +63,16 @@ export function FeedPage() {
           />
         </div>
         <div className="mt-3 flex items-center justify-between pl-[56px]">
-          <div className="flex gap-4" style={{ color: colors.verified }}>
-            {([['Code', Code2], ['Clip', Paperclip], ['Image', Image], ['Video', Video], ['Stats', BarChart3]] as const).map(([label, Icon]) => (
-              <button key={label} aria-label={`Add ${label}`} className="hover:opacity-70 transition-opacity" onClick={() => setPostText((prev) => prev + ` [attach ${label}]`)}>
+          <div className="flex gap-1">
+            {([['Code snippet', Code2], ['Attach file', Paperclip], ['Image', Image], ['Video', Video], ['Poll', BarChart3]] as const).map(([label, Icon]) => (
+              <button
+                key={label}
+                aria-label={label}
+                title={label}
+                className="flex h-9 w-9 items-center justify-center rounded-full transition-colors hover:bg-[#1a1d24]"
+                style={{ color: colors.verified }}
+                onClick={() => setPostText((prev) => prev + ` [attach ${label}]`)}
+              >
                 <Icon size={18} />
               </button>
             ))}
@@ -81,148 +88,153 @@ export function FeedPage() {
       </section>
 
       {/* Feed */}
-      <div>
-        {posts.map((post) => (
-          <article
-            key={post.id}
-            className="border-b px-4 py-3 transition-colors sm:px-5"
-            style={{ borderColor: colors.border, background: 'transparent' }}
-          >
-            <div className="flex items-start gap-3">
-              <img src={post.avatar} alt="" className="mt-1 h-11 w-11 shrink-0 rounded-full object-cover grayscale" />
-              <div className="min-w-0 flex-1">
-                {/* Author row */}
-                <div className="flex items-start gap-2">
-                  <div className="min-w-0 flex-1">
-                    <div className="flex flex-wrap items-center gap-x-1.5 gap-y-0.5 text-[15px] leading-5">
-                      <h2 className="truncate font-bold" style={{ color: colors.primary }}>{post.author}</h2>
-                      <span className="truncate" style={{ color: colors.muted }}>{post.handle}</span>
-                      <span style={{ color: colors.muted }}>·</span>
-                      <span style={{ color: colors.muted }}>{post.age}</span>
-                      <Badge status={post.status} />
-                    </div>
-                  </div>
-                  <div className="relative shrink-0">
-                    <button className="grid h-8 w-8 place-items-center rounded-full transition-colors hover:bg-[#1a1d24]" style={{ color: colors.muted }} aria-label="More actions" onClick={(e) => { e.stopPropagation(); setOpenMenu(openMenu === post.id ? null : post.id); }}>
-                      <MoreHorizontal size={18} />
-                    </button>
-                    {openMenu === post.id && (
-                      <>
-                        <div className="fixed inset-0 z-10" onClick={() => setOpenMenu(null)} />
-                        <div className="absolute right-0 top-10 z-20 w-48 rounded-lg border py-1 shadow-xl" style={{ background: '#14171c', borderColor: '#2f3336' }}>
-                          <button className="flex w-full items-center gap-2 px-4 py-2.5 text-left text-sm transition-colors hover:bg-[#1a1d24]" style={{ color: '#e7e9ea' }} onClick={() => { navigator.clipboard.writeText(window.location.origin + '/post/' + post.id); showToast('Link copied!', 'success'); setOpenMenu(null); }}>
-                            <Share2 size={15} /> Copy link
-                          </button>
-                          <div className="mx-2 my-1 border-t" style={{ borderColor: '#2f3336' }} />
-                          <button className="flex w-full items-center gap-2 px-4 py-2.5 text-left text-sm transition-colors hover:bg-[#1a1d24]" style={{ color: '#e7e9ea' }} onClick={() => { showToast('Marked as Interested', 'success'); setOpenMenu(null); }}>
-                            <ThumbsUp size={15} /> Interested
-                          </button>
-                          <button className="flex w-full items-center gap-2 px-4 py-2.5 text-left text-sm transition-colors hover:bg-[#1a1d24]" style={{ color: '#e7e9ea' }} onClick={() => { showToast('Marked as Not Interested', 'success'); setOpenMenu(null); }}>
-                            <ThumbsDown size={15} /> Not Interested
-                          </button>
-                          <div className="mx-2 my-1 border-t" style={{ borderColor: '#2f3336' }} />
-                          <button className="flex w-full items-center gap-2 px-4 py-2.5 text-left text-sm transition-colors hover:bg-[#1a1d24]" style={{ color: '#e7e9ea' }} onClick={() => { showToast('Unfollowed', 'success'); setOpenMenu(null); }}>
-                            <UserMinus size={15} /> Unfollow
-                          </button>
-                          <button className="flex w-full items-center gap-2 px-4 py-2.5 text-left text-sm transition-colors hover:bg-[#1a1d24]" style={{ color: '#e7e9ea' }} onClick={() => { showToast('Reported', 'success'); setOpenMenu(null); }}>
-                            <BarChart3 size={15} /> Report post
-                          </button>
-                        </div>
-                      </>
-                    )}
+      {posts.map((post) => (
+        <article
+          key={post.id}
+          className="rounded-2xl px-5 py-5 transition-colors"
+          style={{ background: colors.card }}
+        >
+          <div className="flex items-start gap-3">
+            <img src={post.avatar} alt="" className="mt-1 h-11 w-11 shrink-0 rounded-full object-cover grayscale" />
+            <div className="min-w-0 flex-1">
+              {/* Author row */}
+              <div className="flex items-start gap-2">
+                <div className="min-w-0 flex-1">
+                  <div className="flex flex-wrap items-center gap-x-1.5 gap-y-0.5 text-[15px] leading-5">
+                    <h2 className="truncate font-bold" style={{ color: colors.primary }}>{post.author}</h2>
+                    <span className="truncate" style={{ color: colors.muted }}>{post.handle}</span>
+                    <span style={{ color: colors.muted }}>·</span>
+                    <span style={{ color: colors.muted }}>{post.age}</span>
+                    <Badge status={post.status} />
                   </div>
                 </div>
-
-                {/* Impact */}
-                <div className="mt-0.5 flex flex-wrap items-center gap-2 text-[13px]">
-                  <span style={{ color: colors.verified }}>{post.patched}</span>
-                  <span style={{ color: colors.muted }}>
-                    Impact: <b style={{ color: colors.primary }}>{post.impactScore}</b>
-                  </span>
+                <div className="relative shrink-0">
+                  <button className="grid h-8 w-8 place-items-center rounded-full transition-colors hover:bg-[#1a1d24]" style={{ color: colors.muted }} aria-label="More actions" onClick={(e) => { e.stopPropagation(); setOpenMenu(openMenu === post.id ? null : post.id); }}>
+                    <MoreHorizontal size={18} />
+                  </button>
+                  {openMenu === post.id && (
+                    <>
+                      <div className="fixed inset-0 z-10" onClick={() => setOpenMenu(null)} />
+                      <div className="absolute right-0 top-10 z-20 w-48 rounded-lg border py-1 shadow-xl" style={{ background: '#151515', borderColor: '#2f3336' }}>
+                        <button className="flex w-full items-center gap-2 px-4 py-2.5 text-left text-sm transition-colors hover:bg-[#1a1d24]" style={{ color: '#e7e9ea' }} onClick={() => { navigator.clipboard.writeText(window.location.origin + '/post/' + post.id); showToast('Link copied!', 'success'); setOpenMenu(null); }}>
+                          <Share2 size={15} /> Copy link
+                        </button>
+                        <div className="mx-2 my-1 border-t" style={{ borderColor: '#2f3336' }} />
+                        <button className="flex w-full items-center gap-2 px-4 py-2.5 text-left text-sm transition-colors hover:bg-[#1a1d24]" style={{ color: '#e7e9ea' }} onClick={() => { showToast('Marked as Interested', 'success'); setOpenMenu(null); }}>
+                          <ThumbsUp size={15} /> Interested
+                        </button>
+                        <button className="flex w-full items-center gap-2 px-4 py-2.5 text-left text-sm transition-colors hover:bg-[#1a1d24]" style={{ color: '#e7e9ea' }} onClick={() => { showToast('Marked as Not Interested', 'success'); setOpenMenu(null); }}>
+                          <ThumbsDown size={15} /> Not Interested
+                        </button>
+                        <div className="mx-2 my-1 border-t" style={{ borderColor: '#2f3336' }} />
+                        <button className="flex w-full items-center gap-2 px-4 py-2.5 text-left text-sm transition-colors hover:bg-[#1a1d24]" style={{ color: '#e7e9ea' }} onClick={() => { showToast('Unfollowed', 'success'); setOpenMenu(null); }}>
+                          <UserMinus size={15} /> Unfollow
+                        </button>
+                        <button className="flex w-full items-center gap-2 px-4 py-2.5 text-left text-sm transition-colors hover:bg-[#1a1d24]" style={{ color: '#e7e9ea' }} onClick={() => { showToast('Reported', 'success'); setOpenMenu(null); }}>
+                          <BarChart3 size={15} /> Report post
+                        </button>
+                      </div>
+                    </>
+                  )}
                 </div>
-
-                {/* Excerpt */}
-                <p className="mt-1.5 max-w-[620px] text-[15px] leading-5" style={{ color: colors.primary }}>
-                  {post.excerpt}
-                </p>
-
-                {/* Code block */}
-                {post.code && (
-                  <pre className="mt-2.5 max-w-[620px] overflow-x-auto rounded-lg p-3 font-mono text-[13px] leading-5" style={{ background: '#0a0c10', border: `1px solid ${colors.border}`, color: '#c9d1d9' }}>
-                    <code>{post.code}</code>
-                  </pre>
-                )}
-
-                {/* Tags */}
-                <div className="mt-2 flex flex-wrap gap-1.5">
-                  {post.tags.map((tag) => (
-                    <span key={tag} className="rounded-md px-2 py-0.5 text-xs font-medium" style={{ background: 'rgba(0,200,150,0.08)', color: colors.verified }}>
-                      [{tag}]
-                    </span>
-                  ))}
-                </div>
-
-                {/* Patch history */}
-                <details className="mt-2.5 max-w-[620px] rounded-lg px-3 py-2 text-[13px]" style={{ border: `1px solid ${colors.border}` }}>
-                  <summary className="cursor-pointer font-semibold" style={{ color: colors.primary }}>Patch history timeline</summary>
-                  <ol className="mt-2 space-y-1.5" style={{ color: colors.secondary }}>
-                    <li>v2.4 accepted benchmark correction by @kernel_notes</li>
-                    <li>v2.3 merged epoll fallback note by @ops-lab</li>
-                  </ol>
-                </details>
-
-                {/* Actions */}
-                <div className="mt-2.5 flex max-w-[600px] items-center justify-between text-[13px]" style={{ color: colors.muted }}>
-                  <button className="inline-flex items-center gap-1.5 transition-colors hover:text-rose-500" onClick={() => toggleLiked(post.id)}>
-                    <Heart size={17} fill={liked.has(post.id) ? '#f43f5e' : 'none'} />
-                    {post.likes + (liked.has(post.id) ? 1 : 0)}
-                  </button>
-                  <button className="inline-flex items-center gap-1.5 transition-colors hover:text-sky-500" onClick={() => { setReplyingTo(replyingTo === post.id ? null : post.id); setReplyText(''); }}>
-                    <MessageCircle size={17} />
-                    {post.comments}
-                  </button>
-                  <button className="inline-flex items-center gap-1.5 transition-colors hover:text-[#00C896]" onClick={() => navigate(`/editor/new?fork=${post.id}&title=${encodeURIComponent(post.title || post.excerpt)}&body=${encodeURIComponent(post.excerpt)}`)}>
-                    <Repeat2 size={17} />
-                    {post.forks}
-                  </button>
-                  <button className="inline-flex items-center gap-1.5 transition-colors hover:text-surface" onClick={() => toggleSaved(post.id)}>
-                    <Bookmark size={17} fill={saved.has(post.id) ? '#e7e9ea' : 'none'} />
-                    {saved.has(post.id) ? 'Saved' : 'Save'}
-                  </button>
-                  <button className="hidden items-center gap-1.5 transition-colors hover:text-sky-500 sm:inline-flex" onClick={() => { navigator.clipboard.writeText(window.location.origin + '/post/' + post.id); showToast('Link copied!', 'success'); }}>
-                    <Share2 size={17} />
-                    Share
-                  </button>
-                  <span className="inline-flex items-center gap-1.5">
-                    <BarChart3 size={17} />
-                    {compactNumber(post.impressions)}
-                  </span>
-                </div>
-
-                {/* Inline reply */}
-                {replyingTo === post.id && (
-                  <div className="mt-3 flex gap-3 pl-12">
-                    <textarea
-                      className="min-h-[40px] flex-1 resize-none rounded-lg border bg-transparent p-2 text-sm leading-5 outline-none"
-                      style={{ borderColor: colors.border, color: colors.primary }}
-                      placeholder="Write a reply..."
-                      value={replyText}
-                      onChange={(e) => setReplyText(e.target.value)}
-                    />
-                    <button
-                      className="h-fit rounded-full px-4 py-1.5 text-xs font-bold transition-all hover:brightness-110"
-                      style={{ background: colors.verified, color: '#000' }}
-                      onClick={() => { if (replyText.trim()) { showToast('Reply posted!', 'success'); } setReplyText(''); setReplyingTo(null); }}
-                    >
-                      Reply
-                    </button>
-                  </div>
-                )}
               </div>
+
+              {/* Impact */}
+              <div className="mt-0.5 flex flex-wrap items-center gap-2 text-[13px]">
+                <span style={{ color: colors.verified }}>{post.patched}</span>
+                <span style={{ color: colors.muted }}>
+                  Impact: <b style={{ color: colors.primary }}>{post.impactScore}</b>
+                </span>
+              </div>
+
+              {/* Excerpt */}
+              <p className="mt-1.5 max-w-[620px] text-[15px] leading-5" style={{ color: colors.primary }}>
+                {post.excerpt}
+              </p>
+
+              {/* Code block */}
+              {post.code && (
+                <pre className="mt-2.5 max-w-[620px] overflow-x-auto rounded-lg p-3 font-mono text-[13px] leading-5" style={{ background: '#0a0c10', border: `1px solid ${colors.border}`, color: '#c9d1d9' }}>
+                  <code>{post.code}</code>
+                </pre>
+              )}
+
+              {/* Tags */}
+              <div className="mt-2 flex flex-wrap gap-1.5">
+                {post.tags.map((tag) => (
+                  <span key={tag} className="rounded-full px-3 py-1 text-xs font-semibold" style={{ background: 'rgba(45,212,163,0.14)', color: colors.verified }}>
+                    {tag}
+                  </span>
+                ))}
+              </div>
+
+              {/* Patch history */}
+              <details className="mt-2.5 max-w-[620px] rounded-lg px-3 py-2 text-[13px]" style={{ border: `1px solid ${colors.border}` }}>
+                <summary className="cursor-pointer font-semibold" style={{ color: colors.primary }}>Patch history timeline</summary>
+                <ol className="mt-2 space-y-1.5" style={{ color: colors.secondary }}>
+                  <li>v2.4 accepted benchmark correction by @kernel_notes</li>
+                  <li>v2.3 merged epoll fallback note by @ops-lab</li>
+                </ol>
+              </details>
+
+              {/* Actions — primary vs secondary hierarchy */}
+              <div className="mt-3 flex max-w-[600px] items-center gap-1 text-[13px]" style={{ color: colors.muted }}>
+                {/* Primary: like */}
+                <button className="flex items-center gap-1.5 rounded-full px-2.5 py-1.5 font-semibold transition-colors hover:bg-rose-500/10 hover:text-rose-500" onClick={() => toggleLiked(post.id)}>
+                  <Heart size={17} fill={liked.has(post.id) ? '#f43f5e' : 'none'} />
+                  <span>{post.likes + (liked.has(post.id) ? 1 : 0)}</span>
+                </button>
+                {/* Primary: comment */}
+                <button className="flex items-center gap-1.5 rounded-full px-2.5 py-1.5 font-semibold transition-colors hover:bg-sky-500/10 hover:text-sky-500" onClick={() => { setReplyingTo(replyingTo === post.id ? null : post.id); setReplyText(''); }}>
+                  <MessageCircle size={17} />
+                  <span>{post.comments}</span>
+                </button>
+                {/* Primary: repost */}
+                <button className="flex items-center gap-1.5 rounded-full px-2.5 py-1.5 font-semibold transition-colors hover:bg-[#2DD4A3]/10 hover:text-[#2DD4A3]" onClick={() => navigate(`/editor/new?fork=${post.id}&title=${encodeURIComponent(post.title || post.excerpt)}&body=${encodeURIComponent(post.excerpt)}`)}>
+                  <Repeat2 size={17} />
+                  <span>{post.forks}</span>
+                </button>
+
+                {/* Secondary: save */}
+                <button className="ml-auto flex items-center gap-1 rounded-full px-2 py-1.5 text-xs opacity-60 transition-all hover:opacity-100 hover:text-surface" onClick={() => toggleSaved(post.id)}>
+                  <Bookmark size={15} fill={saved.has(post.id) ? '#e7e9ea' : 'none'} />
+                  <span className="hidden sm:inline">{saved.has(post.id) ? 'Saved' : 'Save'}</span>
+                </button>
+                {/* Secondary: share */}
+                <button className="flex items-center gap-1 rounded-full px-2 py-1.5 text-xs opacity-60 transition-all hover:opacity-100 hover:text-sky-500 sm:inline-flex" onClick={() => { navigator.clipboard.writeText(window.location.origin + '/post/' + post.id); showToast('Link copied!', 'success'); }}>
+                  <Share2 size={15} />
+                  <span className="hidden sm:inline">Share</span>
+                </button>
+                {/* Muted: view count */}
+                <span className="ml-2 flex items-center gap-1 text-xs">
+                  <BarChart3 size={14} />
+                  {compactNumber(post.impressions)}
+                </span>
+              </div>
+
+              {/* Inline reply */}
+              {replyingTo === post.id && (
+                <div className="mt-3 flex gap-3 pl-12">
+                  <textarea
+                    className="min-h-[40px] flex-1 resize-none rounded-lg border bg-transparent p-2 text-sm leading-5 outline-none"
+                    style={{ borderColor: colors.border, color: colors.primary }}
+                    placeholder="Write a reply..."
+                    value={replyText}
+                    onChange={(e) => setReplyText(e.target.value)}
+                  />
+                  <button
+                    className="h-fit rounded-full px-4 py-1.5 text-xs font-bold transition-all hover:brightness-110"
+                    style={{ background: colors.verified, color: '#000' }}
+                    onClick={() => { if (replyText.trim()) { showToast('Reply posted!', 'success'); } setReplyText(''); setReplyingTo(null); }}
+                  >
+                    Reply
+                  </button>
+                </div>
+              )}
             </div>
-          </article>
-        ))}
-      </div>
+          </div>
+        </article>
+      ))}
     </div>
   );
 }

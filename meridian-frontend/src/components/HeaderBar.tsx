@@ -81,10 +81,10 @@ export function HeaderBar() {
                   <button onClick={() => setShowHelp(false)} className="grid h-6 w-6 place-items-center rounded-full hover:bg-[#1a1d24]" style={{ color: '#71767b' }}><X size={14} /></button>
                 </div>
                 <ul className="mt-3 space-y-2">
-                  <li><button className="w-full text-left text-sm transition-colors hover:text-[#00C896]" style={{ color: '#e7e9ea' }} onClick={() => { showToast('Opening quick start guide...', 'success'); setShowHelp(false); }}>📖 Quick Start Guide</button></li>
-                  <li><button className="w-full text-left text-sm transition-colors hover:text-[#00C896]" style={{ color: '#e7e9ea' }} onClick={() => { showToast('API docs are available at /docs', 'success'); setShowHelp(false); }}>📘 API Documentation</button></li>
-                  <li><button className="w-full text-left text-sm transition-colors hover:text-[#00C896]" style={{ color: '#e7e9ea' }} onClick={() => { showToast('Keyboard shortcuts: N = New Post, F = Feed, D = Discover', 'success'); setShowHelp(false); }}>⌨️ Keyboard Shortcuts</button></li>
-                  <li><button className="w-full text-left text-sm transition-colors hover:text-[#00C896]" style={{ color: '#e7e9ea' }} onClick={() => { showToast('Report an issue at github.com/meridian/issues', 'success'); setShowHelp(false); }}>🐛 Report an Issue</button></li>
+                  <li><button className="w-full text-left text-sm transition-colors hover:text-[#2DD4A3]" style={{ color: '#e7e9ea' }} onClick={() => { showToast('Opening quick start guide...', 'success'); setShowHelp(false); }}>📖 Quick Start Guide</button></li>
+                  <li><button className="w-full text-left text-sm transition-colors hover:text-[#2DD4A3]" style={{ color: '#e7e9ea' }} onClick={() => { showToast('API docs are available at /docs', 'success'); setShowHelp(false); }}>📘 API Documentation</button></li>
+                  <li><button className="w-full text-left text-sm transition-colors hover:text-[#2DD4A3]" style={{ color: '#e7e9ea' }} onClick={() => { showToast('Keyboard shortcuts: N = New Post, F = Feed, D = Discover', 'success'); setShowHelp(false); }}>⌨️ Keyboard Shortcuts</button></li>
+                  <li><button className="w-full text-left text-sm transition-colors hover:text-[#2DD4A3]" style={{ color: '#e7e9ea' }} onClick={() => { showToast('Report an issue at github.com/meridian/issues', 'success'); setShowHelp(false); }}>🐛 Report an Issue</button></li>
                 </ul>
               </div>
             </>

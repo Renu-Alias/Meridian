@@ -38,7 +38,7 @@ export function NotificationsPage() {
               <div className="fixed inset-0 z-10" onClick={() => setFilterOpen(false)} />
               <div className="absolute right-0 top-12 z-20 w-40 rounded-lg border py-1 shadow-xl" style={{ background: '#14171c', borderColor: '#2f3336' }}>
                 {filterOptions.map((opt) => (
-                  <button key={opt} className={`flex w-full items-center px-4 py-2 text-left text-sm transition-colors hover:bg-[#1a1d24] ${activeFilter === opt ? 'font-bold' : ''}`} style={{ color: activeFilter === opt ? '#00C896' : '#e7e9ea' }} onClick={() => { setActiveFilter(opt); setFilterOpen(false); }}>
+                  <button key={opt} className={`flex w-full items-center px-4 py-2 text-left text-sm transition-colors hover:bg-[#1a1d24] ${activeFilter === opt ? 'font-bold' : ''}`} style={{ color: activeFilter === opt ? '#2DD4A3' : '#e7e9ea' }} onClick={() => { setActiveFilter(opt); setFilterOpen(false); }}>
                     {opt}
                   </button>
                 ))}

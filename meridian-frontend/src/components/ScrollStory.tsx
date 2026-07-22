@@ -12,7 +12,7 @@ gsap.registerPlugin(ScrollTrigger);
 const BLACK = 'transparent';
 const SURFACE = '#EAECEC'; // Light text color for drawings on dark background
 const MUTED = '#999B9B';
-const VERIFIED = '#00C896';
+const VERIFIED = '#2DD4A3';
 const FLAGGED = '#FF6B6B';
 const HIGHLIGHT = '#FFB900';
 

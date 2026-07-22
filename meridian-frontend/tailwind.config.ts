@@ -8,7 +8,7 @@ export default {
         ink: '#000000',
         surface: '#EAECEC',
         muted: '#999B9B',
-        verified: '#00C896',
+        verified: '#2DD4A3',
         flagged: '#FF6B6B',
         highlight: '#FFB900',
       },

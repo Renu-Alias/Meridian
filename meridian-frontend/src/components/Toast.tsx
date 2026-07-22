@@ -26,7 +26,7 @@ export function Toast() {
           <div
             className="flex items-center gap-3 rounded-lg px-5 py-3 text-sm font-medium shadow-xl"
             style={{
-              background: toast.type === 'success' ? '#00C896' : '#14171C',
+              background: toast.type === 'success' ? '#2DD4A3' : '#14171C',
               color: toast.type === 'success' ? '#000' : '#e7e9ea',
               border: '1px solid #2f3336',
             }}

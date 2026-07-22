@@ -38,7 +38,7 @@ export function WalletPage() {
             <h2 className="text-2xl font-bold">Monthly impact analytics</h2>
             <p className="mt-1 text-sm text-neutral-500">Earnings from bookmarks, internal shares, and Used This At Work reactions.</p>
           </div>
-          <button className="hidden h-10 rounded-full px-5 font-bold text-black sm:block" style={{ background: '#00C896' }} onClick={() => setShowPayout(true)}>Request payout</button>
+          <button className="hidden h-10 rounded-full px-5 font-bold text-black sm:block" style={{ background: '#2DD4A3' }} onClick={() => setShowPayout(true)}>Request payout</button>
         </div>
         <div className="mt-8 flex h-56 items-end gap-2 border-b border-l border-[#333] px-3">
           {data.trend.map((point, index) => (
@@ -93,7 +93,7 @@ export function WalletPage() {
             <p className="mt-3 text-sm" style={{ color: '#71767b' }}>Request a payout of <b style={{ color: '#e7e9ea' }}>{currency(data.balance)}</b> to your connected Stripe account.</p>
             <div className="mt-5 flex gap-3">
               <button onClick={() => setShowPayout(false)} className="flex-1 h-10 rounded-full text-sm font-bold" style={{ border: '1px solid #2f3336', color: '#71767b' }}>Cancel</button>
-              <button onClick={() => { setShowPayout(false); showToast(`Payout of ${currency(data.balance)} requested!`, 'success'); }} className="flex-1 h-10 rounded-full text-sm font-bold text-black" style={{ background: '#00C896' }}>Confirm Payout</button>
+              <button onClick={() => { setShowPayout(false); showToast(`Payout of ${currency(data.balance)} requested!`, 'success'); }} className="flex-1 h-10 rounded-full text-sm font-bold text-black" style={{ background: '#2DD4A3' }}>Confirm Payout</button>
             </div>
           </div>
         </>
