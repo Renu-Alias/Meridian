@@ -1,74 +1,179 @@
 import { useState } from 'react';
-import { Bell, Eye, Key, Shield, User } from 'lucide-react';
+import { Bell, Eye, Key, LogOut, Shield, ShieldAlert, User } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { useUiStore } from '../store/uiStore';
 
-const sections = [
+const initialSections = [
   {
     icon: User,
     title: 'Profile',
     fields: [
-      ['Display name', 'Alex Rivera'],
-      ['Handle', '@arivera.dev'],
-      ['Bio', 'Writes about distributed systems, observability...'],
-      ['Email', 'alex@meridian.dev'],
+      { label: 'Display name', value: 'Alex Rivera', editable: true },
+      { label: 'Handle', value: '@arivera.dev', editable: true },
+      { label: 'Bio', value: 'Writes about distributed systems, observability...', editable: true },
+      { label: 'Email', value: 'alex@meridian.dev', editable: true },
     ],
   },
   {
     icon: Eye,
     title: 'Appearance',
     fields: [
-      ['Theme', 'Dark'],
-      ['Font size', 'Medium'],
-      ['Reduce motion', 'Off'],
+      { label: 'Theme', value: 'Dark', editable: true },
+      { label: 'Font size', value: 'Medium', editable: true },
+      { label: 'Reduce motion', value: 'Off', editable: true },
     ],
   },
   {
     icon: Bell,
     title: 'Notifications',
     fields: [
-      ['Push notifications', 'On'],
-      ['Email digest', 'Weekly'],
-      ['Mentor requests', 'On'],
+      { label: 'Push notifications', value: 'On', editable: true },
+      { label: 'Email digest', value: 'Weekly', editable: true },
+      { label: 'Mentor requests', value: 'On', editable: true },
     ],
   },
   {
     icon: Key,
     title: 'Account',
     fields: [
-      ['Connected wallet', '0x7421...8e3f'],
-      ['GitHub integration', 'Connected'],
-      ['API keys', 'Manage'],
+      { label: 'Connected wallet', value: '0x7421...8e3f', editable: false },
+      { label: 'GitHub integration', value: 'Connected', editable: false },
+      { label: 'API keys', value: 'Edit', editable: false },
     ],
   },
 ];
 
 export function SettingsPage() {
-  const [editing, setEditing] = useState<string | null>(null);
+  const showToast = useUiStore((s) => s.showToast);
+  const navigate = useNavigate();
+  const [sections, setSections] = useState(initialSections);
+  const [editingField, setEditingField] = useState<string | null>(null);
+  const [editValue, setEditValue] = useState('');
+  const [showDangerConfirm, setShowDangerConfirm] = useState<'deactivate' | 'delete' | null>(null);
+
+  const startEdit = (fieldKey: string, currentValue: string) => {
+    setEditingField(fieldKey);
+    setEditValue(currentValue);
+  };
+
+  const saveEdit = (fieldKey: string) => {
+    setSections((prev) =>
+      prev.map((sec) => ({
+        ...sec,
+        fields: sec.fields.map((f) =>
+          f.label === fieldKey ? { ...f, value: editValue } : f
+        ),
+      }))
+    );
+    setEditingField(null);
+    showToast('Saved', 'success');
+  };
+
   return (
     <div className="mx-auto max-w-4xl p-6 lg:p-8">
       <h1 className="mb-8 text-3xl font-black">Settings</h1>
       <div className="space-y-6">
         {sections.map(({ icon: Icon, title, fields }) => (
-          <section key={title} className="border border-[#333] bg-[#14171C]">
-            <div className="flex items-center gap-3 border-b border-[#333] px-6 py-4">
-              <Icon size={18} className="text-verified" />
+          <section key={title} className="rounded-xl border border-[#2f3336] bg-[#151515]">
+            <div className="flex items-center gap-3 border-b border-[#2f3336] px-6 py-4">
+              <Icon size={18} style={{ color: '#2DD4A3' }} />
               <h2 className="text-lg font-bold">{title}</h2>
             </div>
-            <div className="divide-y divide-[#222]">
-              {fields.map(([label, value]) => (
-                <div key={label} className="flex items-center justify-between px-6 py-3.5">
-                  <span className="text-sm text-neutral-500">{label}</span>
-                  <div className="flex items-center gap-3">
-                    <span className="text-sm font-medium">{value}</span>
-                    <button className="rounded-md border border-[#333] px-3 py-1 text-xs font-medium transition-colors hover:bg-[#1a1d24]" onClick={() => setEditing(editing === label ? null : label)}>
-                      {editing === label ? 'Done' : 'Edit'}
-                    </button>
+            <div className="divide-y divide-[#2f3336]/40">
+              {fields.map((field) => {
+                const fieldKey = field.label;
+                const isEditing = editingField === fieldKey;
+                return (
+                  <div key={fieldKey} className="flex items-center justify-between px-6 py-3.5">
+                    <span className="text-sm" style={{ color: '#71767b' }}>{field.label}</span>
+                    <div className="flex items-center gap-3">
+                      {isEditing ? (
+                        <input
+                          autoFocus
+                          className="w-48 rounded-md border border-[#2f3336] bg-[#0a0a0a] px-3 py-1 text-sm font-medium outline-none focus:border-[#2DD4A3]"
+                          style={{ color: '#e7e9ea' }}
+                          value={editValue}
+                          onChange={(e) => setEditValue(e.target.value)}
+                          onKeyDown={(e) => { if (e.key === 'Enter') saveEdit(fieldKey); if (e.key === 'Escape') setEditingField(null); }}
+                          onBlur={() => saveEdit(fieldKey)}
+                        />
+                      ) : (
+                        <span className="text-sm font-medium">{field.value}</span>
+                      )}
+                      {field.editable && (
+                        <button
+                          className="rounded-md border border-[#2f3336] px-3 py-1 text-xs font-medium transition-colors hover:bg-[#1a1d24]"
+                          onClick={() => isEditing ? saveEdit(fieldKey) : startEdit(fieldKey, field.value)}
+                        >
+                          {isEditing ? 'Done' : 'Edit'}
+                        </button>
+                      )}
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </section>
         ))}
       </div>
+
+      {/* Log out */}
+      <section className="mt-6 rounded-xl border border-[#2f3336] bg-[#151515] p-6">
+        <button
+          className="flex h-10 w-full items-center justify-center gap-2 rounded-full text-sm font-bold transition-all hover:brightness-110"
+          style={{ background: '#2DD4A3', color: '#0a0a0a' }}
+          onClick={() => { showToast('Logged out', 'success'); navigate('/'); }}
+        >
+          <LogOut size={16} /> Log out
+        </button>
+      </section>
+
+      {/* Danger Zone */}
+      <section className="mt-6 rounded-xl border border-red-500/30 bg-[#151515]">
+        <div className="flex items-center gap-3 border-b border-red-500/30 px-6 py-4">
+          <ShieldAlert size={18} style={{ color: '#FF6B6B' }} />
+          <h2 className="text-lg font-bold" style={{ color: '#FF6B6B' }}>Danger Zone</h2>
+        </div>
+        <div className="p-6 space-y-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="font-semibold">Deactivate account</p>
+              <p className="text-sm" style={{ color: '#536471' }}>Temporarily disable your account. You can reactivate anytime.</p>
+            </div>
+            <button
+              className="rounded-md border border-red-500/40 px-4 py-2 text-sm font-bold transition-colors hover:bg-red-500/10"
+              style={{ color: '#FF6B6B' }}
+              onClick={() => showToast('Account deactivated', 'info')}
+            >
+              Deactivate
+            </button>
+          </div>
+          <div className="border-t border-red-500/20 pt-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="font-semibold">Delete account</p>
+                <p className="text-sm" style={{ color: '#536471' }}>Permanently delete your account and all associated data. This cannot be undone.</p>
+              </div>
+              <button
+                className="rounded-md px-4 py-2 text-sm font-bold transition-colors"
+                style={showDangerConfirm === 'delete' ? { background: '#FF6B6B', color: '#000' } : { background: 'rgba(255,107,107,0.1)', color: '#FF6B6B' }}
+                onClick={() => {
+                  if (showDangerConfirm === 'delete') {
+                    showToast('Account deleted', 'info');
+                    setShowDangerConfirm(null);
+                    navigate('/');
+                  } else {
+                    setShowDangerConfirm('delete');
+                    showToast('Click again to confirm deletion', 'info');
+                  }
+                }}
+              >
+                {showDangerConfirm === 'delete' ? 'Confirm delete' : 'Delete account'}
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
     </div>
   );
 }

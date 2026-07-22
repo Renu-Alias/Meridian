@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Github, Globe, Linkedin, ShieldCheck } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { ContributionGrid } from '../components/ContributionGrid';
@@ -9,7 +10,7 @@ function ProfileContent() {
 
   return (
     <div className="space-y-6">
-      <section className="border border-[#333] bg-[#14171C] p-5">
+      <section className="rounded-xl border border-[#2f3336] bg-[#151515] p-5">
         <div className="flex flex-col gap-6 sm:flex-row">
           <img
             src="https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&w=200&q=80"
@@ -19,16 +20,16 @@ function ProfileContent() {
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-3">
               <h2 className="text-3xl font-black">{profile.name}</h2>
-              <span className="inline-flex items-center gap-1 rounded-full bg-verified px-3 py-1 text-sm font-bold">
+              <span className="inline-flex items-center gap-1 rounded-full px-3 py-1 text-sm font-bold" style={{ background: 'rgba(45,212,163,0.14)', color: '#2DD4A3' }}>
                 <ShieldCheck size={16} />
                 {profile.credibility}% credible
               </span>
             </div>
-            <p className="mt-1 text-neutral-500">
+            <p className="mt-1" style={{ color: '#71767b' }}>
               {profile.handle} · {profile.designation}
             </p>
             <p className="mt-4 max-w-2xl leading-7">{profile.bio}</p>
-            <div className="mt-4 flex flex-wrap items-center gap-3 text-neutral-500">
+            <div className="mt-4 flex flex-wrap items-center gap-3" style={{ color: '#71767b' }}>
               <Github size={19} />
               <Linkedin size={19} />
               <Globe size={19} />
@@ -38,49 +39,50 @@ function ProfileContent() {
         </div>
       </section>
 
-      <section className="border border-[#333] bg-[#14171C] p-5">
+      <section className="rounded-xl border border-[#2f3336] bg-[#151515] p-5">
         <h3 className="text-xl font-bold">Tech stack</h3>
         <div className="mt-4 flex flex-wrap gap-2">
           {profile.stack.map((tag) => (
-            <span key={tag} className="rounded-full bg-[#222] px-3 py-1 text-sm font-semibold text-[#EAECEC]">
+            <span key={tag} className="rounded-full px-3 py-1 text-sm font-semibold" style={{ background: 'rgba(45,212,163,0.14)', color: '#2DD4A3' }}>
               {tag}
             </span>
           ))}
         </div>
       </section>
 
-      <section className="border border-[#333] bg-[#14171C] p-5">
+      <section className="rounded-xl border border-[#2f3336] bg-[#151515] p-5">
         <div className="flex items-center justify-between">
           <h3 className="text-xl font-bold">Auto-built skills graph</h3>
           <label className="flex items-center gap-2 text-sm font-semibold">
-            <input type="checkbox" defaultChecked className="h-4 w-4 accent-verified" />
+            <input type="checkbox" defaultChecked className="h-4 w-4 accent-[#2DD4A3]" />
             Visible to recruiters
           </label>
         </div>
+        <p className="mt-1 text-xs" style={{ color: '#536471' }}>When off, recruiters see your tech stack but not detailed skill percentages.</p>
         <div className="mt-6 space-y-4">
           {profile.skills.map(([skill, value]) => (
             <div key={skill as string}>
               <div className="flex justify-between text-sm">
                 <span className="font-bold">{skill as string}</span>
-                <span className="text-muted">{value as number}% depth signal</span>
+                <span style={{ color: '#536471' }}>{value as number}% depth signal</span>
               </div>
-              <div className="mt-2 h-2 bg-surface">
-                <span className="block h-full bg-verified" style={{ width: `${value}%` }} />
+              <div className="mt-2 h-2 rounded-full" style={{ background: '#1a1d24' }}>
+                <span className="block h-full rounded-full" style={{ width: `${value}%`, background: '#2DD4A3' }} />
               </div>
             </div>
           ))}
         </div>
       </section>
 
-      <section className="border border-[#333] bg-[#14171C] p-5">
+      <section className="rounded-xl border border-[#2f3336] bg-[#151515] p-5">
         <h3 className="text-xl font-bold">Meridian contributions</h3>
-        <p className="mt-1 text-sm text-neutral-500">Patches, answers, citations, and published writing over the last year.</p>
+        <p className="mt-1 text-sm" style={{ color: '#71767b' }}>Patches, answers, citations, and published writing over the last year.</p>
         <div className="mt-5">
           <ContributionGrid />
         </div>
       </section>
 
-      <section className="border border-[#333] bg-[#14171C] p-5">
+      <section className="rounded-xl border border-[#2f3336] bg-[#151515] p-5">
         <h3 className="text-xl font-bold">Contribution history</h3>
         <div className="mt-4 space-y-4">
           {[
@@ -88,32 +90,14 @@ function ProfileContent() {
             ['Published Kubernetes CRD migration notes', 'May 02, 2026'],
             ['Mentored draft on Python async queues', 'Jun 11, 2026'],
           ].map(([item, date]) => (
-            <div key={item} className="border-l-2 border-verified pl-4">
+            <div key={item} className="border-l-2 border-[#2DD4A3] pl-4">
               <p className="font-semibold">{item}</p>
-              <p className="text-sm text-muted">{date}</p>
+              <p className="text-sm" style={{ color: '#536471' }}>{date}</p>
             </div>
           ))}
         </div>
       </section>
     </div>
-  );
-}
-
-function ProfileSidebar() {
-  const items = ['Profile', 'Security', 'Settings'];
-  return (
-    <aside className="h-max border border-[#333] bg-[#14171C] p-4">
-      {items.map((item, index) => (
-        <button
-          key={item}
-          className={`block h-11 w-full rounded-md px-3 text-left font-semibold ${
-            index === 0 ? 'bg-[#14171C] text-white' : 'text-neutral-600 hover:bg-surface'
-          }`}
-        >
-          {item}
-        </button>
-      ))}
-    </aside>
   );
 }
 
@@ -123,7 +107,7 @@ export function ProfilePage() {
 
 export function ProfileShell() {
   return (
-    <div className="min-h-screen text-[#EAECEC]" style={{ background: '#1C1B1B' }}>
+    <div className="min-h-screen text-[#EAECEC]" style={{ background: '#0a0a0a' }}>
       <div className="mx-auto max-w-4xl px-6 py-8">
         <ProfileContent />
       </div>
