@@ -44,9 +44,9 @@ export function FeedPage() {
   };
 
   return (
-    <div className="space-y-4">
+    <div>
       {/* Composer */}
-      <section className="rounded-2xl border px-4 pb-4 pt-7 sm:px-5 sm:pb-5 shadow-lg" style={{ borderColor: colors.border, background: colors.card }}>
+      <section className="border-b px-4 pb-4 pt-7 sm:px-5 sm:pb-5" style={{ borderColor: '#2a2a2a', background: '#151515' }}>
         <div className="flex gap-3">
           <img
             src="https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=120&q=80"
@@ -91,8 +91,8 @@ export function FeedPage() {
       {posts.map((post) => (
         <article
           key={post.id}
-          className="rounded-2xl px-5 py-5 transition-colors"
-          style={{ background: colors.card }}
+          className="border-b px-5 py-5 transition-colors"
+          style={{ borderColor: '#2a2a2a' }}
         >
           <div className="flex items-start gap-3">
             <img src={post.avatar} alt="" className="mt-1 h-11 w-11 shrink-0 rounded-full object-cover grayscale" />
