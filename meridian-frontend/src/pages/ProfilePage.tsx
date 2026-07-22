@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Github, Globe, Linkedin, ShieldCheck } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
-import { ContributionGrid } from '../components/ContributionGrid';
+import { ContributionGraph } from '../components/ContributionGraph';
 import { fetchProfile } from '../services/mockApi';
 
 function ProfileContent() {
@@ -78,7 +78,7 @@ function ProfileContent() {
         <h3 className="text-xl font-bold">Meridian contributions</h3>
         <p className="mt-1 text-sm" style={{ color: '#71767b' }}>Patches, answers, citations, and published writing over the last year.</p>
         <div className="mt-5">
-          <ContributionGrid />
+          <ContributionGraph variant="full" />
         </div>
       </section>
 

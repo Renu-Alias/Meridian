@@ -1,6 +1,6 @@
-import { useState } from 'react';
 import { Edit3, GraduationCap } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { ContributionGraph } from './ContributionGraph';
 import { useUiStore } from '../store/uiStore';
 
 const colors = {
@@ -15,17 +15,6 @@ const colors = {
 export function RightPanel() {
   const navigate = useNavigate();
   const activeStack = useUiStore((state) => state.activeStack);
-  const [hoveredCell, setHoveredCell] = useState<number | null>(null);
-
-  const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-  const weekCount = 8;
-  const cells = days.flatMap((day, dayIdx) =>
-    Array.from({ length: weekCount }, (_, weekIdx) => ({
-      day,
-      week: weekIdx,
-      level: ((dayIdx * weekCount + weekIdx) * 7) % 5,
-    }))
-  );
 
   return (
     <aside className="hidden w-[330px] shrink-0 border-l p-5 xl:block" style={{ borderColor: colors.border, background: 'transparent' }}>
@@ -48,32 +37,8 @@ export function RightPanel() {
           <span>Stack Velocity</span>
           <span className="font-sans text-sm font-bold normal-case tracking-normal" style={{ color: colors.verified }}>+12% this week</span>
         </div>
-        <div className="mt-3 grid gap-1" style={{ gridTemplateColumns: `repeat(${weekCount}, minmax(0, 1fr))` }}>
-          {cells.map((cell, index) => (
-            <span
-              key={index}
-              className="relative h-3 w-3 rounded-sm"
-              onMouseEnter={() => setHoveredCell(index)}
-              onMouseLeave={() => setHoveredCell(null)}
-              style={{
-                background: cell.level > 3 ? colors.verified : cell.level > 1 ? 'rgba(45,212,163,0.3)' : '#1a1d24',
-                cursor: 'default',
-              }}
-            >
-              {hoveredCell === index && (
-                <span className="absolute bottom-full left-1/2 z-10 mb-2 -translate-x-1/2 whitespace-nowrap rounded bg-[#1a1d24] px-2 py-1 text-[11px] shadow-lg" style={{ color: colors.primary, border: `1px solid ${colors.border}` }}>
-                  {cell.day} · Activity: {cell.level > 3 ? 'High' : cell.level > 1 ? 'Medium' : 'Low'}
-                </span>
-              )}
-            </span>
-          ))}
-        </div>
-        <div className="mt-2 flex items-center justify-end gap-2 text-[10px]" style={{ color: colors.muted }}>
-          <span>Less</span>
-          {[0, 1, 2, 3, 4].map((l) => (
-            <span key={l} className="h-3 w-3 rounded-sm" style={{ background: l > 3 ? colors.verified : l > 1 ? 'rgba(45,212,163,0.3)' : '#1a1d24' }} />
-          ))}
-          <span>More</span>
+        <div className="mt-3">
+          <ContributionGraph variant="mini" weeks={10} />
         </div>
       </section>
 
