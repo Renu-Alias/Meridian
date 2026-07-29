@@ -1,8 +1,9 @@
 import { motion } from 'framer-motion';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { ArrowRight, BookOpen } from 'lucide-react';
 import { BrandMark } from '../components/Logo';
 import { ScrollStory } from '../components/ScrollStory';
+import { useUiStore } from '../store/uiStore';
 
 /* ─────────────────────────────────────────────────────────────────────────
    HERO — Terminal / Code-Editor Preview
@@ -44,7 +45,7 @@ function TerminalPreview() {
       style={{
         background: '#0a0c10',
         borderColor: '#2f3336',
-        boxShadow: '0 0 0 1px rgba(0,200,150,0.08), 0 20px 60px rgba(0,0,0,0.5)',
+        boxShadow: '0 0 0 1px rgba(45,212,163,0.08), 0 20px 60px rgba(0,0,0,0.5)',
       }}
     >
       {/* Title bar */}
@@ -119,13 +120,15 @@ function TerminalPreview() {
 }
 
 export function LandingPage() {
+  const isAuthenticated = useUiStore((s) => s.isAuthenticated);
+
   return (
     <main className="relative w-full" style={{ background: '#0d0f14' }} aria-label="Meridian hero">
       {/* Dot-grid background — covers full page */}
       <div
         className="pointer-events-none fixed inset-0 z-0"
         style={{
-          backgroundImage: 'radial-gradient(rgba(0,200,150,0.20) 1px, transparent 1px)',
+          backgroundImage: 'radial-gradient(rgba(45,212,163,0.20) 1px, transparent 1px)',
           backgroundSize: '24px 24px',
         }}
         aria-hidden="true"
@@ -136,8 +139,8 @@ export function LandingPage() {
         className="pointer-events-none fixed inset-0 z-0"
         style={{
           backgroundImage: `
-            linear-gradient(rgba(0,200,150,0.10) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(0,200,150,0.10) 1px, transparent 1px)
+            linear-gradient(rgba(45,212,163,0.10) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(45,212,163,0.10) 1px, transparent 1px)
           `,
           backgroundSize: '80px 80px',
         }}
@@ -154,7 +157,7 @@ export function LandingPage() {
             className="group [font-family:Inter,sans-serif] [letter-spacing:0.01em]"
           />
           <div className="flex items-center gap-6">
-            <Link to="/discover" className="text-base transition-colors hover:text-white" style={{ fontFamily: 'Inter, sans-serif', color: 'var(--color-muted)' }}>
+            <Link to={isAuthenticated ? '/discover' : '/auth'} className="text-base transition-colors hover:text-white" style={{ fontFamily: 'Inter, sans-serif', color: 'var(--color-muted)' }}>
               Discover
             </Link>
             <Link
@@ -177,7 +180,7 @@ export function LandingPage() {
           {/* Left column: Typography + CTAs */}
           <div className="flex w-full flex-col justify-center gap-6 md:w-1/2 md:pr-4">
             <motion.div custom={0.2} variants={fadeUp} initial="hidden" animate="visible" className="-mt-8">
-              <span className="inline-flex items-center gap-2 rounded-full px-3.5 py-1 text-[11px] font-semibold uppercase tracking-widest" style={{ fontFamily: 'Inter, sans-serif', background: 'rgba(0,200,150,0.08)', border: '1px solid rgba(0,200,150,0.3)', color: 'var(--color-verified)', letterSpacing: '0.13em' }}>
+              <span className="inline-flex items-center gap-2 rounded-full px-3.5 py-1 text-[11px] font-semibold uppercase tracking-widest" style={{ fontFamily: 'Inter, sans-serif', background: 'rgba(45,212,163,0.08)', border: '1px solid rgba(45,212,163,0.3)', color: 'var(--color-verified)', letterSpacing: '0.13em' }}>
                 <span className="h-1.5 w-1.5 rounded-full" style={{ background: 'var(--color-verified)' }} />
                 Built for Engineers
               </span>
@@ -193,10 +196,10 @@ export function LandingPage() {
             </motion.p>
 
             <motion.div custom={0.9} variants={fadeUp} initial="hidden" animate="visible" className="flex flex-col items-start gap-4 sm:flex-row">
-              <Link to="/editor/new" id="cta-start-writing" className="group inline-flex h-11 items-center gap-2 rounded-lg px-6 text-sm font-semibold transition-all hover:brightness-110 active:scale-[0.98]" style={{ fontFamily: 'Inter, sans-serif', background: 'var(--color-verified)', color: '#000', letterSpacing: '0.01em' }} aria-label="Start writing on Meridian">
+              <Link to={isAuthenticated ? '/editor/new' : '/auth'} id="cta-start-writing" className="group inline-flex h-11 items-center gap-2 rounded-lg px-6 text-sm font-semibold transition-all hover:brightness-110 active:scale-[0.98]" style={{ fontFamily: 'Inter, sans-serif', background: 'var(--color-verified)', color: '#000', letterSpacing: '0.01em' }} aria-label="Start writing on Meridian">
                 Start Writing <ArrowRight size={15} className="transition-transform group-hover:translate-x-0.5" />
               </Link>
-              <Link to="/feed" id="cta-explore-posts" className="inline-flex h-11 items-center gap-2 rounded-lg px-6 text-sm font-medium transition-all hover:bg-white/5 active:scale-[0.98]" style={{ fontFamily: 'Inter, sans-serif', border: '1px solid rgba(255,255,255,0.15)', color: 'var(--color-surface)', letterSpacing: '0.01em' }} aria-label="Explore posts on Meridian">
+              <Link to={isAuthenticated ? '/feed' : '/auth'} id="cta-explore-posts" className="inline-flex h-11 items-center gap-2 rounded-lg px-6 text-sm font-medium transition-all hover:bg-white/5 active:scale-[0.98]" style={{ fontFamily: 'Inter, sans-serif', border: '1px solid rgba(255,255,255,0.15)', color: 'var(--color-surface)', letterSpacing: '0.01em' }} aria-label="Explore posts on Meridian">
                 <BookOpen size={15} /> Explore Posts
               </Link>
             </motion.div>

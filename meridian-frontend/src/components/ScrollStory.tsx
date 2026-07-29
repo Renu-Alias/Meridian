@@ -4,6 +4,7 @@ import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { Link } from 'react-router-dom';
 import { ArrowRight, Sparkles } from 'lucide-react';
+import { useUiStore } from '../store/uiStore';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -594,6 +595,7 @@ function FeatureSection({ feature, index }: { feature: FeatureDef; index: number
 function FinalConstellation() {
   const sectionRef = useRef<HTMLDivElement>(null!);
   const canvasRef = useRef<HTMLCanvasElement>(null!);
+  const isAuthenticated = useUiStore((s) => s.isAuthenticated);
 
   useEffect(() => {
     const section = sectionRef.current;
@@ -684,13 +686,13 @@ function FinalConstellation() {
           className="mt-4 flex flex-col items-center gap-3 sm:flex-row"
         >
           <Link
-            to="/editor/new"
+            to={isAuthenticated ? '/editor/new' : '/auth'}
             className="group inline-flex h-10 items-center gap-2 rounded-full px-6 text-sm font-semibold transition-all hover:scale-[1.03] active:scale-[0.98]"
             style={{
               fontFamily: 'Inter, sans-serif',
               background: VERIFIED,
-              color: '#ffffff',
-              boxShadow: '0 4px 14px rgba(0,200,150,0.3)',
+              color: '#0a0a0a',
+              boxShadow: '0 4px 14px rgba(45,212,163,0.3)',
             }}
           >
             Start Writing
@@ -698,7 +700,7 @@ function FinalConstellation() {
           </Link>
 
           <Link
-            to="/feed"
+            to={isAuthenticated ? '/feed' : '/auth'}
             className="inline-flex h-10 items-center gap-2 rounded-full px-6 text-sm font-medium transition-all hover:scale-[1.03] active:scale-[0.98]"
             style={{
               fontFamily: 'Inter, sans-serif',

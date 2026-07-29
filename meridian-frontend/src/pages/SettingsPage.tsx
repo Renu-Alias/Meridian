@@ -45,6 +45,7 @@ const initialSections = [
 
 export function SettingsPage() {
   const showToast = useUiStore((s) => s.showToast);
+  const setAuthenticated = useUiStore((s) => s.setAuthenticated);
   const navigate = useNavigate();
   const [sections, setSections] = useState(initialSections);
   const [editingField, setEditingField] = useState<string | null>(null);
@@ -122,7 +123,7 @@ export function SettingsPage() {
         <button
           className="flex h-10 w-full items-center justify-center gap-2 rounded-full text-sm font-bold transition-all hover:brightness-110"
           style={{ background: '#2DD4A3', color: '#0a0a0a' }}
-          onClick={() => { showToast('Logged out', 'success'); navigate('/'); }}
+          onClick={() => { setAuthenticated(false); showToast('Logged out', 'success'); navigate('/'); }}
         >
           <LogOut size={16} /> Log out
         </button>

@@ -13,8 +13,12 @@ import { PostDetailPage } from './pages/PostDetailPage';
 import { ProfilePage, ProfileShell } from './pages/ProfilePage';
 import { AuthPage } from './pages/AuthPage';
 import { WalletPage } from './pages/WalletPage';
+import { SettingsPage } from './pages/SettingsPage';
+import { useUiStore } from './store/uiStore';
 
 function AppShell() {
+  const isAuthenticated = useUiStore((s) => s.isAuthenticated);
+  if (!isAuthenticated) return <Navigate to="/auth" replace />;
   return (
     <div className="relative z-10 min-h-screen text-surface" style={{ background: '#1C1B1B' }}>
       <div className="grid min-h-screen grid-cols-[260px_minmax(0,1fr)_320px]">

@@ -95,7 +95,7 @@ export function EditorPage() {
                   <span
                     key={tag}
                     className="inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-xs font-semibold"
-                    style={{ background: 'rgba(0,200,150,0.12)', color: colors.mint }}
+                    style={{ background: 'rgba(45,212,163,0.12)', color: colors.mint }}
                   >
                     {tag}
                     <button onClick={() => removeTag(tag)} className="hover:brightness-150" aria-label={`Remove ${tag}`}>
@@ -122,7 +122,7 @@ export function EditorPage() {
                 />
                 <span
                   className="inline-flex items-center rounded-md border px-3 py-1 font-mono text-sm font-bold"
-                  style={{ borderColor: 'rgba(0,200,150,0.3)', color: colors.mint, background: 'rgba(0,200,150,0.06)' }}
+                  style={{ borderColor: 'rgba(45,212,163,0.3)', color: colors.mint, background: 'rgba(45,212,163,0.06)' }}
                 >
                   {impactScore}%
                 </span>
@@ -164,7 +164,7 @@ export function EditorPage() {
             ))}
             <button
               className="grid h-8 w-8 place-items-center rounded"
-              style={{ background: 'rgba(0,200,150,0.15)', color: colors.mint }}
+              style={{ background: 'rgba(45,212,163,0.15)', color: colors.mint }}
               aria-label="Code Block"
             >
               <Code2 size={16} />
@@ -179,7 +179,7 @@ export function EditorPage() {
                 <Icon size={16} />
               </button>
             ))}
-            <span className="ml-auto text-xs" style={{ color: 'rgba(0,200,150,0.6)' }}>• Draft Saved</span>
+            <span className="ml-auto text-xs" style={{ color: 'rgba(45,212,163,0.6)' }}>• Draft Saved</span>
           </div>
 
           {/* Textarea */}
@@ -207,7 +207,7 @@ export function EditorPage() {
               </div>
               <span
                 className="rounded px-2 py-0.5 font-mono text-[11px]"
-                style={{ background: 'rgba(0,200,150,0.1)', color: colors.mint }}
+                style={{ background: 'rgba(45,212,163,0.1)', color: colors.mint }}
               >
                 Rust ▾
               </span>

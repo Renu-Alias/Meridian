@@ -42,7 +42,7 @@ export function DiscoverPage() {
       {/* Featured */}
       <article className="mt-5 rounded-xl p-5" style={{ background: colors.card, border: `1px solid ${colors.border}` }}>
         <div className="flex gap-4">
-          <div className="grid h-11 w-11 shrink-0 place-items-center rounded-full text-lg font-mono font-bold" style={{ background: 'rgba(0,200,150,0.1)', color: colors.verified }}>
+          <div className="grid h-11 w-11 shrink-0 place-items-center rounded-full text-lg font-mono font-bold" style={{ background: 'rgba(45,212,163,0.1)', color: colors.verified }}>
             λ
           </div>
           <div className="min-w-0 flex-1">
@@ -117,7 +117,7 @@ export function DiscoverPage() {
         <div className="mt-5 grid gap-4 md:grid-cols-3">
           {data.mentors.map(([name, role, tagA, tagB]) => (
             <article key={name} className="rounded-xl p-5 text-center transition-colors hover:bg-[#1a1d24]" style={{ background: colors.card, border: `1px solid ${colors.border}` }}>
-              <div className="mx-auto h-14 w-14 rounded-full" style={{ background: 'rgba(0,200,150,0.1)' }} />
+              <div className="mx-auto h-14 w-14 rounded-full" style={{ background: 'rgba(45,212,163,0.1)' }} />
               <h3 className="mt-3 font-bold" style={{ color: colors.primary }}>{name}</h3>
               <p className="text-sm" style={{ color: colors.secondary }}>{role}</p>
               <div className="mt-3 flex justify-center gap-2">
@@ -146,7 +146,7 @@ export function DiscoverPage() {
             <div className="mt-4 space-y-3">
               {data.mentors.map(([name, role, tagA, tagB]) => (
                 <div key={name} className="flex items-center gap-4 rounded-lg p-4" style={{ border: `1px solid ${colors.border}` }}>
-                  <div className="h-10 w-10 shrink-0 rounded-full" style={{ background: 'rgba(0,200,150,0.1)' }} />
+                  <div className="h-10 w-10 shrink-0 rounded-full" style={{ background: 'rgba(45,212,163,0.1)' }} />
                   <div className="min-w-0 flex-1">
                     <p className="font-bold" style={{ color: colors.primary }}>{name}</p>
                     <p className="text-sm" style={{ color: colors.secondary }}>{role}</p>

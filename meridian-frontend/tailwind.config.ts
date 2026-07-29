@@ -18,12 +18,12 @@ export default {
       },
       boxShadow: {
         panel: '0 18px 50px rgba(0, 0, 0, 0.08)',
-        glow: '0 0 32px rgba(0, 200, 150, 0.28)',
+        glow: '0 0 32px rgba(45, 212, 163, 0.28)',
       },
       keyframes: {
         pulseGlow: {
-          '0%, 100%': { boxShadow: '0 0 0 rgba(0, 200, 150, 0)' },
-          '50%': { boxShadow: '0 0 28px rgba(0, 200, 150, 0.35)' },
+          '0%, 100%': { boxShadow: '0 0 0 rgba(45, 212, 163, 0)' },
+          '50%': { boxShadow: '0 0 28px rgba(45, 212, 163, 0.35)' },
         },
         fadeUp: {
           '0%': { opacity: '0', transform: 'translateY(18px)' },

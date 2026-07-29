@@ -29,7 +29,7 @@ export function NotificationsPage() {
           <h2 className="mt-2 text-3xl font-black">Patch decisions, answers, forks, and payouts</h2>
         </div>
         <div className="relative">
-          <button className="inline-flex h-10 items-center gap-2 rounded-full border border-black px-4 font-bold" onClick={() => setFilterOpen(!filterOpen)}>
+          <button className="inline-flex h-10 items-center gap-2 rounded-full border border-[#2f3336] px-4 font-bold" onClick={() => setFilterOpen(!filterOpen)}>
             <Filter size={16} />
             {activeFilter}
           </button>
