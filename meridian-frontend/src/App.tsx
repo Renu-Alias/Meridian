@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { Navigate, Route, Routes } from 'react-router-dom';
 import { HeaderBar } from './components/HeaderBar';
 import { RightPanel } from './components/RightPanel';
@@ -45,6 +46,10 @@ function AppShell() {
 }
 
 export default function App() {
+  const restoreSession = useUiStore((s) => s.restoreSession);
+
+  useEffect(() => { restoreSession(); }, [restoreSession]);
+
   return (
     <>
       <SpaceBackground />
