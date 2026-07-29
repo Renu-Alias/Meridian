@@ -11,7 +11,7 @@ import { LandingPage } from './pages/LandingPage';
 import { NotificationsPage } from './pages/NotificationsPage';
 import { PostDetailPage } from './pages/PostDetailPage';
 import { ProfilePage, ProfileShell } from './pages/ProfilePage';
-import { SettingsPage } from './pages/SettingsPage';
+import { AuthPage } from './pages/AuthPage';
 import { WalletPage } from './pages/WalletPage';
 
 function AppShell() {
@@ -46,6 +46,7 @@ export default function App() {
       <SpaceBackground />
       <Routes>
         <Route path="/" element={<LandingPage />} />
+        <Route path="/auth" element={<AuthPage />} />
         <Route path="/editor/new" element={<EditorPage />} />
         <Route path="/*" element={<AppShell />} />
       </Routes>

@@ -158,7 +158,7 @@ export function LandingPage() {
               Discover
             </Link>
             <Link
-              to="/discover"
+              to="/auth"
               className="inline-flex h-8 items-center gap-1 rounded-full px-4 text-base font-medium transition-all hover:bg-black/10"
               style={{
                 fontFamily: 'Inter, sans-serif',
