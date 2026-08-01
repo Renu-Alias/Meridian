@@ -21,10 +21,10 @@ function AppShell() {
   const isAuthenticated = useUiStore((s) => s.isAuthenticated);
   if (!isAuthenticated) return <Navigate to="/auth" replace />;
   return (
-    <div className="relative z-10 min-h-screen text-surface" style={{ background: '#1C1B1B' }}>
-      <div className="grid min-h-screen grid-cols-[260px_minmax(0,1fr)_320px]">
+    <div className="relative z-10 h-screen overflow-hidden text-surface" style={{ background: '#1C1B1B' }}>
+      <div className="flex h-full">
         <Sidebar />
-        <main className="min-w-0 flex-1">
+        <main className="h-full min-w-0 flex-1 overflow-y-auto">
           <HeaderBar />
           <Routes>
             <Route path="/feed" element={<FeedPage />} />

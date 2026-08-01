@@ -17,7 +17,7 @@ export function RightPanel() {
   const activeStack = useUiStore((state) => state.activeStack);
 
   return (
-    <aside className="hidden w-[330px] shrink-0 border-l p-5 xl:block" style={{ borderColor: colors.border, background: 'transparent' }}>
+    <aside className="hidden h-full w-[330px] shrink-0 overflow-y-auto border-l p-5 xl:block" style={{ borderColor: colors.border, background: 'transparent' }}>
       {/* Your Stack */}
       <section className="rounded-xl p-5" style={{ background: colors.card, border: `1px solid ${colors.border}` }}>
         <div className="flex items-center justify-between">
