@@ -24,21 +24,23 @@ function AppShell() {
     <div className="relative z-10 h-screen overflow-hidden text-surface" style={{ background: '#1C1B1B' }}>
       <div className="flex h-full">
         <Sidebar />
-        <main className="h-full min-w-0 flex-1 overflow-y-auto">
-          <HeaderBar />
-          <Routes>
-            <Route path="/feed" element={<FeedPage />} />
-            <Route path="/post/:id" element={<PostDetailPage />} />
-            <Route path="/discover" element={<DiscoverPage />} />
-            <Route path="/notifications" element={<NotificationsPage />} />
-            <Route path="/wallet" element={<WalletPage />} />
-            <Route path="/profile/:username/*" element={<ProfileShell />} />
-            <Route path="/mentored" element={<DiscoverPage />} />
-            <Route path="/settings" element={<SettingsPage />} />
-            <Route path="*" element={<Navigate to="/discover" replace />} />
-          </Routes>
-        </main>
-        <RightPanel />
+        <div className="flex h-full min-w-0 flex-1 overflow-y-auto">
+          <main className="min-w-0 flex-1">
+            <HeaderBar />
+            <Routes>
+              <Route path="/feed" element={<FeedPage />} />
+              <Route path="/post/:id" element={<PostDetailPage />} />
+              <Route path="/discover" element={<DiscoverPage />} />
+              <Route path="/notifications" element={<NotificationsPage />} />
+              <Route path="/wallet" element={<WalletPage />} />
+              <Route path="/profile/:username/*" element={<ProfileShell />} />
+              <Route path="/mentored" element={<DiscoverPage />} />
+              <Route path="/settings" element={<SettingsPage />} />
+              <Route path="*" element={<Navigate to="/discover" replace />} />
+            </Routes>
+          </main>
+          <RightPanel />
+        </div>
         <Toast />
       </div>
     </div>
