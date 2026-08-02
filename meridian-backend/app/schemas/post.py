@@ -58,6 +58,7 @@ class PostRead(BaseModel):
     fork_of_id: Optional[str] = None
     is_mentored: bool
     impact_score: int
+    flagged: bool = False
     citations: list[CitationRead] = []
     created_at: datetime
     updated_at: datetime

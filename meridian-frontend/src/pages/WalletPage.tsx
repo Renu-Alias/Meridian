@@ -1,17 +1,20 @@
 import { useState } from 'react';
 import { ArrowUpRight, CreditCard, WalletCards, X } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useUiStore } from '../store/uiStore';
-import { fetchWallet } from '../services/mockApi';
+import { api } from '../services/api';
+import { toWallet } from '../services/adapters';
 import { currency } from '../utils/format';
 
 const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
 export function WalletPage() {
-  const { data } = useQuery({ queryKey: ['wallet'], queryFn: fetchWallet });
+  const queryClient = useQueryClient();
+  const { data } = useQuery({ queryKey: ['wallet'], queryFn: () => api.getWallet().then(toWallet) });
   const showToast = useUiStore((s) => s.showToast);
   const [showPayout, setShowPayout] = useState(false);
+  const [paying, setPaying] = useState(false);
   if (!data) return <div className="p-8">Loading wallet...</div>;
   const max = Math.max(...data.trend);
   const stats: Array<[string, number, LucideIcon]> = [
@@ -19,6 +22,20 @@ export function WalletPage() {
     ['Pending This Cycle', data.pending, ArrowUpRight],
     ['Lifetime Paid', data.paid, CreditCard],
   ];
+
+  const confirmPayout = async () => {
+    setPaying(true);
+    try {
+      const res = await api.requestPayout(data.balance);
+      queryClient.invalidateQueries({ queryKey: ['wallet'] });
+      showToast(`Payout of ${currency(res.amount ?? data.balance)} requested!`, 'success');
+    } catch (err) {
+      showToast('Payout failed', 'info');
+    } finally {
+      setPaying(false);
+      setShowPayout(false);
+    }
+  };
 
   return (
     <div className="mx-auto max-w-5xl p-6 lg:p-8">
@@ -106,7 +123,7 @@ export function WalletPage() {
             <p className="mt-3 text-sm" style={{ color: '#71767b' }}>Request a payout of <b style={{ color: '#e7e9ea' }}>{currency(data.balance)}</b> to your connected wallet.</p>
             <div className="mt-5 flex gap-3">
               <button onClick={() => setShowPayout(false)} className="flex-1 h-10 rounded-full text-sm font-bold" style={{ border: '1px solid #2f3336', color: '#71767b' }}>Cancel</button>
-              <button onClick={() => { setShowPayout(false); showToast(`Payout of ${currency(data.balance)} requested!`, 'success'); }} className="flex-1 h-10 rounded-full text-sm font-bold text-black" style={{ background: '#2DD4A3' }}>Confirm Payout</button>
+              <button onClick={confirmPayout} disabled={paying} className="flex-1 h-10 rounded-full text-sm font-bold text-black disabled:opacity-50" style={{ background: '#2DD4A3' }}>{paying ? 'Processing...' : 'Confirm Payout'}</button>
             </div>
           </div>
         </>

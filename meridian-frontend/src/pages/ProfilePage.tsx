@@ -1,11 +1,17 @@
-import { useState } from 'react';
+import { useParams } from 'react-router-dom';
 import { Github, Globe, Linkedin, ShieldCheck } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { ContributionGraph } from '../components/ContributionGraph';
-import { fetchProfile } from '../services/mockApi';
+import { useUiStore } from '../store/uiStore';
+import { api } from '../services/api';
+import { toProfile } from '../services/adapters';
 
-function ProfileContent() {
-  const { data: profile } = useQuery({ queryKey: ['profile'], queryFn: fetchProfile });
+function ProfileContent({ username }: { username: string }) {
+  const { data: profile } = useQuery({
+    queryKey: ['profile', username],
+    queryFn: () => api.getProfile(username).then(toProfile),
+    enabled: !!username,
+  });
   if (!profile) return <div className="p-8">Loading profile...</div>;
 
   return (
@@ -13,7 +19,7 @@ function ProfileContent() {
       <section className="rounded-xl border border-[#2f3336] bg-[#151515] p-5">
         <div className="flex flex-col gap-6 sm:flex-row">
           <img
-            src="https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&w=200&q=80"
+            src={profile.avatar}
             alt=""
             className="h-24 w-24 rounded-full object-cover grayscale"
           />
@@ -102,14 +108,17 @@ function ProfileContent() {
 }
 
 export function ProfilePage() {
-  return <ProfileContent />;
+  const me = useUiStore((s) => s.me);
+  return <ProfileContent username={me?.username ?? 'alex'} />;
 }
 
 export function ProfileShell() {
+  const { username } = useParams<{ username: string }>();
+  const me = useUiStore((s) => s.me);
   return (
     <div className="min-h-screen text-[#EAECEC]" style={{ background: '#0a0a0a' }}>
       <div className="mx-auto max-w-4xl px-6 py-8">
-        <ProfileContent />
+        <ProfileContent username={username ?? me?.username ?? 'alex'} />
       </div>
     </div>
   );

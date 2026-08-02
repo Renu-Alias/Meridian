@@ -58,6 +58,7 @@ def _post_to_read(post: Post, db: Session) -> PostRead:
     counts = {}
     for r in reactions:
         counts[r.reaction_type] = counts.get(r.reaction_type, 0) + 1
+    flagged = db.query(ClaimFlag).filter(ClaimFlag.post_id == post.id).count() > 0
     return PostRead(
         id=post.id,
         title=post.title,
@@ -70,6 +71,7 @@ def _post_to_read(post: Post, db: Session) -> PostRead:
         fork_of_id=post.fork_of_id,
         is_mentored=post.is_mentored or False,
         impact_score=post.impact_score or 0,
+        flagged=flagged,
         citations=[CitationRead(id=c.id, anchor_text=c.anchor_text, url=c.url, citation_type=c.citation_type, position_start=c.position_start, position_end=c.position_end) for c in citations],
         created_at=post.created_at,
         updated_at=post.updated_at,

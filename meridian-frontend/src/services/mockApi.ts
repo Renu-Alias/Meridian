@@ -11,6 +11,7 @@ export type Post = {
   patched: string;
   impactScore: number;
   excerpt: string;
+  body?: string;
   tags: string[];
   comments: number;
   forks: number;
@@ -27,6 +28,8 @@ export type Notification = {
   detail: string;
   time: string;
   accent: 'verified' | 'flagged' | 'highlight' | 'muted';
+  is_read?: boolean;
+  created_at?: string;
 };
 
 const wait = (ms = 220) => new Promise((resolve) => window.setTimeout(resolve, ms));

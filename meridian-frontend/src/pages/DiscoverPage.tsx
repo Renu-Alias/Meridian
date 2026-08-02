@@ -4,7 +4,9 @@ import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { Badge } from '../components/Badge';
 import { useUiStore } from '../store/uiStore';
-import { fetchDiscover } from '../services/mockApi';
+import { api } from '../services/api';
+import { toDiscover } from '../services/adapters';
+import { compactNumber } from '../utils/format';
 
 const colors = {
   card: '#14171c',
@@ -16,7 +18,7 @@ const colors = {
 };
 
 export function DiscoverPage() {
-  const { data } = useQuery({ queryKey: ['discover'], queryFn: fetchDiscover });
+  const { data } = useQuery({ queryKey: ['discover'], queryFn: () => api.getDiscover().then(toDiscover) });
   const navigate = useNavigate();
   const showToast = useUiStore((s) => s.showToast);
   const [showExperts, setShowExperts] = useState(false);
@@ -40,6 +42,7 @@ export function DiscoverPage() {
       </div>
 
       {/* Featured */}
+      {data.featured && (
       <article className="mt-5 rounded-xl p-5" style={{ background: colors.card, border: `1px solid ${colors.border}` }}>
         <div className="flex gap-4">
           <div className="grid h-11 w-11 shrink-0 place-items-center rounded-full text-lg font-mono font-bold" style={{ background: 'rgba(45,212,163,0.1)', color: colors.verified }}>
@@ -55,12 +58,13 @@ export function DiscoverPage() {
             </div>
             <p className="mt-2 max-w-3xl text-[15px] leading-6" style={{ color: colors.primary }}>{data.featured.excerpt}</p>
             <div className="mt-4 flex gap-6 text-sm" style={{ color: colors.muted, borderTop: `1px solid ${colors.border}`, paddingTop: '14px' }}>
-              <span className="inline-flex items-center gap-1.5"><Repeat2 size={16} style={{ color: colors.verified }} />1.2k Impact Ripples</span>
-              <span className="inline-flex items-center gap-1.5"><MessageSquare size={16} />84 Comments</span>
+              <span className="inline-flex items-center gap-1.5"><Repeat2 size={16} style={{ color: colors.verified }} />{compactNumber(data.featured.impactScore)} Impact Ripples</span>
+              <span className="inline-flex items-center gap-1.5"><MessageSquare size={16} />{data.featured.comments} Comments</span>
             </div>
           </div>
         </div>
       </article>
+      )}
 
       {/* Cards grid */}
       <div className="mt-4 grid gap-4 md:grid-cols-2">
@@ -89,19 +93,19 @@ export function DiscoverPage() {
           <Flame size={22} style={{ color: colors.verified }} /> Trending Patches
         </h2>
         <div className="mt-4 space-y-2">
-          {data.trending.map(([title, growth], index) => (
-            <article key={title} className="flex items-center gap-4 rounded-xl p-4 transition-colors hover:bg-[#1a1d24]" style={{ background: colors.card, border: `1px solid ${colors.border}` }}>
+          {data.trending.map((item, index) => (
+            <article key={item.title} className="flex items-center gap-4 rounded-xl p-4 transition-colors hover:bg-[#1a1d24]" style={{ background: colors.card, border: `1px solid ${colors.border}` }}>
               <span className="text-2xl font-bold" style={{ color: index === 0 ? colors.verified : colors.muted }}>
                 {String(index + 1).padStart(2, '0')}
               </span>
               <div className="min-w-0 flex-1">
-                <h3 className="truncate text-[15px] font-bold" style={{ color: colors.primary }}>{title}</h3>
+                <h3 className="truncate text-[15px] font-bold" style={{ color: colors.primary }}>{item.title}</h3>
                 <p className="text-sm" style={{ color: colors.secondary }}>
-                  Patched by @security_lead · {index ? '8.4k' : '12k'} forks in 2 hours
+                  Patched by @{item.author} · {item.forks} forks
                 </p>
               </div>
               <span className="flex items-center gap-1 font-mono text-sm font-bold" style={{ color: colors.verified }}>
-                {growth}<TrendingUp size={16} />
+                {item.growth}<TrendingUp size={16} />
               </span>
             </article>
           ))}

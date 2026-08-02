@@ -3,6 +3,7 @@ import { Bold, Code2, ImageIcon, Italic, GitBranch, Link as LinkIcon, List, List
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useUiStore } from '../store/uiStore';
 import { BrandMark } from '../components/Logo';
+import { api } from '../services/api';
 
 const colors = {
   bg: '#1C1B1B',
@@ -31,6 +32,31 @@ export function EditorPage() {
     setTags((prev) => prev.filter((t) => t !== tag));
   };
 
+  const [publishing, setPublishing] = useState(false);
+
+  const publish = async () => {
+    setPublishing(true);
+    try {
+      let created;
+      if (forkId) {
+        created = await api.forkPost(forkId);
+      } else {
+        created = await api.createPost({
+          title: title.trim() || 'Untitled patch',
+          body: body.trim(),
+          excerpt: body.trim().slice(0, 200),
+          tags,
+        });
+      }
+      await api.publishPost(created.id);
+      navigate('/feed');
+      showToast(forkId ? 'Fork published!' : 'Patch published!', 'success');
+    } catch (err) {
+      showToast('Failed to publish', 'info');
+      setPublishing(false);
+    }
+  };
+
   return (
     <main className="relative z-10 min-h-screen" style={{ background: colors.bg }}>
       <nav className="border-b px-6 py-3" style={{ borderColor: colors.border, background: 'rgba(28,27,27,0.95)' }}>
@@ -56,11 +82,12 @@ export function EditorPage() {
               Cancel
             </button>
             <button
-              className="inline-flex h-9 items-center rounded-md px-5 text-sm font-bold transition-all hover:brightness-110"
+              disabled={publishing}
+              className="inline-flex h-9 items-center rounded-md px-5 text-sm font-bold transition-all hover:brightness-110 disabled:opacity-50"
               style={{ background: colors.mint, color: '#000' }}
-              onClick={() => { navigate('/feed'); showToast(forkId ? 'Fork published!' : 'Patch published!', 'success'); }}
+              onClick={publish}
             >
-              {forkId ? 'Publish Fork' : 'Publish Patch'}
+              {publishing ? 'Publishing...' : forkId ? 'Publish Fork' : 'Publish Patch'}
             </button>
           </div>
         </header>

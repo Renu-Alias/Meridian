@@ -1,10 +1,11 @@
 import { useState } from 'react';
 import { BarChart3, Bookmark, Code2, Heart, Image, MessageCircle, MoreHorizontal, Paperclip, Repeat2, Share2, ThumbsDown, ThumbsUp, UserMinus, Video } from 'lucide-react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { Badge } from '../components/Badge';
 import { useUiStore } from '../store/uiStore';
-import { fetchFeed } from '../services/mockApi';
+import { api } from '../services/api';
+import { toPost } from '../services/adapters';
 import { compactNumber } from '../utils/format';
 
 const colors = {
@@ -18,7 +19,11 @@ const colors = {
 };
 
 export function FeedPage() {
-  const { data: posts = [] } = useQuery({ queryKey: ['feed'], queryFn: fetchFeed });
+  const queryClient = useQueryClient();
+  const { data: posts = [] } = useQuery({
+    queryKey: ['feed'],
+    queryFn: async () => (await api.getFeed({ limit: 50 })).items.map(toPost),
+  });
   const navigate = useNavigate();
   const showToast = useUiStore((s) => s.showToast);
   const [postText, setPostText] = useState('');
@@ -28,19 +33,54 @@ export function FeedPage() {
   const [replyText, setReplyText] = useState('');
   const [openMenu, setOpenMenu] = useState<string | null>(null);
 
-  const toggleLiked = (id: string) => {
+  const publishPost = async () => {
+    const text = postText.trim();
+    if (!text) return;
+    try {
+      const created = await api.createPost({
+        title: text.split('\n')[0].slice(0, 80),
+        body: text,
+        excerpt: text.slice(0, 200),
+      });
+      await api.publishPost(created.id);
+      setPostText('');
+      queryClient.invalidateQueries({ queryKey: ['feed'] });
+      showToast('Post published!', 'success');
+    } catch (err) {
+      showToast('Failed to publish post', 'info');
+    }
+  };
+
+  const toggleLiked = (postId: string) => {
     setLiked((prev) => {
       const next = new Set(prev);
-      if (next.has(id)) next.delete(id); else next.add(id);
+      if (next.has(postId)) next.delete(postId); else next.add(postId);
       return next;
     });
+    api.addReaction(postId, 'upvote').catch(() => {});
   };
+
   const toggleSaved = (id: string) => {
     setSaved((prev) => {
       const next = new Set(prev);
       if (next.has(id)) next.delete(id); else next.add(id);
       return next;
     });
+    api.addReaction(id, 'bookmark').catch(() => {});
+  };
+
+  const submitReply = async (postId: string) => {
+    const text = replyText.trim();
+    if (!text) return;
+    try {
+      await api.askQuestion(postId, text);
+      queryClient.invalidateQueries({ queryKey: ['feed'] });
+      showToast('Reply posted!', 'success');
+    } catch (err) {
+      showToast('Failed to post reply', 'info');
+    }
+    setReplyText('');
+    setReplyingTo(null);
   };
 
   return (
@@ -80,7 +120,7 @@ export function FeedPage() {
           <button
             className="h-9 rounded-full px-5 text-[15px] font-bold transition-all hover:brightness-110"
             style={{ background: colors.verified, color: '#000' }}
-            onClick={() => { if (postText.trim()) { showToast('Post published!', 'success'); setPostText(''); } }}
+            onClick={publishPost}
           >
             Post
           </button>
@@ -225,7 +265,7 @@ export function FeedPage() {
                   <button
                     className="h-fit rounded-full px-4 py-1.5 text-xs font-bold transition-all hover:brightness-110"
                     style={{ background: colors.verified, color: '#000' }}
-                    onClick={() => { if (replyText.trim()) { showToast('Reply posted!', 'success'); } setReplyText(''); setReplyingTo(null); }}
+                    onClick={() => submitReply(post.id)}
                   >
                     Reply
                   </button>

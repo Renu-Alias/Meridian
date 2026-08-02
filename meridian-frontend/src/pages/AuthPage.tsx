@@ -19,6 +19,7 @@ export function AuthPage() {
   const showToast = useUiStore((s) => s.showToast);
   const setAuthenticated = useUiStore((s) => s.setAuthenticated);
   const setToken = useUiStore((s) => s.setToken);
+  const setMe = useUiStore((s) => s.setMe);
   const [tab, setTab] = useState<'signin' | 'signup'>('signin');
   const [showPassword, setShowPassword] = useState(false);
   const [forgotMode, setForgotMode] = useState(false);
@@ -27,13 +28,23 @@ export function AuthPage() {
   const [name, setName] = useState('');
   const [loading, setLoading] = useState(false);
 
+  const finalize = async () => {
+    try {
+      const me = await api.getMe();
+      setMe({ username: me.username, display_name: me.display_name, avatar_url: me.avatar_url });
+    } catch {
+      // non-fatal — token still valid
+    }
+    navigate('/feed');
+  };
+
   const signIn = async () => {
     setLoading(true);
     try {
       const res = await api.login(email, password);
       setToken(res.access_token);
       setAuthenticated(true);
-      navigate('/feed');
+      await finalize();
     } catch (err) {
       showToast(err instanceof ApiError ? err.message : 'Login failed', 'info');
     } finally {
@@ -52,7 +63,7 @@ export function AuthPage() {
         const res = await api.register(email, username, name || username, password);
         setToken(res.access_token);
         setAuthenticated(true);
-        navigate('/feed');
+        await finalize();
       } catch (err) {
         showToast(err instanceof ApiError ? err.message : 'Registration failed', 'info');
       } finally {

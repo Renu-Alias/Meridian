@@ -49,7 +49,14 @@ def get_discover(
         "featured": _post_to_read(all_posts[0], db) if all_posts else None,
         "trending": [_post_to_read(p, db) for p in trending],
         "mentors": [
-            {"id": m.id, "display_name": m.display_name, "username": m.username, "bio": m.bio, "avatar_url": m.avatar_url}
+            {
+                "id": m.id,
+                "display_name": m.display_name,
+                "username": m.username,
+                "bio": m.bio,
+                "avatar_url": m.avatar_url,
+                "stack": [s.technology for s in db.query(StackProfile).filter(StackProfile.user_id == m.id).all()],
+            }
             for m in mentors
         ],
     }

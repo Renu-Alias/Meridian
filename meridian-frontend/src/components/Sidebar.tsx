@@ -3,16 +3,6 @@ import { NavLink } from 'react-router-dom';
 import { BrandMark } from './Logo';
 import { useUiStore } from '../store/uiStore';
 
-const links = [
-  { to: '/feed', label: 'Feed', icon: Home },
-  { to: '/discover', label: 'Discover', icon: Compass },
-  { to: '/notifications', label: 'Notifications', icon: Bell },
-  { to: '/wallet', label: 'Wallet', icon: WalletCards },
-  { to: '/profile/alex', label: 'Profile', icon: User },
-  { to: '/editor/new', label: 'Write', icon: Edit3 },
-  { to: '/settings', label: 'Settings', icon: Settings },
-];
-
 const colors = {
   border: '#2f3336',
   primary: '#e7e9ea',
@@ -25,6 +15,17 @@ const colors = {
 export function Sidebar() {
   const sidebarOpen = useUiStore((state) => state.sidebarOpen);
   const toggleSidebar = useUiStore((state) => state.toggleSidebar);
+  const me = useUiStore((state) => state.me);
+
+  const links = [
+    { to: '/feed', label: 'Feed', icon: Home },
+    { to: '/discover', label: 'Discover', icon: Compass },
+    { to: '/notifications', label: 'Notifications', icon: Bell },
+    { to: '/wallet', label: 'Wallet', icon: WalletCards },
+    { to: `/profile/${me?.username ?? 'alex'}`, label: 'Profile', icon: User },
+    { to: '/editor/new', label: 'Write', icon: Edit3 },
+    { to: '/settings', label: 'Settings', icon: Settings },
+  ];
 
   return (
     <>
@@ -75,13 +76,13 @@ export function Sidebar() {
         <div className="mt-auto border-t pt-5" style={{ borderColor: colors.border }}>
           <div className="flex items-center gap-3 px-2">
             <img
-              src="https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&w=120&q=80"
-              alt="Alex Rivera"
+              src={me?.avatar_url || 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&w=120&q=80'}
+              alt={me?.display_name || 'User'}
               className="h-9 w-9 rounded-full object-cover grayscale"
             />
             <div>
-              <p className="text-sm font-semibold" style={{ color: colors.primary }}>Alex Rivera</p>
-              <p className="text-xs" style={{ color: colors.muted }}>@arivera.dev</p>
+              <p className="text-sm font-semibold" style={{ color: colors.primary }}>{me?.display_name || 'Alex Rivera'}</p>
+              <p className="text-xs" style={{ color: colors.muted }}>@{me?.username || 'arivera.dev'}</p>
             </div>
           </div>
         </div>

@@ -1,11 +1,12 @@
 import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, BarChart3, Bookmark, Heart, MessageCircle, MoreHorizontal, Repeat2, Send, Share2, ThumbsDown, ThumbsUp, UserMinus } from 'lucide-react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Badge } from '../components/Badge';
 import { useUiStore } from '../store/uiStore';
-import { fetchPost } from '../services/mockApi';
-import type { Post } from '../services/mockApi';
+import { api } from '../services/api';
+import { toPost, toComments } from '../services/adapters';
+import type { Comment } from '../services/adapters';
 
 const colors = {
   primary: '#e7e9ea',
@@ -15,30 +16,6 @@ const colors = {
   card: '#151515',
   cardHover: '#1a1d24',
   verified: '#2DD4A3',
-};
-
-type Comment = {
-  id: string;
-  author: string;
-  handle: string;
-  avatar: string;
-  body: string;
-  time: string;
-  likes: number;
-};
-
-const mockComments: Record<string, Comment[]> = {
-  'io-uring-loop': [
-    { id: 'c1', author: 'James K.', handle: '@kernel_notes', avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=120&q=80', body: 'Great work on the io_uring integration. Did you benchmark against epoll with the same concurrency profile?', time: '45m ago', likes: 23 },
-    { id: 'c2', author: 'Priya M.', handle: '@ops_lab', avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=120&q=80', body: 'We saw similar latency improvements in our production deployment. The completion polling strategy is key.', time: '22m ago', likes: 16 },
-  ],
-  'meridian-cli': [
-    { id: 'c3', author: 'Alex R.', handle: '@arivera.dev', avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=120&q=80', body: 'The static analysis integration looks promising. How does it handle cross-repo dependencies?', time: '1h ago', likes: 8 },
-  ],
-  'raft-go': [
-    { id: 'c4', author: 'Sarah C.', handle: '@schen_dev', avatar: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&w=160&q=80', body: 'Brilliant simplification of the Raft protocol. The leader election section is exceptionally clear.', time: '30m ago', likes: 31 },
-    { id: 'c5', author: 'Marcus T.', handle: '@mthorne_ops', avatar: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&w=160&q=80', body: 'Have you considered adding a section on log compaction? That would make this a complete reference.', time: '15m ago', likes: 12 },
-  ],
 };
 
 function PostDetailSkeleton() {
@@ -65,6 +42,7 @@ function PostDetailSkeleton() {
 export function PostDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const showToast = useUiStore((s) => s.showToast);
   const [liked, setLiked] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -73,9 +51,29 @@ export function PostDetailPage() {
 
   const { data: post, isLoading, error } = useQuery({
     queryKey: ['post', id],
-    queryFn: () => fetchPost(id!),
+    queryFn: () => api.getPost(id!).then(toPost),
     enabled: !!id,
   });
+
+  const { data: comments = [] } = useQuery({
+    queryKey: ['qa', id],
+    queryFn: () => api.getQA(id!).then(toComments),
+    enabled: !!id,
+  });
+
+  const submitComment = async () => {
+    const text = commentText.trim();
+    if (!text) return;
+    try {
+      await api.askQuestion(id!, text);
+      setCommentText('');
+      queryClient.invalidateQueries({ queryKey: ['qa', id] });
+      queryClient.invalidateQueries({ queryKey: ['post', id] });
+      showToast('Comment posted!', 'success');
+    } catch (err) {
+      showToast('Failed to post comment', 'info');
+    }
+  };
 
   if (isLoading) return <PostDetailSkeleton />;
   if (error || !post) {
@@ -88,8 +86,6 @@ export function PostDetailPage() {
       </div>
     );
   }
-
-  const comments = mockComments[post.id] || [];
 
   return (
     <article>
@@ -116,8 +112,12 @@ export function PostDetailPage() {
                 </div>
                 <div className="flex items-center gap-1.5 text-sm" style={{ color: colors.muted }}>
                   <span>{post.handle}</span>
-                  <span>·</span>
-                  <span>{post.role}</span>
+                  {post.role && (
+                    <>
+                      <span>·</span>
+                      <span>{post.role}</span>
+                    </>
+                  )}
                 </div>
               </div>
             </div>
@@ -169,8 +169,8 @@ export function PostDetailPage() {
         </div>
 
         {/* Full body */}
-        <p className="mt-5 text-[17px] leading-7" style={{ color: colors.primary }}>
-          {post.excerpt}
+        <p className="mt-5 whitespace-pre-line text-[17px] leading-7" style={{ color: colors.primary }}>
+          {post.body || post.excerpt}
         </p>
 
         {/* Code block */}
@@ -223,7 +223,7 @@ export function PostDetailPage() {
         {/* Actions — primary vs secondary hierarchy */}
         <div className="mt-5 flex max-w-[600px] items-center gap-1 border-y py-3" style={{ borderColor: colors.border, color: colors.muted }}>
           {/* Primary */}
-          <button className="flex items-center gap-2 rounded-full px-3 py-1.5 text-sm font-semibold transition-colors hover:bg-rose-500/10 hover:text-rose-500" onClick={() => { setLiked(!liked); }}>
+          <button className="flex items-center gap-2 rounded-full px-3 py-1.5 text-sm font-semibold transition-colors hover:bg-rose-500/10 hover:text-rose-500" onClick={() => { setLiked(!liked); api.addReaction(post.id, 'upvote').catch(() => {}); }}>
             <Heart size={20} fill={liked ? '#f43f5e' : 'none'} stroke={liked ? '#f43f5e' : 'currentColor'} />
             <span>{post.likes + (liked ? 1 : 0)}</span>
           </button>
@@ -269,7 +269,7 @@ export function PostDetailPage() {
               className="grid h-8 w-8 place-items-center rounded-full transition-colors"
               style={{ background: commentText.trim() ? colors.verified : 'transparent', color: commentText.trim() ? '#000' : colors.muted }}
               disabled={!commentText.trim()}
-              onClick={() => { showToast('Comment posted!', 'success'); setCommentText(''); }}
+              onClick={submitComment}
             >
               <Send size={16} />
             </button>
