@@ -7,16 +7,11 @@ const LEVEL_COLORS      = ['#161b22', '#0d3d33', '#0f6b52', '#17a878', '#2dd4a3'
 const LEVEL_COLORS_MINI = ['#161b22', '#0b3530', '#0d5e49', '#14956b', '#27b890'];
 
 const MONTH_NAMES = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-// Only label Mon, Wed, Fri (indices 0, 2, 4 in Mon-first week)
-const DAY_LABELS: [number, string][] = [[0,'Mon'],[2,'Wed'],[4,'Fri']];
 
 // Cell geometry
 const CELL   = 11;   // px — square cell
 const GAP    =  2;   // px — gap between cells
 const STRIDE = CELL + GAP;  // 13px per cell
-
-// Left gutter for day-of-week labels (full variant)
-const GUTTER = 28;  // px
 
 // ─── helpers ──────────────────────────────────────────────────────────────────
 
@@ -81,9 +76,9 @@ export function ContributionGraph({ variant = 'full', weeks: weekProp, year }: P
       cells.push({ date, level, tooltip: `${formatDate(date)} — ${level} contribution${level !== 1 ? 's' : ''}` });
     }
 
-    // Month label positions: place label at the FIRST full week of each month.
-    // "full week" = week where Monday (row 0) belongs to that month.
-    // This mirrors exactly how GitHub positions month labels.
+    // Month label positions — place at the first week whose Monday is in that month.
+    // Skip December if it appears at the very start (prior-year spillover weeks).
+    // Always emit January unconditionally so it's never suppressed.
     const monthLabels: Array<{ label: string; x: number }> = [];
     let lastMonth = -1;
     for (let w = 0; w < totalWeeks; w++) {
@@ -91,11 +86,16 @@ export function ContributionGraph({ variant = 'full', weeks: weekProp, year }: P
       if (!mondayCell) continue;
       const m = mondayCell.date.getMonth();
       if (m !== lastMonth) {
-        // Only emit the label if there's enough room to not overlap the previous one
         const x = w * STRIDE;
+        // Skip December spillover at the very beginning of the grid
+        if (m === 11 && monthLabels.length === 0) {
+          lastMonth = m;
+          continue;
+        }
         const prev = monthLabels[monthLabels.length - 1];
-        // Require at least 2 full weeks (26px) gap to the previous label
-        if (!prev || x - prev.x >= STRIDE * 2) {
+        // Jan always gets through; other months need 2-week clearance
+        const clearance = m === 0 || !prev || x - prev.x >= STRIDE * 2;
+        if (clearance) {
           monthLabels.push({ label: MONTH_NAMES[m], x });
         }
         lastMonth = m;
@@ -107,14 +107,12 @@ export function ContributionGraph({ variant = 'full', weeks: weekProp, year }: P
   }, [selYear, totalWeeks]);
 
   // ── dimensions ──────────────────────────────────────────────────────────
-  const gridW  = totalWeeks * STRIDE - GAP;         // exact pixel width of cell grid
-  const gridH  = 7 * STRIDE - GAP;                  // exact pixel height of cell grid
-  const svgW   = isMini ? gridW : GUTTER + gridW;   // total SVG canvas width
-  const svgH   = gridH;
+  const gridW  = totalWeeks * STRIDE - GAP;   // exact pixel width of cell grid
+  const svgW   = gridW;                        // no gutter — labels removed
 
   // Tooltip positioning — keep inside bounds
   function tooltipX(col: number): number {
-    const cx = (isMini ? 0 : GUTTER) + col * STRIDE + CELL / 2;
+    const cx = col * STRIDE + CELL / 2;
     return Math.max(50, Math.min(svgW - 50, cx));
   }
 
@@ -158,14 +156,14 @@ export function ContributionGraph({ variant = 'full', weeks: weekProp, year }: P
       <div className="overflow-x-auto thin-scrollbar">
         <svg
           width={svgW}
-          height={svgH + (isMini ? 0 : 20)}   // +20px top margin for month labels
+          height={7 * STRIDE - GAP + (isMini ? 0 : 20)}
           style={{ display: 'block' }}
         >
           {/* Month labels (full only) */}
           {!isMini && monthLabels.map(({ label, x }) => (
             <text
               key={label + x}
-              x={GUTTER + x}
+              x={x}
               y={12}
               fontSize={11}
               fill="#536471"
@@ -175,27 +173,12 @@ export function ContributionGraph({ variant = 'full', weeks: weekProp, year }: P
             </text>
           ))}
 
-          {/* Day-of-week labels (full only) */}
-          {!isMini && DAY_LABELS.map(([row, name]) => (
-            <text
-              key={name}
-              x={GUTTER - 4}
-              y={20 + row * STRIDE + CELL * 0.75}
-              fontSize={11}
-              fill="#536471"
-              textAnchor="end"
-              fontFamily="inherit"
-            >
-              {name}
-            </text>
-          ))}
-
           {/* Cell grid */}
           {cells.map((cell, idx) => {
             const col = Math.floor(idx / 7);
             const row = idx % 7;
-            const cx  = (isMini ? 0 : GUTTER) + col * STRIDE;
-            const cy  = (isMini ? 0 : 20)     + row * STRIDE;
+            const cx  = col * STRIDE;
+            const cy  = (isMini ? 0 : 20) + row * STRIDE;
             return (
               <rect
                 key={idx}
