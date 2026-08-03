@@ -27,7 +27,7 @@ export function RightPanel() {
           </button>
         </div>
         <div className="mt-4 flex flex-wrap gap-2">
-          {activeStack.slice(0, 3).map((tag) => (
+          {activeStack.map((tag) => (
             <span key={tag} className="rounded-full px-3 py-1 text-sm font-medium" style={{ background: 'rgba(45,212,163,0.12)', color: colors.verified }}>
               {tag}
             </span>

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, BarChart3, Bookmark, Heart, MessageCircle, MoreHorizontal, Repeat2, Send, Share2, ThumbsDown, ThumbsUp, UserMinus } from 'lucide-react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
@@ -44,10 +44,12 @@ export function PostDetailPage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const showToast = useUiStore((s) => s.showToast);
+  const me = useUiStore((s) => s.me);
   const [liked, setLiked] = useState(false);
   const [saved, setSaved] = useState(false);
   const [commentText, setCommentText] = useState('');
   const [openMenu, setOpenMenu] = useState(false);
+  const composerRef = useRef<HTMLDivElement>(null);
 
   const { data: post, isLoading, error } = useQuery({
     queryKey: ['post', id],
@@ -102,16 +104,32 @@ export function PostDetailPage() {
       <div className="px-4 py-4 sm:px-5">
         {/* Author row */}
         <div className="flex items-start gap-3">
-          <img src={post.avatar} alt="" className="h-12 w-12 rounded-full object-cover grayscale" />
+          <img
+            src={post.avatar}
+            alt=""
+            className="h-12 w-12 rounded-full object-cover grayscale cursor-pointer"
+            onClick={() => navigate(`/profile/${post.handle.slice(1)}`)}
+          />
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-2">
               <div>
                 <div className="flex items-center gap-1.5">
-                  <h2 className="font-bold text-[17px]" style={{ color: colors.primary }}>{post.author}</h2>
+                  <h2
+                    className="font-bold text-[17px] cursor-pointer hover:underline"
+                    style={{ color: colors.primary }}
+                    onClick={() => navigate(`/profile/${post.handle.slice(1)}`)}
+                  >
+                    {post.author}
+                  </h2>
                   <Badge status={post.status} />
                 </div>
                 <div className="flex items-center gap-1.5 text-sm" style={{ color: colors.muted }}>
-                  <span>{post.handle}</span>
+                  <span
+                    className="cursor-pointer hover:underline"
+                    onClick={() => navigate(`/profile/${post.handle.slice(1)}`)}
+                  >
+                    {post.handle}
+                  </span>
                   {post.role && (
                     <>
                       <span>·</span>
@@ -227,7 +245,7 @@ export function PostDetailPage() {
             <Heart size={20} fill={liked ? '#f43f5e' : 'none'} stroke={liked ? '#f43f5e' : 'currentColor'} />
             <span>{post.likes + (liked ? 1 : 0)}</span>
           </button>
-          <button className="flex items-center gap-2 rounded-full px-3 py-1.5 text-sm font-semibold transition-colors hover:bg-sky-500/10 hover:text-sky-500" onClick={() => showToast(`${post.comments} comments on this post`, 'info')}>
+          <button className="flex items-center gap-2 rounded-full px-3 py-1.5 text-sm font-semibold transition-colors hover:bg-sky-500/10 hover:text-sky-500" onClick={() => { composerRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' }); composerRef.current?.querySelector('input')?.focus(); }}>
             <MessageCircle size={20} />
             <span>{post.comments}</span>
           </button>
@@ -251,9 +269,9 @@ export function PostDetailPage() {
         </div>
 
         {/* Comment composer */}
-        <div className="mt-5 flex gap-3">
+        <div className="mt-5 flex gap-3" ref={composerRef}>
           <img
-            src="https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=120&q=80"
+            src={me?.avatar_url || 'https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=120&q=80'}
             alt=""
             className="h-10 w-10 rounded-full object-cover grayscale"
           />

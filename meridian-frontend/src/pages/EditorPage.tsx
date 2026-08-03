@@ -75,7 +75,7 @@ export function EditorPage() {
           </div>
           <div className="flex items-center gap-3">
             <button
-              onClick={() => navigate('/feed')}
+              onClick={() => navigate(-1)}
               className="inline-flex h-9 items-center rounded-md px-4 text-sm font-semibold transition-colors hover:brightness-110"
               style={{ border: `1px solid ${colors.border}`, color: colors.secondary }}
             >

@@ -192,7 +192,7 @@ export function toProfile(p: ApiProfile): ProfileShape {
   };
 }
 
-export type Card = { title: string; status: string; ripples: number; image: string };
+export type Card = { id: string; title: string; status: string; ripples: number; image: string };
 export type TrendingRow = { title: string; growth: string; author: string; forks: number };
 export type MentorRow = [string, string, string, string];
 
@@ -206,6 +206,7 @@ export type DiscoverShape = {
 export function toDiscover(d: ApiDiscover): DiscoverShape {
   const featured = d.featured ? toPost(d.featured) : null;
   const cards: Card[] = d.trending.slice(0, 2).map((p, i) => ({
+    id: p.id,
     title: p.title,
     status: p.citations.length > 0 ? 'Verified Claims' : 'Runtime Verified',
     ripples: p.impact_score ?? 0,

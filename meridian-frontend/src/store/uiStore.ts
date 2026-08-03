@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { api } from '../services/api';
 
 type Toast = { message: string; type?: 'info' | 'success' } | null;
 
@@ -6,6 +7,8 @@ export type Me = {
   username: string;
   display_name: string;
   avatar_url: string;
+  email: string;
+  bio: string;
 };
 
 type UiState = {
@@ -22,7 +25,8 @@ type UiState = {
   setAuthenticated: (value: boolean) => void;
   setToken: (token: string | null) => void;
   setMe: (me: Me | null) => void;
-  restoreSession: () => void;
+  restoreSession: () => Promise<void>;
+  logout: () => void;
 };
 
 export const useUiStore = create<UiState>((set) => ({
@@ -47,17 +51,35 @@ export const useUiStore = create<UiState>((set) => ({
     else localStorage.removeItem('me');
     set({ me });
   },
-  restoreSession: () => {
+  restoreSession: async () => {
     const token = localStorage.getItem('token');
-    if (token) {
-      let me: Me | null = null;
-      try {
-        const raw = localStorage.getItem('me');
-        if (raw) me = JSON.parse(raw) as Me;
-      } catch {
-        me = null;
-      }
-      set({ token, me, isAuthenticated: true });
+    if (!token) return;
+    let me: Me | null = null;
+    try {
+      const raw = localStorage.getItem('me');
+      if (raw) me = JSON.parse(raw) as Me;
+    } catch {
+      me = null;
     }
+    set({ token, me, isAuthenticated: true });
+    try {
+      const fresh = await api.getMe();
+      const next: Me = {
+        username: fresh.username,
+        display_name: fresh.display_name,
+        avatar_url: fresh.avatar_url,
+        email: fresh.email,
+        bio: fresh.bio,
+      };
+      localStorage.setItem('me', JSON.stringify(next));
+      set({ me: next });
+    } catch {
+      // keep the stored session if the refresh fails
+    }
+  },
+  logout: () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('me');
+    set({ token: null, me: null, isAuthenticated: false });
   },
 }));

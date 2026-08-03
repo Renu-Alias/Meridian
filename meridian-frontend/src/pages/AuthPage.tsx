@@ -27,11 +27,12 @@ export function AuthPage() {
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
   const finalize = async () => {
     try {
       const me = await api.getMe();
-      setMe({ username: me.username, display_name: me.display_name, avatar_url: me.avatar_url });
+      setMe({ username: me.username, display_name: me.display_name, avatar_url: me.avatar_url, email: me.email, bio: me.bio });
     } catch {
       // non-fatal — token still valid
     }
@@ -39,6 +40,9 @@ export function AuthPage() {
   };
 
   const signIn = async () => {
+    setError('');
+    if (!email.trim()) { setError('Please enter your email address.'); return; }
+    if (!password) { setError('Please enter your password.'); return; }
     setLoading(true);
     try {
       const res = await api.login(email, password);
@@ -46,7 +50,17 @@ export function AuthPage() {
       setAuthenticated(true);
       await finalize();
     } catch (err) {
-      showToast(err instanceof ApiError ? err.message : 'Login failed', 'info');
+      if (err instanceof ApiError) {
+        if (err.status === 401 || err.status === 400) {
+          setError('Incorrect email or password. Please try again.');
+        } else if (err.status === 422) {
+          setError('Invalid email or password format.');
+        } else {
+          setError(err.message || 'Login failed. Please try again.');
+        }
+      } else {
+        showToast('Unexpected error. Please try again.', 'info');
+      }
     } finally {
       setLoading(false);
     }
@@ -54,9 +68,13 @@ export function AuthPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError('');
     if (tab === 'signin') {
       await signIn();
     } else {
+      if (!email.trim()) { setError('Please enter your email address.'); return; }
+      if (!password) { setError('Please enter a password.'); return; }
+      if (password.length < 8) { setError('Password must be at least 8 characters.'); return; }
       setLoading(true);
       try {
         const username = (name || email.split('@')[0]).toLowerCase().replace(/[^a-z0-9_]/g, '_');
@@ -65,7 +83,17 @@ export function AuthPage() {
         setAuthenticated(true);
         await finalize();
       } catch (err) {
-        showToast(err instanceof ApiError ? err.message : 'Registration failed', 'info');
+        if (err instanceof ApiError) {
+          if (err.status === 400 || err.status === 409) {
+            setError('An account with this email already exists.');
+          } else if (err.status === 422) {
+            setError('Please check your details — some fields are invalid.');
+          } else {
+            setError(err.message || 'Registration failed. Please try again.');
+          }
+        } else {
+          showToast('Unexpected error. Please try again.', 'info');
+        }
       } finally {
         setLoading(false);
       }
@@ -77,6 +105,7 @@ export function AuthPage() {
     setEmail('');
     setPassword('');
     setName('');
+    setError('');
   };
 
   return (
@@ -117,7 +146,7 @@ export function AuthPage() {
                 color: tab === 'signin' ? colors.primary : colors.muted,
                 borderBottom: tab === 'signin' ? `2px solid ${colors.verified}` : '2px solid transparent',
               }}
-              onClick={() => setTab('signin')}
+              onClick={() => { setTab('signin'); setError(''); }}
             >
               Sign In
             </button>
@@ -127,7 +156,7 @@ export function AuthPage() {
                 color: tab === 'signup' ? colors.primary : colors.muted,
                 borderBottom: tab === 'signup' ? `2px solid ${colors.verified}` : '2px solid transparent',
               }}
-              onClick={() => { setTab('signup'); setForgotMode(false); }}
+              onClick={() => { setTab('signup'); setForgotMode(false); setError(''); }}
             >
               Sign Up
             </button>
@@ -183,7 +212,7 @@ export function AuthPage() {
                       style={{ background: '#0a0a0a', borderColor: colors.border, color: colors.primary }}
                       placeholder="Alex Rivera"
                       value={name}
-                      onChange={(e) => setName(e.target.value)}
+                      onChange={(e) => { setName(e.target.value); setError(''); }}
                     />
                   </div>
                 )}
@@ -197,7 +226,7 @@ export function AuthPage() {
                     style={{ background: '#0a0a0a', borderColor: colors.border, color: colors.primary }}
                     placeholder="alex@meridian.dev"
                     value={email}
-                    onChange={(e) => setEmail(e.target.value)}
+                    onChange={(e) => { setEmail(e.target.value); setError(''); }}
                   />
                 </div>
                 <div>
@@ -221,7 +250,7 @@ export function AuthPage() {
                       style={{ background: '#0a0a0a', borderColor: colors.border, color: colors.primary }}
                       placeholder="••••••••"
                       value={password}
-                      onChange={(e) => setPassword(e.target.value)}
+                      onChange={(e) => { setPassword(e.target.value); setError(''); }}
                     />
                     <button
                       type="button"
@@ -234,6 +263,18 @@ export function AuthPage() {
                     </button>
                   </div>
                 </div>
+                {error && (
+                  <div
+                    className="flex items-start gap-2 rounded-lg px-3 py-2.5 text-sm"
+                    style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)', color: '#f87171' }}
+                    role="alert"
+                  >
+                    <svg className="mt-0.5 shrink-0" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+                    </svg>
+                    {error}
+                  </div>
+                )}
                 <button
                   type="submit"
                   disabled={loading}

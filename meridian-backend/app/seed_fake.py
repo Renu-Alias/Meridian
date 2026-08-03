@@ -51,20 +51,25 @@ REACTION_WEIGHTS = {"bookmark": 0.05, "share_internal": 0.10, "used_at_work": 0.
 ROLES = [
     "Software Engineer", "Senior Software Engineer", "Staff Engineer",
     "Principal Engineer", "Engineering Manager", "Platform Engineer",
-    "Backend Engineer", "Frontend Engineer", "ML Engineer", "SRE",
-    "DevOps Engineer", "Security Engineer", "Tech Lead", "Distinguished Engineer",
+    "Backend Engineer", "Frontend Engineer", "Full Stack Engineer",
+    "ML Engineer", "SRE", "DevOps Engineer", "Security Engineer",
+    "Tech Lead", "Distinguished Engineer", "Infrastructure Engineer",
+    "Data Engineer", "Embedded Systems Engineer", "Systems Programmer",
+    "API Platform Engineer", "Observability Engineer", "Cloud Architect",
+    "Compiler Engineer", "Database Engineer", "Open Source Maintainer",
 ]
 
-SENIORITY = ["", "", "Junior", "Mid", "Senior", "Senior", "Staff", "Principal"]
+SENIORITY = ["", "", "Junior", "Mid", "Senior", "Senior", "Staff", "Principal", "Distinguished"]
 
 TECHNOLOGY_POOL = [
-    "Python", "TypeScript", "Rust", "Go", "C++", "Zig",
-    "React", "Vue", "Svelte", "Next.js", "Tailwind CSS",
-    "FastAPI", "Django", "Flask", "Node", "GraphQL", "gRPC",
-    "PostgreSQL", "MongoDB", "Redis", "ClickHouse", "Elasticsearch",
-    "Kafka", "RabbitMQ", "Docker", "Kubernetes", "Terraform",
-    "AWS", "GCP", "Azure", "Prometheus", "Grafana", "OpenTelemetry",
-    "PyTorch", "TensorFlow", "LLM", "Wasm", "Linux Kernel", "eBPF",
+    "Python", "TypeScript", "Rust", "Go", "C++", "Zig", "Java", "Kotlin", "Elixir",
+    "React", "Vue", "Svelte", "Next.js", "Tailwind CSS", "SolidJS",
+    "FastAPI", "Django", "Flask", "Node", "GraphQL", "gRPC", "tRPC",
+    "PostgreSQL", "MongoDB", "Redis", "ClickHouse", "Elasticsearch", "SQLite",
+    "Kafka", "RabbitMQ", "NATS", "Docker", "Kubernetes", "Terraform", "Pulumi",
+    "AWS", "GCP", "Azure", "Prometheus", "Grafana", "OpenTelemetry", "Jaeger",
+    "PyTorch", "TensorFlow", "JAX", "LLM", "Wasm", "Linux Kernel", "eBPF",
+    "Temporal", "Deno", "Bun", "Tauri", "WebRTC", "Supabase",
 ]
 
 TOPICS = [
@@ -76,17 +81,37 @@ TOPICS = [
     "cache invalidation", "background job orchestration", "multi-region failover",
     "real-time collaboration", "audio processing at scale", "packet capture on Linux",
     "browser rendering performance", "CSS architecture", "schema evolution",
+    "memory allocator tuning", "actor model concurrency", "CRDT-based sync",
+    "hot-reload without downtime", "incremental compiler design", "garbage collector pauses",
+    "tail latency reduction", "write-ahead logging", "snapshot isolation",
+    "fan-out at scale", "webhook delivery guarantees", "idempotency keys",
+    "cold start optimization", "distributed tracing propagation", "canary releases",
+    "connection draining", "leader election", "bloom filter usage",
+    "data pagination at scale", "API versioning strategy", "graceful degradation",
+    "token bucket vs leaky bucket", "epoll vs io_uring", "copy-on-write semantics",
 ]
 
 TITLE_PATTERNS = [
     "Refactoring {topic} in production",
     "Implementing {topic} from scratch",
-    "How we scaled {topic}",
+    "How we scaled {topic} to 10x traffic",
     "A deep dive into {topic}",
     "Lessons learned from {topic}",
-    "Optimizing {topic} for latency",
+    "Optimizing {topic} for p99 latency",
     "Rethinking {topic} with {tech}",
     "Building a reliable {topic} pipeline",
+    "Why we replaced our {topic} with {tech}",
+    "The hidden cost of {topic}",
+    "How {tech} changed our approach to {topic}",
+    "Production postmortem: {topic} at scale",
+    "Six months with {tech}: what worked and what didn't",
+    "Cutting p99 latency in half with {tech}",
+    "The architecture behind our {topic} system",
+    "Stop reinventing {topic} — use {tech}",
+    "What nobody tells you about {topic}",
+    "From 0 to production: {topic} with {tech}",
+    "We benchmarked every {topic} approach. Here's what won.",
+    "{tech} internals: understanding {topic}",
 ]
 
 EXCERPT_TEMPLATES = [
@@ -94,31 +119,114 @@ EXCERPT_TEMPLATES = [
     "Breaking down how we solved {topic} end-to-end, including the tradeoffs and benchmarks that convinced us.",
     "Everything I learned implementing {topic} in a real system, with code, numbers, and honest hindsight.",
     "How {tech} made {topic} dramatically simpler — and the sharp edges we hit along the way.",
+    "The full story of our {topic} rewrite: what broke, what we kept, and what we'd do differently.",
+    "If you've been burned by naive {topic} approaches before, this post is for you.",
+    "We spent 3 months fixing {topic}. Here's the architecture that finally held.",
+    "A measured comparison of every serious approach to {topic} — with real production numbers.",
+    "Why {tech} is the right tool for {topic}, and the three places where it still falls short.",
+    "From incident to insight: how a {topic} failure led us to rebuild with {tech}.",
 ]
 
 CODE_SNIPPETS = {
-    "Rust": "pub async fn poll_events(&mut self) -> Result<(), Error> {\n    let mut ring = IoUring::new(256)?;\n    loop {\n        self.flush_completions(&mut ring).await?;\n    }\n}",
-    "Go": "func NewLimiter(r store) *Limiter {\n    return &Limiter{store: r, window: time.Minute}\n}\n\nfunc (l *Limiter) Allow(key string) bool {\n    return l.store.Incr(key, l.window) <= l.limit\n}",
-    "Python": "async def process(batch: list[Event]) -> None:\n    async with semaphore:\n        results = await gather(*[handle(e) for e in batch])\n    await buffer.flush(results)",
-    "TypeScript": "export function useVirtualRows<T>(items: T[], size: number) {\n  return useMemo(() => items.slice(0, Math.ceil(size / ROW_H)), [items, size]);\n}",
-    "Kubernetes": "spec:\n  replicas: 6\n  strategy:\n    rollingUpdate:\n      maxUnavailable: 1\n  template:\n    spec:\n      containers:\n        - image: meridian/worker:2.4",
-    "PostgreSQL": "CREATE INDEX CONCURRENTLY idx_events_created\n  ON events (created_at)\n  WHERE status = 'processed';\n\nALTER TABLE events DETACH PARTITION events_2025_old;",
+    "Rust": "pub async fn poll_events(&mut self) -> Result<(), Error> {\n    let mut ring = IoUring::builder().build(256)?;\n    loop {\n        ring.submit_and_wait(1)?;\n        for cqe in ring.completion() {\n            self.handle_cqe(cqe).await?;\n        }\n    }\n}",
+    "Go": "func NewLimiter(r Store, limit int) *Limiter {\n    return &Limiter{store: r, limit: limit, window: time.Minute}\n}\n\nfunc (l *Limiter) Allow(ctx context.Context, key string) (bool, error) {\n    count, err := l.store.Incr(ctx, key, l.window)\n    if err != nil {\n        return true, err // fail open\n    }\n    return count <= l.limit, nil\n}",
+    "Python": "async def process_batch(batch: list[Event], sem: asyncio.Semaphore) -> list[Result]:\n    async with sem:\n        tasks = [asyncio.create_task(handle(e)) for e in batch]\n        results = await asyncio.gather(*tasks, return_exceptions=True)\n    return [r for r in results if not isinstance(r, Exception)]",
+    "TypeScript": "export function useVirtualRows<T>(items: T[], containerHeight: number) {\n  const [scrollTop, setScrollTop] = useState(0);\n  const start = Math.floor(scrollTop / ROW_HEIGHT);\n  const end = Math.min(items.length, start + Math.ceil(containerHeight / ROW_HEIGHT) + 1);\n  return { visibleItems: items.slice(start, end), startIndex: start };\n}",
+    "Kubernetes": "apiVersion: apps/v1\nkind: Deployment\nspec:\n  replicas: 6\n  strategy:\n    type: RollingUpdate\n    rollingUpdate:\n      maxUnavailable: 1\n      maxSurge: 2\n  template:\n    spec:\n      terminationGracePeriodSeconds: 60\n      containers:\n        - name: worker\n          image: meridian/worker:2.4.1\n          resources:\n            requests:\n              cpu: 250m\n              memory: 256Mi",
+    "PostgreSQL": "-- Concurrent index creation to avoid table locks\nCREATE INDEX CONCURRENTLY idx_events_created_status\n  ON events (created_at DESC)\n  WHERE status = 'processed';\n\n-- Partition detach (non-blocking in PG 14+)\nALTER TABLE events\n  DETACH PARTITION events_2024_q4 CONCURRENTLY;",
+    "Python:async": "class RateLimiter:\n    def __init__(self, rate: int, period: float = 1.0):\n        self._tokens = rate\n        self._rate = rate\n        self._period = period\n        self._lock = asyncio.Lock()\n\n    async def acquire(self) -> None:\n        async with self._lock:\n            if self._tokens <= 0:\n                await asyncio.sleep(self._period / self._rate)\n            self._tokens -= 1",
+    "Go:grpc": "func (s *Server) StreamEvents(req *pb.StreamRequest, stream pb.Events_StreamEventsServer) error {\n    ch := s.bus.Subscribe(req.Topic)\n    defer s.bus.Unsubscribe(ch)\n    for {\n        select {\n        case evt := <-ch:\n            if err := stream.Send(evt); err != nil {\n                return err\n            }\n        case <-stream.Context().Done():\n            return nil\n        }\n    }\n}",
+    "Rust:memory": "#[repr(C, align(64))]\nstruct CacheAligned<T>(T);\n\nimpl<T: Send> CacheAligned<T> {\n    pub fn new(val: T) -> Self { Self(val) }\n\n    /// Zero-cost read through a shared reference.\n    pub fn get(&self) -> &T { &self.0 }\n}\n\n// Prevents false sharing on hot paths across cores.",
+    "Elixir": "defmodule Pipeline.Supervisor do\n  use Supervisor\n\n  def start_link(opts), do: Supervisor.start_link(__MODULE__, opts, name: __MODULE__)\n\n  @impl true\n  def init(_opts) do\n    children = [\n      {Registry, keys: :unique, name: Pipeline.Registry},\n      {DynamicSupervisor, strategy: :one_for_one, name: Pipeline.WorkerSup}\n    ]\n    Supervisor.init(children, strategy: :one_for_all)\n  end\nend",
+    "eBPF": "SEC(\"tracepoint/syscalls/sys_enter_write\")\nint trace_write(struct trace_event_raw_sys_enter *ctx) {\n    u32 pid = bpf_get_current_pid_tgid() >> 32;\n    u64 ts = bpf_ktime_get_ns();\n    bpf_map_update_elem(&start_times, &pid, &ts, BPF_ANY);\n    return 0;\n}",
 }
 
 TECH_RELATED = {
-    "Rust": ["Linux Kernel", "Wasm", "gRPC"],
-    "Go": ["Kubernetes", "Docker", "Terraform"],
-    "Python": ["FastAPI", "LLM", "PyTorch"],
-    "TypeScript": ["React", "Next.js", "GraphQL"],
-    "Kubernetes": ["Docker", "Terraform", "Prometheus"],
-    "Redis": ["PostgreSQL", "Kubernetes"],
-    "PostgreSQL": ["ClickHouse", "Redis"],
-    "Kafka": ["RabbitMQ", "Go"],
-    "LLM": ["PyTorch", "TensorFlow", "Elasticsearch"],
-    "eBPF": ["Linux Kernel", "Prometheus", "Grafana"],
-    "AWS": ["Kubernetes", "Terraform"],
-    "GCP": ["Kubernetes", "Go"],
+    "Rust": ["Linux Kernel", "Wasm", "gRPC", "eBPF"],
+    "Go": ["Kubernetes", "Docker", "Terraform", "gRPC"],
+    "Python": ["FastAPI", "LLM", "PyTorch", "Kafka"],
+    "TypeScript": ["React", "Next.js", "GraphQL", "tRPC"],
+    "Kubernetes": ["Docker", "Terraform", "Prometheus", "Grafana"],
+    "Redis": ["PostgreSQL", "Kubernetes", "NATS"],
+    "PostgreSQL": ["ClickHouse", "Redis", "Temporal"],
+    "Kafka": ["RabbitMQ", "Go", "ClickHouse"],
+    "LLM": ["PyTorch", "TensorFlow", "Elasticsearch", "JAX"],
+    "eBPF": ["Linux Kernel", "Prometheus", "Grafana", "Rust"],
+    "AWS": ["Kubernetes", "Terraform", "Pulumi"],
+    "GCP": ["Kubernetes", "Go", "BigQuery"],
+    "Elixir": ["NATS", "PostgreSQL", "WebRTC"],
+    "Temporal": ["Go", "Python", "Kubernetes"],
 }
+
+BIO_TEMPLATES = [
+    "Staff engineer at {company}. I work on {area1} and {area2}. Previously at {prev}. Open source contributor.",
+    "Building {area1} infrastructure. Passionate about {area2} and writing about things I learn the hard way.",
+    "{seniority} engineer focused on {area1}. I write about distributed systems, performance, and the occasional war story.",
+    "I've spent the last {years} years working on {area1} at scale. Now I write so future-me doesn't forget.",
+    "Engineering lead at {company}. My interests are {area1}, {area2}, and making complex systems boring.",
+    "Former {prev} engineer. Obsessed with {area1}. I write long-form posts about real production problems.",
+    "Principal engineer. I break things at scale and write about how to un-break them. Specialising in {area1}.",
+    "Independent contractor and open source maintainer. Current obsession: {area1} with {tech}.",
+    "I run the {area1} platform team at {company}. Occasional conference speaker. Infrequent blogger.",
+    "SRE turned software engineer. I care deeply about {area1}, on-call health, and {area2}.",
+]
+
+BIO_COMPANIES = [
+    "a fintech startup", "a tier-1 cloud provider", "a high-frequency trading firm",
+    "a mid-size SaaS company", "a distributed-systems consultancy", "an adtech platform",
+    "a developer tools company", "a ride-sharing platform", "a genomics lab",
+]
+
+BIO_AREAS = [
+    "distributed systems", "database internals", "observability", "ML infrastructure",
+    "API platform", "frontend performance", "compiler tooling", "storage engines",
+    "real-time messaging", "data pipelines", "security engineering", "developer experience",
+    "container orchestration", "edge computing", "streaming architectures",
+]
+
+BIO_PREV_COMPANIES = [
+    "Google", "Meta", "Stripe", "Cloudflare", "HashiCorp", "Datadog",
+    "Vercel", "PlanetScale", "Figma", "Linear", "Notion", "Retool",
+]
+
+QA_QUESTION_TEMPLATES = [
+    "Did you consider {alt} as an alternative? Would love to understand the tradeoffs.",
+    "How does this hold up under {condition}? We hit a similar issue and ended up with a different approach.",
+    "What does your {metric} look like under sustained load? Our numbers were quite different.",
+    "Have you profiled the {component} path specifically? That was our bottleneck.",
+    "Is there a reason you chose {choice} over the simpler approach? Just trying to understand the motivation.",
+    "What happens to {component} during a rolling restart? Did you have to handle that separately?",
+    "How do you handle {scenario} in this setup? We struggled with that edge case for weeks.",
+    "Did this approach change how you think about {concept} more broadly?",
+    "What's your p99 at peak? Curious how it compares to the before numbers.",
+    "Did you open-source this? Would love to look at the full implementation.",
+    "What would you do differently if you were starting over today?",
+    "How long did the migration take end-to-end? And was there any rollback plan?",
+    "Is this approach idiomatic {tech} or did you have to fight the framework a bit?",
+    "How does this interact with your existing {component}? Any conflicts there?",
+    "What's the team size that owns this? Curious about the operational burden.",
+]
+
+QA_ALTERNATIVES = [
+    "io_uring", "FoundationDB", "Temporal", "NATS JetStream", "Apache Flink",
+    "CockroachDB", "TiKV", "Scylla", "Vitess", "PlanetScale", "Materialize",
+]
+QA_CONDITIONS = [
+    "network partitions", "clock skew", "burst traffic", "cold caches",
+    "high write amplification", "large payloads", "cross-region latency",
+]
+QA_METRICS = [
+    "memory footprint", "CPU utilisation", "GC pause time", "tail latency",
+    "throughput", "error rate", "connection count",
+]
+QA_COMPONENTS = [
+    "connection pool", "serialisation", "scheduler", "write path",
+    "read path", "auth middleware", "retry logic",
+]
+QA_SCENARIOS = [
+    "partial failures", "duplicate delivery", "out-of-order events",
+    "back-pressure", "poison-pill messages", "thundering herd",
+]
 
 
 def _now() -> datetime:
@@ -158,6 +266,19 @@ def unique_handle(faker: Faker, used: set) -> tuple[str, str]:
     return slug, f"@{slug}"
 
 
+def _make_bio(faker: Faker) -> str:
+    template = random.choice(BIO_TEMPLATES)
+    return template.format(
+        company=random.choice(BIO_COMPANIES),
+        area1=random.choice(BIO_AREAS),
+        area2=random.choice(BIO_AREAS),
+        prev=random.choice(BIO_PREV_COMPANIES),
+        seniority=random.choice(["Senior", "Staff", "Principal"]),
+        years=random.randint(3, 12),
+        tech=random.choice(TECHNOLOGY_POOL),
+    )
+
+
 def make_user(db, faker: Faker, index: int, used: set) -> User:
     slug, handle = unique_handle(faker, used)
     display_name = faker.name()
@@ -167,7 +288,7 @@ def make_user(db, faker: Faker, index: int, used: set) -> User:
         email=f"{slug}@meridian.dev",
         username=slug,
         display_name=display_name,
-        bio=faker.paragraph(nb_sentences=3),
+        bio=_make_bio(faker),
         avatar_url=_avatar(index),
         role=random.choice(ROLES),
         seniority=random.choice(SENIORITY),
@@ -230,15 +351,30 @@ def compose_title(faker: Faker, topic: str, tech: str) -> str:
     return pattern.format(topic=topic, tech=tech).capitalize()
 
 
+def _pick_snippet(tech: str) -> str | None:
+    """Return a code snippet for the given tech, trying specialised keys first."""
+    keys = [k for k in CODE_SNIPPETS if k.startswith(tech)]
+    if keys:
+        return CODE_SNIPPETS[random.choice(keys)]
+    # Fallback: pick a random snippet 20% of the time even for unmatched tech
+    if random.random() < 0.2:
+        return random.choice(list(CODE_SNIPPETS.values()))
+    return None
+
+
 def compose_body(faker: Faker, topic: str, tech: str) -> str:
     ops_per_day = random.randint(200, 900)
-    p99_before = random.randint(40, 90)
-    p99_after = random.randint(8, 25)
+    p99_before = random.randint(40, 120)
+    p99_after = random.randint(8, 30)
     savings = random.randint(20, 80)
-    loc = random.randint(100, 900)
-    return "\n\n".join(
-        [
-            f"I spent the last few weeks working on {topic}, and after two rounds of rewrites I finally have something worth sharing. "
+    loc = random.randint(80, 1200)
+    cpu_drop = random.randint(10, 55)
+    weeks = random.randint(2, 16)
+
+    structures = [
+        # Structure A: context → implementation → benchmarks → retrospective
+        "\n\n".join([
+            f"I spent the last {weeks} weeks working on {topic}, and after {random.choice(['two rounds of rewrites', 'several false starts', 'a painful incident'])} I finally have something worth sharing. "
             f"The short version: {tech} handled the heavy lifting, but the real win came from simplifying how we reason about {topic}.",
             f"### Context\nOur system processes roughly {ops_per_day}k events a day. We originally solved {topic} with a naive approach "
             f"that worked at small scale, then fell over once traffic patterns shifted. This post covers the architecture we landed on "
@@ -247,12 +383,43 @@ def compose_body(faker: Faker, topic: str, tech: str) -> str:
             f"generic abstraction layer — and the second draft cut all of it in favor of a ~{loc} line implementation that is much easier to "
             f"reason about. A few key decisions:\n- {faker.sentence()}\n- {faker.sentence()}\n- {faker.sentence()}",
             f"### Benchmarks\nThe change reduced p99 latency from {p99_before}ms to {p99_after}ms and cut error-budget burn by roughly "
-            f"{savings}%. CPU usage in the hottest path also dropped by {random.randint(10, 45)}%. Numbers were captured with OpenTelemetry "
+            f"{savings}%. CPU usage in the hottest path also dropped by {cpu_drop}%. Numbers were captured with OpenTelemetry "
             f"traces and Prometheus histograms across three regions.",
             f"### What I'd do differently\nHindsight is {random.randint(2, 9)}/10. I'd validate the failure modes earlier and write the load "
             f"test before the implementation, not after. Happy to answer questions in the comments.",
-        ]
-    )
+        ]),
+        # Structure B: problem → alternatives considered → chosen approach → results
+        "\n\n".join([
+            f"We had a {topic} problem. It wasn't obvious at first — the system looked fine in staging and only revealed itself at {ops_per_day}k daily requests. "
+            f"This post is a blow-by-blow account of how we diagnosed it, what we tried, and what finally worked.",
+            f"### The problem\n{faker.sentence()} {faker.sentence()} The p99 had crept from {p99_after}ms up to {p99_before}ms over three months. "
+            f"We'd added {random.choice(['caching', 'retries', 'circuit breakers', 'rate limiting'])} as band-aids but the root cause was always {topic}.",
+            f"### Alternatives we considered\nWe looked at three approaches before settling on {tech}:\n"
+            f"1. **{random.choice(QA_ALTERNATIVES)}** — promising but operationally heavy for our team size.\n"
+            f"2. **A home-grown solution** — we prototyped it in {random.randint(3, 10)} days but the edge cases multiplied fast.\n"
+            f"3. **{tech}** — the one we shipped. {faker.sentence()}",
+            f"### What we built\nThe final implementation sits at around {loc} lines and has been running in production for "
+            f"{random.randint(3, 26)} weeks without incident. {faker.sentence()} {faker.sentence()}\n"
+            f"The three design decisions that mattered most:\n- {faker.sentence()}\n- {faker.sentence()}\n- {faker.sentence()}",
+            f"### Results\np99: {p99_before}ms → {p99_after}ms. Error rate: -{savings}%. On-call pages per week: "
+            f"{random.randint(8, 20)} → {random.randint(0, 3)}. The team is happy. The pager is quiet.",
+        ]),
+        # Structure C: opinion-first essay style
+        "\n\n".join([
+            f"Most engineers overcomplicate {topic}. I know because I did it for three years before a {random.choice(['5am incident', 'painful postmortem', 'brutal code review'])} "
+            f"forced me to confront the unnecessary complexity I'd built.",
+            f"### The trap\nThe standard approach to {topic} involves {faker.sentence().lower()} It feels principled. "
+            f"It's taught in courses. And at {random.randint(50, 500)}k requests per day it completely falls apart because {faker.sentence().lower()}",
+            f"### What actually works\n{tech} gives you {faker.sentence().lower()} The key insight is that {faker.sentence().lower()} "
+            f"Once you internalise that, {topic} becomes {random.choice(['a solved problem', 'dramatically simpler', 'a 200-line module instead of a 2000-line framework'])}.",
+            f"### The numbers\nBefore: p99 {p99_before}ms, {ops_per_day * 10}k ops/hour, {cpu_drop + random.randint(5,20)}% CPU. "
+            f"After: p99 {p99_after}ms, same throughput, {random.randint(8,30)}% CPU. "
+            f"The {loc}-line implementation replaced {random.randint(loc, loc * 5)} lines of the old system.",
+            f"### Caveats\nThis works for our constraints. {faker.sentence()} If you have {random.choice(['multi-region requirements', 'strict ordering guarantees', 'sub-millisecond SLAs', 'regulatory compliance needs'])}, "
+            f"you'll need to adapt it. The comments are open.",
+        ]),
+    ]
+    return random.choice(structures)
 
 
 def compose_tags(tech: str) -> list[str]:
@@ -279,6 +446,10 @@ def make_post(
     topic = random.choice(TOPICS)
     title = compose_title(faker, topic, tech)
     body = compose_body(faker, topic, tech)
+    snippet = _pick_snippet(tech)
+    if snippet:
+        lang = tech.lower().replace(" ", "")
+        body += f"\n\n### Code\n```{lang}\n{snippet}\n```"
     excerpt = random.choice(EXCERPT_TEMPLATES).format(topic=topic, tech=tech)
     status = "published" if random.random() < 0.9 else "draft"
 
@@ -323,11 +494,25 @@ def make_post(
     return post
 
 
+def _make_question(faker: Faker) -> str:
+    template = random.choice(QA_QUESTION_TEMPLATES)
+    return template.format(
+        alt=random.choice(QA_ALTERNATIVES),
+        condition=random.choice(QA_CONDITIONS),
+        metric=random.choice(QA_METRICS),
+        component=random.choice(QA_COMPONENTS),
+        choice=random.choice(TECHNOLOGY_POOL),
+        scenario=random.choice(QA_SCENARIOS),
+        concept=random.choice(TOPICS),
+        tech=random.choice(TECHNOLOGY_POOL),
+    )
+
+
 def make_comment(db, faker: Faker, post: Post, questioner: User, created: datetime, all_users: list[User]):
     thread = QAThread(
         post_id=post.id,
         questioner_id=questioner.id,
-        question=faker.sentence(nb_words=random.randint(8, 18)),
+        question=_make_question(faker),
         created_at=created,
     )
     if random.random() < 0.7:
@@ -542,6 +727,25 @@ def seed(db, num_users: int, num_posts: int) -> dict:
     db.commit()
     print(f"Seeded {transactions} wallet transactions, {qa_notifs} Q&A notifications")
 
+    # Mentions notifications (you were @mentioned in a comment)
+    mentions = 0
+    for post in published:
+        qa = db.query(QAThread).filter(QAThread.post_id == post.id).first()
+        if qa and qa.questioner and random.random() < 0.5:
+            db.add(
+                Notification(
+                    user_id=post.author_id,
+                    category="Mentions",
+                    title=f"{qa.questioner.display_name} mentioned you",
+                    detail=f"You were mentioned in a comment on '{post.title}'.",
+                    link=f"/posts/{post.id}",
+                    created_at=qa.created_at + timedelta(hours=random.uniform(0, 24)),
+                )
+            )
+            mentions += 1
+    db.commit()
+    print(f"Seeded {mentions} mentions notifications")
+
     # Flag a few posts to keep the verification UI interesting
     for post in random.sample(published, min(3, len(published))):
         flager_id = (
@@ -575,6 +779,7 @@ def seed(db, num_users: int, num_posts: int) -> dict:
         "patches": patches,
         "submissions": submissions,
         "transactions": transactions,
+        "mentions": mentions,
     }
 
 

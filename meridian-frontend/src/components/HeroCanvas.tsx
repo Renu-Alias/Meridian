@@ -1,6 +1,6 @@
 import React, { useRef, useMemo } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
-import { Points, PointMaterial, Line, LineBasicMaterial, Sphere } from '@react-three/drei';
+import { Points, PointMaterial, Line } from '@react-three/drei';
 import * as THREE from 'three';
 
 // Utility to generate random positions for particles
@@ -36,23 +36,15 @@ function ParticleField({ count = 2000 }: { count?: number }) {
   });
 
   return (
-    <points ref={ref} position={[0, 0, 0]}>
-      <bufferGeometry>
-        <bufferAttribute
-          attach="attributes-position"
-          count={positions.length / 3}
-          array={positions}
-          itemSize={3}
-        />
-      </bufferGeometry>
-      <pointMaterial
+    <Points ref={ref} positions={positions} position={[0, 0, 0]}>
+      <PointMaterial
         size={0.04}
-        sizeAttenuation={true}
+        sizeAttenuation
         color="#2c2c2c"
-        transparent={true}
+        transparent
         opacity={0.7}
       />
-    </points>
+    </Points>
   );
 }
 
@@ -124,17 +116,8 @@ function KnowledgeLines({ points }: { points: THREE.Vector3[] }) {
       const dist = pi.distanceTo(pj);
       if (dist < maxDist) {
         const id = `${i}-${j}`;
-        const geometry = new THREE.BufferGeometry().setFromPoints([pi, pj]);
         lines.push(
-          <line key={id} geometry={geometry}>
-            <lineBasicMaterial
-              attach="material"
-              color="#999B9B"
-              linewidth={0.5}
-              transparent={true}
-              opacity={0.4}
-            />
-          </line>
+          <Line key={id} points={[pi, pj]} color="#999B9B" lineWidth={0.5} />
         );
       }
     }

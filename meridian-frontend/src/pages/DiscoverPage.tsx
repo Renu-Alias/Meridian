@@ -52,7 +52,17 @@ export function DiscoverPage() {
             <div className="flex flex-wrap items-start gap-2">
               <div className="min-w-0 flex-1">
                 <h3 className="text-[17px] font-bold leading-6" style={{ color: colors.primary }}>{data.featured.title}</h3>
-                <p className="text-sm" style={{ color: colors.secondary }}>By {data.featured.handle} · {data.featured.age}</p>
+                <p className="text-sm" style={{ color: colors.secondary }}>
+                  By{' '}
+                  <span
+                    className="cursor-pointer hover:underline"
+                    style={{ color: colors.verified }}
+                    onClick={() => navigate(`/profile/${data.featured!.handle.slice(1)}`)}
+                  >
+                    {data.featured.handle}
+                  </span>{' '}
+                  · {data.featured.age}
+                </p>
               </div>
               <Badge status="verified" label="Verified Claim" />
             </div>
@@ -78,7 +88,7 @@ export function DiscoverPage() {
               <p className="mt-1.5 text-sm font-medium" style={{ color: colors.verified }}>{card.status}</p>
               <div className="mt-4 flex items-center justify-between">
                 <span className="font-mono text-xs" style={{ color: colors.muted }}>{card.ripples} Ripples</span>
-                <button className="text-sm font-bold transition-all group-hover:brightness-110" style={{ color: colors.verified }} onClick={() => navigate('/feed')}>
+                <button className="text-sm font-bold transition-all group-hover:brightness-110" style={{ color: colors.verified }} onClick={() => navigate(`/post/${card.id}`)}>
                   Read More →
                 </button>
               </div>
@@ -101,7 +111,15 @@ export function DiscoverPage() {
               <div className="min-w-0 flex-1">
                 <h3 className="truncate text-[15px] font-bold" style={{ color: colors.primary }}>{item.title}</h3>
                 <p className="text-sm" style={{ color: colors.secondary }}>
-                  Patched by @{item.author} · {item.forks} forks
+                  Patched by{' '}
+                  <span
+                    className="cursor-pointer hover:underline"
+                    style={{ color: colors.verified }}
+                    onClick={(e) => { e.stopPropagation(); navigate(`/profile/${item.author}`); }}
+                  >
+                    @{item.author}
+                  </span>
+                  {' '}· {item.forks} forks
                 </p>
               </div>
               <span className="flex items-center gap-1 font-mono text-sm font-bold" style={{ color: colors.verified }}>

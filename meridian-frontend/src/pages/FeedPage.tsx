@@ -26,6 +26,7 @@ export function FeedPage() {
   });
   const navigate = useNavigate();
   const showToast = useUiStore((s) => s.showToast);
+  const me = useUiStore((s) => s.me);
   const [postText, setPostText] = useState('');
   const [liked, setLiked] = useState<Set<string>>(new Set());
   const [saved, setSaved] = useState<Set<string>>(new Set());
@@ -89,7 +90,7 @@ export function FeedPage() {
       <section className="border-b px-4 pb-4 pt-7 sm:px-5 sm:pb-5" style={{ borderColor: '#2a2a2a', background: '#151515' }}>
         <div className="flex gap-3">
           <img
-            src="https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=120&q=80"
+            src={me?.avatar_url || 'https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=120&q=80'}
             alt=""
             className="h-11 w-11 rounded-full object-cover grayscale"
           />
@@ -131,18 +132,36 @@ export function FeedPage() {
       {posts.map((post) => (
         <article
           key={post.id}
-          className="border-b px-5 py-5 transition-colors"
+          className="border-b px-5 py-5 cursor-pointer"
           style={{ borderColor: '#2a2a2a' }}
+          onClick={() => navigate(`/post/${post.id}`)}
         >
           <div className="flex items-start gap-3">
-            <img src={post.avatar} alt="" className="mt-1 h-11 w-11 shrink-0 rounded-full object-cover grayscale" />
+            <img
+              src={post.avatar}
+              alt=""
+              className="mt-1 h-11 w-11 shrink-0 rounded-full object-cover grayscale cursor-pointer"
+              onClick={(e) => { e.stopPropagation(); navigate(`/profile/${post.handle.slice(1)}`); }}
+            />
             <div className="min-w-0 flex-1">
               {/* Author row */}
               <div className="flex items-start gap-2">
                 <div className="min-w-0 flex-1">
                   <div className="flex flex-wrap items-center gap-x-1.5 gap-y-0.5 text-[15px] leading-5">
-                    <h2 className="truncate font-bold" style={{ color: colors.primary }}>{post.author}</h2>
-                    <span className="truncate" style={{ color: colors.muted }}>{post.handle}</span>
+                    <h2
+                      className="truncate font-bold cursor-pointer hover:underline"
+                      style={{ color: colors.primary }}
+                      onClick={(e) => { e.stopPropagation(); navigate(`/profile/${post.handle.slice(1)}`); }}
+                    >
+                      {post.author}
+                    </h2>
+                    <span
+                      className="truncate cursor-pointer hover:underline"
+                      style={{ color: colors.muted }}
+                      onClick={(e) => { e.stopPropagation(); navigate(`/profile/${post.handle.slice(1)}`); }}
+                    >
+                      {post.handle}
+                    </span>
                     <span style={{ color: colors.muted }}>·</span>
                     <span style={{ color: colors.muted }}>{post.age}</span>
                     <Badge status={post.status} />
@@ -218,7 +237,7 @@ export function FeedPage() {
               </details>
 
               {/* Actions — primary vs secondary hierarchy */}
-              <div className="mt-3 flex max-w-[600px] items-center gap-1 text-[13px]" style={{ color: colors.muted }}>
+              <div className="mt-3 flex max-w-[600px] items-center gap-1 text-[13px]" style={{ color: colors.muted }} onClick={(e) => e.stopPropagation()}>
                 {/* Primary: like */}
                 <button className="flex items-center gap-1.5 rounded-full px-2.5 py-1.5 font-semibold transition-colors hover:bg-rose-500/10 hover:text-rose-500" onClick={() => toggleLiked(post.id)}>
                   <Heart size={17} fill={liked.has(post.id) ? '#f43f5e' : 'none'} />
@@ -254,7 +273,7 @@ export function FeedPage() {
 
               {/* Inline reply */}
               {replyingTo === post.id && (
-                <div className="mt-3 flex gap-3 pl-12">
+                <div className="mt-3 flex gap-3 pl-12" onClick={(e) => e.stopPropagation()}>
                   <textarea
                     className="min-h-[40px] flex-1 resize-none rounded-lg border bg-transparent p-2 text-sm leading-5 outline-none"
                     style={{ borderColor: colors.border, color: colors.primary }}

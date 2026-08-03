@@ -22,7 +22,7 @@ export function Sidebar() {
     { to: '/discover', label: 'Discover', icon: Compass },
     { to: '/notifications', label: 'Notifications', icon: Bell },
     { to: '/wallet', label: 'Wallet', icon: WalletCards },
-    { to: `/profile/${me?.username ?? 'alex'}`, label: 'Profile', icon: User },
+    ...(me?.username ? [{ to: `/profile/${me.username}`, label: 'Profile', icon: User }] : []),
     { to: '/editor/new', label: 'Write', icon: Edit3 },
     { to: '/settings', label: 'Settings', icon: Settings },
   ];

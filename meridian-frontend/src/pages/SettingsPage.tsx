@@ -1,19 +1,9 @@
 import { useState } from 'react';
 import { Bell, Eye, Key, LogOut, Shield, ShieldAlert, User } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { useUiStore } from '../store/uiStore';
+import { useUiStore, type Me } from '../store/uiStore';
 
 const initialSections = [
-  {
-    icon: User,
-    title: 'Profile',
-    fields: [
-      { label: 'Display name', value: 'Alex Rivera', editable: true },
-      { label: 'Handle', value: '@arivera.dev', editable: true },
-      { label: 'Bio', value: 'Writes about distributed systems, observability...', editable: true },
-      { label: 'Email', value: 'alex@meridian.dev', editable: true },
-    ],
-  },
   {
     icon: Eye,
     title: 'Appearance',
@@ -43,11 +33,22 @@ const initialSections = [
   },
 ];
 
+const profileFields = (me: Me | null) => [
+  { label: 'Display name', value: me?.display_name || '—', editable: true },
+  { label: 'Handle', value: me?.username ? `@${me.username}` : '—', editable: true },
+  { label: 'Bio', value: me?.bio || '', editable: true },
+  { label: 'Email', value: me?.email || '—', editable: true },
+];
+
 export function SettingsPage() {
   const showToast = useUiStore((s) => s.showToast);
-  const setAuthenticated = useUiStore((s) => s.setAuthenticated);
+  const me = useUiStore((s) => s.me);
+  const logout = useUiStore((s) => s.logout);
   const navigate = useNavigate();
-  const [sections, setSections] = useState(initialSections);
+  const [sections, setSections] = useState(() => [
+    { icon: User, title: 'Profile', fields: profileFields(me) },
+    ...initialSections,
+  ]);
   const [editingField, setEditingField] = useState<string | null>(null);
   const [editValue, setEditValue] = useState('');
   const [showDangerConfirm, setShowDangerConfirm] = useState<'deactivate' | 'delete' | null>(null);
@@ -123,7 +124,7 @@ export function SettingsPage() {
         <button
           className="flex h-10 w-full items-center justify-center gap-2 rounded-full text-sm font-bold transition-all hover:brightness-110"
           style={{ background: '#2DD4A3', color: '#0a0a0a' }}
-          onClick={() => { setAuthenticated(false); showToast('Logged out', 'success'); navigate('/'); }}
+          onClick={() => { logout(); showToast('Logged out', 'success'); navigate('/'); }}
         >
           <LogOut size={16} /> Log out
         </button>

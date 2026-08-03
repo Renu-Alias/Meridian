@@ -84,7 +84,12 @@ export function NotificationsPage() {
         {categories.map((category) => (
           <button
             key={category}
-            className={`h-9 shrink-0 rounded-full px-4 text-sm font-semibold ${activeCat === category ? 'bg-[#14171C] text-white' : 'bg-surface text-neutral-600'}`}
+            className="h-9 shrink-0 rounded-full px-4 text-sm font-semibold transition-colors"
+            style={
+              activeCat === category
+                ? { background: '#2DD4A3', color: '#0a0a0a' }
+                : { background: '#1a1d24', color: '#71767b' }
+            }
             onClick={() => setActiveCat(category)}
           >
             {category}
@@ -102,7 +107,7 @@ export function NotificationsPage() {
                 <span className="text-sm text-muted">· {notification.time}</span>
               </div>
               <h3 className="mt-2 font-bold">{notification.title}</h3>
-              <p className="mt-1 text-sm leading-6 text-neutral-600">{notification.detail}</p>
+              <p className="mt-1 text-sm leading-6" style={{ color: '#71767b' }}>{notification.detail}</p>
             </div>
           </article>
         ))}
