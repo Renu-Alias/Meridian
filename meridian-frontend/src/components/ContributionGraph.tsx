@@ -1,23 +1,28 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useRef } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
-const LEVEL_COLORS = ['#1a1a1a', '#0d3d33', '#0f6b52', '#17a878', '#2dd4a3'];
-const LEVEL_COLORS_MINI = ['#1a1a1a', '#0b3530', '#0d5e49', '#14956b', '#27b890'];
+// ─── constants ────────────────────────────────────────────────────────────────
 
-const MONTH_NAMES = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-const DAY_LABELS = ['Mon', '', 'Wed', '', 'Fri', '', ''];
+const LEVEL_COLORS      = ['#161b22', '#0d3d33', '#0f6b52', '#17a878', '#2dd4a3'];
+const LEVEL_COLORS_MINI = ['#161b22', '#0b3530', '#0d5e49', '#14956b', '#27b890'];
 
-type ContributionGraphProps = {
-  variant?: 'full' | 'mini';
-  weeks?: number;
-  year?: number;
-};
+const MONTH_NAMES = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+// Only label Mon, Wed, Fri (indices 0, 2, 4 in Mon-first week)
+const DAY_LABELS: [number, string][] = [[0,'Mon'],[2,'Wed'],[4,'Fri']];
+
+// Cell geometry
+const CELL   = 11;   // px — square cell
+const GAP    =  2;   // px — gap between cells
+const STRIDE = CELL + GAP;  // 13px per cell
+
+// Left gutter for day-of-week labels (full variant)
+const GUTTER = 28;  // px
+
+// ─── helpers ──────────────────────────────────────────────────────────────────
 
 function generateActivity(year: number): number[] {
-  const startDate = new Date(year, 0, 1);
-  const endDate = new Date(year, 11, 31);
-  const dayCount = Math.floor((endDate.getTime() - startDate.getTime()) / 86400000) + 1;
-  return Array.from({ length: dayCount }, (_, i) => {
+  const days = isLeapYear(year) ? 366 : 365;
+  return Array.from({ length: days }, (_, i) => {
     const seed = (i * 2654435761 + year * 1664525) >>> 0;
     const hash = (seed ^ (seed >>> 16)) & 0xffff;
     const roll = hash % 100;
@@ -29,199 +34,237 @@ function generateActivity(year: number): number[] {
   });
 }
 
+function isLeapYear(y: number) {
+  return (y % 4 === 0 && y % 100 !== 0) || y % 400 === 0;
+}
+
 function formatDate(date: Date): string {
   return `${MONTH_NAMES[date.getMonth()]} ${date.getDate()}, ${date.getFullYear()}`;
 }
 
-function Legend({ mini }: { mini: boolean }) {
-  const colors = mini ? LEVEL_COLORS_MINI : LEVEL_COLORS;
-  return (
-    <div className="mt-2 flex items-center gap-1.5 text-[10px]" style={{ color: '#536471' }}>
-      <span>Less</span>
-      {colors.map((c, i) => (
-        <span
-          key={i}
-          className="inline-block rounded-[2px]"
-          style={{ width: mini ? 8 : 10, height: mini ? 8 : 10, background: c }}
-        />
-      ))}
-      <span>More</span>
-    </div>
-  );
-}
+// ─── types ────────────────────────────────────────────────────────────────────
 
-export function ContributionGraph({ variant = 'full', weeks: weekProp, year }: ContributionGraphProps) {
-  const currentYear = new Date().getFullYear();
-  const [selectedYear, setSelectedYear] = useState(year ?? currentYear);
-  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+type Props = {
+  variant?: 'full' | 'mini';
+  weeks?: number;
+  year?: number;
+};
 
-  const isMini = variant === 'mini';
-  const cellSize = isMini ? 7 : 11;
-  const gap = isMini ? 2 : 2.5;
-  const totalWeeks = weekProp ?? (isMini ? 10 : 53);
-  const colors = isMini ? LEVEL_COLORS_MINI : LEVEL_COLORS;
-  const labelWidth = isMini ? 0 : 28;
+type Cell = { date: Date; level: number; tooltip: string };
 
-  const { cells, monthLabels, totalContributions, monthBoundaries } = useMemo(() => {
-    const activity = generateActivity(selectedYear);
-    const jan1 = new Date(selectedYear, 0, 1);
-    const startDayOfWeek = (jan1.getDay() + 6) % 7; // Monday = 0
+// ─── component ────────────────────────────────────────────────────────────────
 
-    const totalCells = totalWeeks * 7;
-    const cells: Array<{ date: Date; level: number; label: string }> = [];
+export function ContributionGraph({ variant = 'full', weeks: weekProp, year }: Props) {
+  const currentYear  = new Date().getFullYear();
+  const [selYear, setSelYear] = useState(year ?? currentYear);
+  const [hovered, setHovered]  = useState<number | null>(null);
+  const wrapRef = useRef<HTMLDivElement>(null);
 
+  const isMini      = variant === 'mini';
+  const totalWeeks  = weekProp ?? (isMini ? 10 : 53);
+  const colors      = isMini ? LEVEL_COLORS_MINI : LEVEL_COLORS;
+
+  // ── build grid data ──────────────────────────────────────────────────────
+  const { cells, monthLabels, total } = useMemo(() => {
+    const activity = generateActivity(selYear);
+    const jan1 = new Date(selYear, 0, 1);
+    // Monday = 0 offset
+    const startOffset = (jan1.getDay() + 6) % 7;
+    const totalCells  = totalWeeks * 7;
+
+    const cells: Cell[] = [];
     for (let i = 0; i < totalCells; i++) {
-      const dayOffset = i - startDayOfWeek;
-      const date = new Date(jan1.getTime() + dayOffset * 86400000);
-      const dayOfYear = Math.floor((date.getTime() - jan1.getTime()) / 86400000);
-      const level = dayOfYear >= 0 && dayOfYear < activity.length ? activity[dayOfYear] : 0;
-      cells.push({ date, level, label: `${formatDate(date)} — ${level} contribution${level !== 1 ? 's' : ''}` });
+      const dayOffset = i - startOffset;
+      const date      = new Date(jan1.getTime() + dayOffset * 86400000);
+      const doy       = Math.floor((date.getTime() - jan1.getTime()) / 86400000);
+      const level     = doy >= 0 && doy < activity.length ? activity[doy] : 0;
+      cells.push({ date, level, tooltip: `${formatDate(date)} — ${level} contribution${level !== 1 ? 's' : ''}` });
     }
 
-    // Month labels: placed at first week of each month
-    const monthLabels: Array<{ label: string; weekIndex: number }> = [];
-    const monthBoundaries = new Set<number>(); // week indices where a new month starts
-    if (!isMini) {
-      let lastMonth = -1;
-      for (let week = 0; week < totalWeeks; week++) {
-        const firstDayIndex = week * 7;
-        if (firstDayIndex < cells.length) {
-          const m = cells[firstDayIndex].date.getMonth();
-          if (m !== lastMonth) {
-            MONTH_NAMES[m] && monthLabels.push({ label: MONTH_NAMES[m], weekIndex: week });
-            if (lastMonth !== -1) monthBoundaries.add(week); // don't draw line before Jan
-            lastMonth = m;
-          }
+    // Month label positions: place label at the FIRST full week of each month.
+    // "full week" = week where Monday (row 0) belongs to that month.
+    // This mirrors exactly how GitHub positions month labels.
+    const monthLabels: Array<{ label: string; x: number }> = [];
+    let lastMonth = -1;
+    for (let w = 0; w < totalWeeks; w++) {
+      const mondayCell = cells[w * 7]; // row 0 = Monday
+      if (!mondayCell) continue;
+      const m = mondayCell.date.getMonth();
+      if (m !== lastMonth) {
+        // Only emit the label if there's enough room to not overlap the previous one
+        const x = w * STRIDE;
+        const prev = monthLabels[monthLabels.length - 1];
+        // Require at least 2 full weeks (26px) gap to the previous label
+        if (!prev || x - prev.x >= STRIDE * 2) {
+          monthLabels.push({ label: MONTH_NAMES[m], x });
         }
+        lastMonth = m;
       }
     }
 
-    const totalContributions = activity.reduce((sum, v) => sum + v, 0);
-    return { cells, monthLabels, totalContributions, monthBoundaries };
-  }, [selectedYear, totalWeeks, isMini]);
+    const total = activity.reduce((s, v) => s + v, 0);
+    return { cells, monthLabels, total };
+  }, [selYear, totalWeeks]);
 
-  const gridWidth = totalWeeks * (cellSize + gap) - gap;
+  // ── dimensions ──────────────────────────────────────────────────────────
+  const gridW  = totalWeeks * STRIDE - GAP;         // exact pixel width of cell grid
+  const gridH  = 7 * STRIDE - GAP;                  // exact pixel height of cell grid
+  const svgW   = isMini ? gridW : GUTTER + gridW;   // total SVG canvas width
+  const svgH   = gridH;
+
+  // Tooltip positioning — keep inside bounds
+  function tooltipX(col: number): number {
+    const cx = (isMini ? 0 : GUTTER) + col * STRIDE + CELL / 2;
+    return Math.max(50, Math.min(svgW - 50, cx));
+  }
 
   return (
-    <div>
-      {/* Header: total count + year navigator (full variant only) */}
+    <div ref={wrapRef}>
+      {/* ── header (full only) ──────────────────────────────────────────── */}
       {!isMini && (
-        <div className="mb-4 flex items-center justify-between">
+        <div className="mb-3 flex items-center justify-between">
           <p className="text-sm" style={{ color: '#71767b' }}>
-            <span className="font-bold" style={{ color: '#e7e9ea' }}>{totalContributions.toLocaleString()}</span>
-            {' '}contributions in {selectedYear}
+            <span className="font-bold" style={{ color: '#e7e9ea' }}>
+              {total.toLocaleString()}
+            </span>{' '}
+            contributions in {selYear}
           </p>
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-0.5">
             <button
               className="grid h-7 w-7 place-items-center rounded-full transition-colors hover:bg-[#1a1d24]"
               style={{ color: '#536471' }}
-              onClick={() => setSelectedYear((y) => y - 1)}
+              onClick={() => setSelYear((y) => y - 1)}
               aria-label="Previous year"
             >
-              <ChevronLeft size={15} />
+              <ChevronLeft size={14} />
             </button>
-            <span className="w-10 text-center text-sm font-semibold" style={{ color: '#e7e9ea' }}>
-              {selectedYear}
+            <span className="w-11 text-center text-sm font-semibold tabular-nums" style={{ color: '#e7e9ea' }}>
+              {selYear}
             </span>
             <button
               className="grid h-7 w-7 place-items-center rounded-full transition-colors hover:bg-[#1a1d24]"
-              style={{ color: selectedYear >= currentYear ? '#2f3336' : '#536471' }}
-              onClick={() => setSelectedYear((y) => Math.min(currentYear, y + 1))}
-              disabled={selectedYear >= currentYear}
+              style={{ color: selYear >= currentYear ? '#2f3336' : '#536471' }}
+              onClick={() => setSelYear((y) => Math.min(currentYear, y + 1))}
+              disabled={selYear >= currentYear}
               aria-label="Next year"
             >
-              <ChevronRight size={15} />
+              <ChevronRight size={14} />
             </button>
           </div>
         </div>
       )}
 
+      {/* ── scrollable SVG canvas ───────────────────────────────────────── */}
       <div className="overflow-x-auto thin-scrollbar">
-        {/* Month labels row */}
-        {!isMini && (
-          <div
-            className="relative mb-1.5 h-4 text-[11px]"
-            style={{ marginLeft: labelWidth + gap, width: gridWidth, color: '#536471' }}
-          >
-            {monthLabels.map((ml) => (
-              <span
-                key={ml.label + ml.weekIndex}
-                className="absolute"
-                style={{ left: ml.weekIndex * (cellSize + gap) }}
-              >
-                {ml.label}
-              </span>
-            ))}
-          </div>
-        )}
+        <svg
+          width={svgW}
+          height={svgH + (isMini ? 0 : 20)}   // +20px top margin for month labels
+          style={{ display: 'block' }}
+        >
+          {/* Month labels (full only) */}
+          {!isMini && monthLabels.map(({ label, x }) => (
+            <text
+              key={label + x}
+              x={GUTTER + x}
+              y={12}
+              fontSize={11}
+              fill="#536471"
+              fontFamily="inherit"
+            >
+              {label}
+            </text>
+          ))}
 
-        <div className="flex items-start" style={{ gap }}>
-          {/* Day-of-week labels */}
-          {!isMini && (
-            <div className="flex flex-col shrink-0" style={{ width: labelWidth, gap }}>
-              {DAY_LABELS.map((label, i) => (
-                <span
-                  key={i}
-                  className="text-[11px] leading-none"
-                  style={{ height: cellSize, color: '#536471', display: 'flex', alignItems: 'center' }}
+          {/* Day-of-week labels (full only) */}
+          {!isMini && DAY_LABELS.map(([row, name]) => (
+            <text
+              key={name}
+              x={GUTTER - 4}
+              y={20 + row * STRIDE + CELL * 0.75}
+              fontSize={11}
+              fill="#536471"
+              textAnchor="end"
+              fontFamily="inherit"
+            >
+              {name}
+            </text>
+          ))}
+
+          {/* Cell grid */}
+          {cells.map((cell, idx) => {
+            const col = Math.floor(idx / 7);
+            const row = idx % 7;
+            const cx  = (isMini ? 0 : GUTTER) + col * STRIDE;
+            const cy  = (isMini ? 0 : 20)     + row * STRIDE;
+            return (
+              <rect
+                key={idx}
+                x={cx}
+                y={cy}
+                width={CELL}
+                height={CELL}
+                rx={2}
+                ry={2}
+                fill={colors[cell.level]}
+                onMouseEnter={() => setHovered(idx)}
+                onMouseLeave={() => setHovered(null)}
+                style={{ cursor: 'default' }}
+              />
+            );
+          })}
+
+          {/* Tooltip */}
+          {hovered !== null && (() => {
+            const col  = Math.floor(hovered / 7);
+            const row  = hovered % 7;
+            const tx   = tooltipX(col);
+            const ty   = (isMini ? 0 : 20) + row * STRIDE - 8;
+            const tip  = cells[hovered]?.tooltip ?? '';
+            const tipW = tip.length * 6.2 + 16;
+            return (
+              <g style={{ pointerEvents: 'none' }}>
+                <rect
+                  x={tx - tipW / 2}
+                  y={ty - 22}
+                  width={tipW}
+                  height={20}
+                  rx={4}
+                  fill="#1a1a1a"
+                  stroke="#2f3336"
+                  strokeWidth={1}
+                />
+                <text
+                  x={tx}
+                  y={ty - 8}
+                  fontSize={11}
+                  fill="#e7e9ea"
+                  textAnchor="middle"
+                  fontFamily="inherit"
                 >
-                  {label}
-                </span>
-              ))}
-            </div>
-          )}
+                  {tip}
+                </text>
+              </g>
+            );
+          })()}
+        </svg>
 
-          {/* Grid — rendered as columns (weeks) */}
-          <div className="relative flex" style={{ gap }}>
-            {Array.from({ length: totalWeeks }, (_, weekIndex) => (
-              <div
-                key={weekIndex}
-                className="relative flex flex-col"
-                style={{ gap, width: cellSize }}
-              >
-                {/* Month boundary line */}
-                {!isMini && monthBoundaries.has(weekIndex) && (
-                  <div
-                    className="absolute -left-[3px] top-0 bottom-0 w-px pointer-events-none"
-                    style={{ background: '#2f3336' }}
-                  />
-                )}
-                {Array.from({ length: 7 }, (_, dayIndex) => {
-                  const cellIndex = weekIndex * 7 + dayIndex;
-                  const cell = cells[cellIndex];
-                  if (!cell) return <div key={dayIndex} style={{ width: cellSize, height: cellSize }} />;
-                  return (
-                    <div
-                      key={dayIndex}
-                      className="relative rounded-[2px]"
-                      style={{ width: cellSize, height: cellSize, background: colors[cell.level], cursor: 'default' }}
-                      onMouseEnter={() => setHoveredIndex(cellIndex)}
-                      onMouseLeave={() => setHoveredIndex(null)}
-                    >
-                      {hoveredIndex === cellIndex && (
-                        <span
-                          className="absolute z-20 whitespace-nowrap rounded px-2 py-1 text-[11px] shadow-lg pointer-events-none"
-                          style={{
-                            bottom: cellSize + 6,
-                            left: '50%',
-                            transform: 'translateX(-50%)',
-                            background: '#1a1a1a',
-                            color: '#e7e9ea',
-                            border: '1px solid #2f3336',
-                          }}
-                        >
-                          {cell.label}
-                        </span>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-            ))}
-          </div>
+        {/* Legend */}
+        <div className="mt-2 flex items-center gap-1.5 text-[10px]" style={{ color: '#536471' }}>
+          <span>Less</span>
+          {colors.map((c, i) => (
+            <span
+              key={i}
+              style={{
+                display: 'inline-block',
+                width:  isMini ? 8 : 10,
+                height: isMini ? 8 : 10,
+                background: c,
+                borderRadius: 2,
+              }}
+            />
+          ))}
+          <span>More</span>
         </div>
-
-        <Legend mini={isMini} />
       </div>
     </div>
   );

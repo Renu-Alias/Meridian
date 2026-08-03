@@ -236,55 +236,55 @@ export function FeedPage() {
                 </ol>
               </details>
 
-              {/* Actions — all icons share the same idle muted color */}
+              {/* Actions */}
               <div className="mt-3 flex max-w-[600px] items-center gap-1 text-[13px]" onClick={(e) => e.stopPropagation()}>
-                {/* Like */}
+                {/* Like — hover red */}
                 <button
-                  className="flex items-center gap-1.5 rounded-full px-2.5 py-1.5 font-semibold transition-colors hover:bg-rose-500/10 hover:text-rose-500"
+                  className="flex items-center gap-1.5 px-2.5 py-1.5 font-semibold transition-colors hover:text-rose-500"
                   style={{ color: liked.has(post.id) ? '#f43f5e' : colors.muted }}
                   onClick={() => toggleLiked(post.id)}
                 >
                   <Heart size={17} fill={liked.has(post.id) ? '#f43f5e' : 'none'} />
                   <span>{post.likes + (liked.has(post.id) ? 1 : 0)}</span>
                 </button>
-                {/* Comment */}
+                {/* Comment — hover white */}
                 <button
-                  className="flex items-center gap-1.5 rounded-full px-2.5 py-1.5 font-semibold transition-colors hover:bg-sky-500/10 hover:text-sky-500"
+                  className="flex items-center gap-1.5 px-2.5 py-1.5 font-semibold transition-colors hover:text-[#e7e9ea]"
                   style={{ color: colors.muted }}
                   onClick={() => { setReplyingTo(replyingTo === post.id ? null : post.id); setReplyText(''); }}
                 >
                   <MessageCircle size={17} />
                   <span>{post.comments}</span>
                 </button>
-                {/* Fork/Repost */}
+                {/* Fork — hover teal */}
                 <button
-                  className="flex items-center gap-1.5 rounded-full px-2.5 py-1.5 font-semibold transition-colors hover:bg-[#2DD4A3]/10 hover:text-[#2DD4A3]"
+                  className="flex items-center gap-1.5 px-2.5 py-1.5 font-semibold transition-colors hover:text-[#2DD4A3]"
                   style={{ color: colors.muted }}
                   onClick={() => navigate(`/editor/new?fork=${post.id}&title=${encodeURIComponent(post.title || post.excerpt)}&body=${encodeURIComponent(post.excerpt)}`)}
                 >
                   <Repeat2 size={17} />
                   <span>{post.forks}</span>
                 </button>
-                {/* Save */}
+                {/* Save — hover white */}
                 <button
-                  className="flex items-center gap-1 rounded-full px-2 py-1.5 text-xs transition-all hover:text-[#e7e9ea]"
+                  className="flex items-center gap-1 px-2 py-1.5 text-xs transition-colors hover:text-[#e7e9ea]"
                   style={{ color: saved.has(post.id) ? '#e7e9ea' : colors.muted }}
                   onClick={() => toggleSaved(post.id)}
                 >
                   <Bookmark size={15} fill={saved.has(post.id) ? '#e7e9ea' : 'none'} />
                   <span className="hidden sm:inline">{saved.has(post.id) ? 'Saved' : 'Save'}</span>
                 </button>
-                {/* Share */}
+                {/* Share — hover white */}
                 <button
-                  className="flex items-center gap-1 rounded-full px-2 py-1.5 text-xs transition-all hover:text-sky-500 sm:inline-flex"
+                  className="flex items-center gap-1 px-2 py-1.5 text-xs transition-colors hover:text-[#e7e9ea] sm:inline-flex"
                   style={{ color: colors.muted }}
                   onClick={() => { navigator.clipboard.writeText(window.location.origin + '/post/' + post.id); showToast('Link copied!', 'success'); }}
                 >
                   <Share2 size={15} />
                   <span className="hidden sm:inline">Share</span>
                 </button>
-                {/* Stats */}
-                <span className="flex items-center gap-1 text-xs" style={{ color: colors.muted }}>
+                {/* Stats — hover white */}
+                <span className="flex items-center gap-1 px-1 text-xs transition-colors hover:text-[#e7e9ea]" style={{ color: colors.muted }}>
                   <BarChart3 size={14} />
                   {compactNumber(post.impressions)}
                 </span>

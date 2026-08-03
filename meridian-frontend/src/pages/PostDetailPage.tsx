@@ -18,32 +18,6 @@ const colors = {
   verified: '#2DD4A3',
 };
 
-/** Derive a topic-oriented Unsplash cover image from the post's first tag. */
-function coverImageUrl(tags: string[]): string {
-  const tagMap: Record<string, string> = {
-    Rust: 'systems-programming',
-    Go: 'golang',
-    Python: 'python-code',
-    TypeScript: 'javascript',
-    Kubernetes: 'cloud-infrastructure',
-    Docker: 'containers',
-    PostgreSQL: 'database',
-    Redis: 'server',
-    Kafka: 'data-pipeline',
-    AWS: 'cloud-computing',
-    LLM: 'artificial-intelligence',
-    eBPF: 'linux-kernel',
-    React: 'frontend',
-    'Next.js': 'web-development',
-    GraphQL: 'api',
-  };
-  const keyword = tags.length > 0 ? (tagMap[tags[0]] ?? tags[0].toLowerCase().replace(/[^a-z0-9]/g, '-')) : 'software-engineering';
-  // Use a hash of the keyword for a stable but varied image
-  let hash = 0;
-  for (let i = 0; i < keyword.length; i++) hash = (hash * 31 + keyword.charCodeAt(i)) >>> 0;
-  return `https://picsum.photos/seed/${keyword}-${hash % 99}/1200/400`;
-}
-
 /** Parse a markdown-ish body into typed segments for structured rendering. */
 type BodySegment =
   | { kind: 'h3'; text: string }
@@ -194,6 +168,10 @@ export function PostDetailPage() {
   const [saved, setSaved] = useState(false);
   const [commentText, setCommentText] = useState('');
   const [openMenu, setOpenMenu] = useState(false);
+  const [commentLikes, setCommentLikes] = useState<Record<string, number>>({});
+  const [commentLiked, setCommentLiked] = useState<Set<string>>(new Set());
+  const [replyingToComment, setReplyingToComment] = useState<string | null>(null);
+  const [replyTexts, setReplyTexts] = useState<Record<string, string>>({});
   const composerRef = useRef<HTMLDivElement>(null);
 
   const { data: post, isLoading, error } = useQuery({
@@ -316,15 +294,17 @@ export function PostDetailPage() {
           </div>
         </div>
 
-        {/* Cover image */}
-        <div className="mt-4 overflow-hidden rounded-xl" style={{ border: `1px solid ${colors.border}` }}>
-          <img
-            src={coverImageUrl(post.tags)}
-            alt={post.title}
-            className="h-48 w-full object-cover sm:h-64"
-            style={{ filter: 'brightness(0.75) saturate(0.6)' }}
-          />
-        </div>
+        {/* Cover image — only for engineering-relevant posts (has code or 2+ tags) */}
+        {post.coverImage && (
+          <div className="mt-4 overflow-hidden rounded-xl" style={{ border: `1px solid ${colors.border}` }}>
+            <img
+              src={post.coverImage}
+              alt={post.title}
+              className="h-48 w-full object-cover sm:h-64"
+              style={{ filter: 'brightness(0.75) saturate(0.6)' }}
+            />
+          </div>
+        )}
 
         {/* Title */}
         <h1 className="mt-5 text-2xl font-bold leading-8" style={{ color: colors.primary }}>
@@ -388,53 +368,53 @@ export function PostDetailPage() {
           ))}
         </div>
 
-        {/* Actions — all icons share the same idle muted color */}
+        {/* Actions */}
         <div className="mt-5 flex max-w-[600px] items-center gap-1 border-y py-3" style={{ borderColor: colors.border }}>
-          {/* Like */}
+          {/* Like — hover red */}
           <button
-            className="flex items-center gap-2 rounded-full px-3 py-1.5 text-sm font-semibold transition-colors hover:bg-rose-500/10 hover:text-rose-500"
+            className="flex items-center gap-2 px-3 py-1.5 text-sm font-semibold transition-colors hover:text-rose-500"
             style={{ color: liked ? '#f43f5e' : colors.muted }}
             onClick={() => { setLiked(!liked); api.addReaction(post.id, 'upvote').catch(() => {}); }}
           >
             <Heart size={20} fill={liked ? '#f43f5e' : 'none'} stroke={liked ? '#f43f5e' : 'currentColor'} />
             <span>{post.likes + (liked ? 1 : 0)}</span>
           </button>
-          {/* Comment */}
+          {/* Comment — hover white */}
           <button
-            className="flex items-center gap-2 rounded-full px-3 py-1.5 text-sm font-semibold transition-colors hover:bg-sky-500/10 hover:text-sky-500"
+            className="flex items-center gap-2 px-3 py-1.5 text-sm font-semibold transition-colors hover:text-[#e7e9ea]"
             style={{ color: colors.muted }}
             onClick={() => { composerRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' }); composerRef.current?.querySelector('input')?.focus(); }}
           >
             <MessageCircle size={20} />
             <span>{post.comments}</span>
           </button>
-          {/* Fork */}
+          {/* Fork — hover teal */}
           <button
-            className="flex items-center gap-2 rounded-full px-3 py-1.5 text-sm font-semibold transition-colors hover:bg-[#2DD4A3]/10 hover:text-[#2DD4A3]"
+            className="flex items-center gap-2 px-3 py-1.5 text-sm font-semibold transition-colors hover:text-[#2DD4A3]"
             style={{ color: colors.muted }}
             onClick={() => navigate(`/editor/new?fork=${post.id}&title=${encodeURIComponent(post.title)}&body=${encodeURIComponent(post.excerpt)}`)}
           >
             <Repeat2 size={20} />
             <span>{post.forks}</span>
           </button>
-          {/* Save */}
+          {/* Save — hover white */}
           <button
-            className="flex items-center gap-2 rounded-full px-2.5 py-1.5 text-sm transition-all hover:text-[#e7e9ea]"
+            className="flex items-center gap-2 px-2.5 py-1.5 text-sm transition-colors hover:text-[#e7e9ea]"
             style={{ color: saved ? '#e7e9ea' : colors.muted }}
             onClick={() => { setSaved(!saved); showToast(saved ? 'Removed from bookmarks' : 'Bookmarked!', 'success'); }}
           >
             <Bookmark size={18} fill={saved ? '#e7e9ea' : 'none'} />
           </button>
-          {/* Share */}
+          {/* Share — hover white */}
           <button
-            className="flex items-center gap-2 rounded-full px-2.5 py-1.5 text-sm transition-all hover:text-sky-500"
+            className="flex items-center gap-2 px-2.5 py-1.5 text-sm transition-colors hover:text-[#e7e9ea]"
             style={{ color: colors.muted }}
             onClick={() => { navigator.clipboard.writeText(window.location.origin + '/post/' + post.id); showToast('Link copied!', 'success'); }}
           >
             <Share2 size={18} />
           </button>
-          {/* Stats */}
-          <span className="flex items-center gap-1.5 text-sm" style={{ color: colors.muted }}>
+          {/* Stats — hover white */}
+          <span className="flex items-center gap-1.5 px-1 text-sm transition-colors hover:text-[#e7e9ea]" style={{ color: colors.muted }}>
             <BarChart3 size={18} />
             {post.impressions.toLocaleString()}
           </span>
@@ -472,23 +452,113 @@ export function PostDetailPage() {
           {comments.length === 0 ? (
             <p className="text-sm" style={{ color: colors.muted }}>No comments yet. Be the first to comment.</p>
           ) : (
-            comments.map((comment) => (
-              <div key={comment.id} className="flex gap-3 border-b py-4" style={{ borderColor: colors.border }}>
-                <img src={comment.avatar} alt="" className="h-9 w-9 shrink-0 rounded-full object-cover grayscale" />
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm font-semibold" style={{ color: colors.primary }}>{comment.author}</span>
-                    <span className="text-xs" style={{ color: colors.muted }}>{comment.handle}</span>
-                    <span style={{ color: colors.muted }}>·</span>
-                    <span className="text-xs" style={{ color: colors.muted }}>{comment.time}</span>
+            comments.map((comment) => {
+              const likeCount = (comment.likes ?? 0) + (commentLikes[comment.id] ?? 0);
+              const isLiked = commentLiked.has(comment.id);
+              const isReplying = replyingToComment === comment.id;
+
+              const toggleCommentLike = () => {
+                setCommentLiked((prev) => {
+                  const next = new Set(prev);
+                  if (next.has(comment.id)) {
+                    next.delete(comment.id);
+                    setCommentLikes((l) => ({ ...l, [comment.id]: (l[comment.id] ?? 1) - 1 }));
+                  } else {
+                    next.add(comment.id);
+                    setCommentLikes((l) => ({ ...l, [comment.id]: (l[comment.id] ?? 0) + 1 }));
+                  }
+                  return next;
+                });
+              };
+
+              const submitCommentReply = async () => {
+                const text = (replyTexts[comment.id] ?? '').trim();
+                if (!text) return;
+                try {
+                  await api.askQuestion(id!, `@${comment.handle.slice(1)} ${text}`);
+                  queryClient.invalidateQueries({ queryKey: ['qa', id] });
+                  queryClient.invalidateQueries({ queryKey: ['post', id] });
+                  showToast('Reply posted!', 'success');
+                } catch {
+                  showToast('Failed to post reply', 'info');
+                }
+                setReplyTexts((prev) => ({ ...prev, [comment.id]: '' }));
+                setReplyingToComment(null);
+              };
+
+              return (
+                <div key={comment.id} className="border-b py-4" style={{ borderColor: colors.border }}>
+                  <div className="flex gap-3">
+                    <img src={comment.avatar} alt="" className="h-9 w-9 shrink-0 rounded-full object-cover grayscale" />
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-semibold" style={{ color: colors.primary }}>{comment.author}</span>
+                        <span className="text-xs" style={{ color: colors.muted }}>{comment.handle}</span>
+                        <span style={{ color: colors.muted }}>·</span>
+                        <span className="text-xs" style={{ color: colors.muted }}>{comment.time}</span>
+                      </div>
+                      <p className="mt-1 text-sm leading-5" style={{ color: colors.primary }}>{comment.body}</p>
+
+                      {/* Like + Reply actions */}
+                      <div className="mt-2 flex items-center gap-4">
+                        <button
+                          className="inline-flex items-center gap-1.5 text-xs transition-colors hover:text-rose-500"
+                          style={{ color: isLiked ? '#f43f5e' : colors.muted }}
+                          onClick={toggleCommentLike}
+                        >
+                          <Heart size={13} fill={isLiked ? '#f43f5e' : 'none'} />
+                          <span>{likeCount > 0 ? likeCount : ''}</span>
+                        </button>
+                        <button
+                          className="inline-flex items-center gap-1.5 text-xs transition-colors hover:text-[#e7e9ea]"
+                          style={{ color: isReplying ? '#e7e9ea' : colors.muted }}
+                          onClick={() => setReplyingToComment(isReplying ? null : comment.id)}
+                        >
+                          <MessageCircle size={13} />
+                          <span>Reply</span>
+                        </button>
+                      </div>
+
+                      {/* Inline reply composer */}
+                      {isReplying && (
+                        <div className="mt-3 flex gap-2">
+                          <img
+                            src={me?.avatar_url || 'https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=120&q=80'}
+                            alt=""
+                            className="h-7 w-7 shrink-0 rounded-full object-cover grayscale"
+                          />
+                          <div className="flex flex-1 items-center gap-2 rounded-xl border px-3 py-1.5" style={{ borderColor: colors.border, background: colors.card }}>
+                            <span className="text-xs font-semibold shrink-0" style={{ color: colors.verified }}>
+                              @{comment.handle.slice(1)}
+                            </span>
+                            <input
+                              autoFocus
+                              className="flex-1 bg-transparent text-sm outline-none"
+                              style={{ color: colors.primary }}
+                              placeholder="Write a reply…"
+                              value={replyTexts[comment.id] ?? ''}
+                              onChange={(e) => setReplyTexts((prev) => ({ ...prev, [comment.id]: e.target.value }))}
+                              onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); submitCommentReply(); } }}
+                            />
+                            <button
+                              className="grid h-6 w-6 place-items-center rounded-full transition-colors"
+                              style={{
+                                background: (replyTexts[comment.id] ?? '').trim() ? colors.verified : 'transparent',
+                                color: (replyTexts[comment.id] ?? '').trim() ? '#000' : colors.muted,
+                              }}
+                              disabled={!(replyTexts[comment.id] ?? '').trim()}
+                              onClick={submitCommentReply}
+                            >
+                              <Send size={13} />
+                            </button>
+                          </div>
+                        </div>
+                      )}
+                    </div>
                   </div>
-                  <p className="mt-1 text-sm leading-5" style={{ color: colors.primary }}>{comment.body}</p>
-                  <button className="mt-1.5 inline-flex items-center gap-1 text-xs transition-colors hover:text-rose-500" style={{ color: colors.muted }} onClick={() => showToast('Liked comment!', 'success')}>
-                    <Heart size={14} /> {comment.likes}
-                  </button>
                 </div>
-              </div>
-            ))
+              );
+            })
           )}
         </div>
       </div>

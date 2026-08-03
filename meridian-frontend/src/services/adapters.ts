@@ -11,6 +11,40 @@ import type { Notification, Post } from './mockApi';
 
 const AVATAR_IMG = (index: number) => `https://i.pravatar.cc/900?img=${(index % 70) + 1}`;
 
+/** Map a technology tag to a relevant Unsplash keyword for engineering imagery */
+const TAG_IMAGE_SEEDS: Record<string, string> = {
+  Rust:           'rust-systems',
+  Go:             'golang-server',
+  Python:         'python-programming',
+  TypeScript:     'typescript-code',
+  Kubernetes:     'kubernetes-cloud',
+  Docker:         'docker-containers',
+  PostgreSQL:     'database-server',
+  Redis:          'redis-cache',
+  Kafka:          'data-streaming',
+  AWS:            'cloud-computing',
+  GCP:            'google-cloud',
+  Azure:          'azure-cloud',
+  LLM:            'artificial-intelligence',
+  eBPF:           'linux-kernel',
+  React:          'react-frontend',
+  'Next.js':      'nextjs-web',
+  GraphQL:        'graphql-api',
+  Terraform:      'infrastructure-code',
+  Prometheus:     'monitoring-metrics',
+  Grafana:        'observability-dashboard',
+  PyTorch:        'machine-learning',
+  WebRTC:         'realtime-communication',
+  Elixir:         'elixir-concurrency',
+  'Linux Kernel': 'linux-systems',
+};
+
+function topicImageUrl(tags: string[], seed: number): string {
+  const tag = tags.find((t) => TAG_IMAGE_SEEDS[t]) ?? tags[0] ?? 'engineering';
+  const keyword = TAG_IMAGE_SEEDS[tag] ?? tag.toLowerCase().replace(/[^a-z0-9]/g, '-');
+  return `https://picsum.photos/seed/${keyword}-${seed % 97}/800/360`;
+}
+
 const truncate = (s: string, n: number) => (s.length > n ? `${s.slice(0, n - 1)}…` : s);
 
 export function relativeTime(iso: string): string {
@@ -30,6 +64,7 @@ export function relativeTime(iso: string): string {
 
 export function toPost(p: ApiPost): Post {
   const counts = p.reaction_counts || {};
+  const hasCover = (p.body?.includes('```') ?? false) || p.tags.length >= 2;
   return {
     id: p.id,
     title: p.title,
@@ -50,6 +85,7 @@ export function toPost(p: ApiPost): Post {
     forks: p.fork_count ?? 0,
     likes: counts.upvote ?? 0,
     impressions: (p.impact_score ?? 0) * 13 + (p.comment_count ?? 0) * 25,
+    coverImage: hasCover ? topicImageUrl(p.tags, p.impact_score ?? 0) : undefined,
   };
 }
 
@@ -210,7 +246,7 @@ export function toDiscover(d: ApiDiscover): DiscoverShape {
     title: p.title,
     status: p.citations.length > 0 ? 'Verified Claims' : 'Runtime Verified',
     ripples: p.impact_score ?? 0,
-    image: AVATAR_IMG((p.impact_score ?? 0) + i * 7),
+    image: topicImageUrl(p.tags, (p.impact_score ?? 0) + i * 13),
   }));
   const trending: TrendingRow[] = d.trending.map((p) => ({
     title: p.title,

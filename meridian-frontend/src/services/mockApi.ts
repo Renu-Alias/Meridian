@@ -19,6 +19,7 @@ export type Post = {
   impressions: number;
   code?: string;
   lineage?: string[];
+  coverImage?: string;
 };
 
 export type Notification = {
