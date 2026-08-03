@@ -1,6 +1,7 @@
-import { useState } from 'react';
-import { Bold, Code2, ImageIcon, Italic, GitBranch, Link as LinkIcon, List, ListOrdered, Table, X } from 'lucide-react';
+import { useRef, useState } from 'react';
+import { Bold, Code2, ImageIcon, Italic, GitBranch, Link as LinkIcon, List, ListOrdered, Plus, Table, X } from 'lucide-react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
 import { useUiStore } from '../store/uiStore';
 import { BrandMark } from '../components/Logo';
 import { api } from '../services/api';
@@ -20,26 +21,84 @@ export function EditorPage() {
   const showToast = useUiStore((s) => s.showToast);
   const [searchParams] = useSearchParams();
   const forkId = searchParams.get('fork');
-  const initialTitle = searchParams.get('title') || '';
-  const initialBody = searchParams.get('body') || '';
 
-  const [title, setTitle] = useState(initialTitle);
-  const [body, setBody] = useState(initialBody);
-  const [tags, setTags] = useState(forkId ? ['Fork'] : ['Rust', 'Wasm']);
-  const [impactScore, setImpactScore] = useState(75);
+  const [title, setTitle] = useState('');
+  const [body, setBody] = useState('');
+  const [tags, setTags] = useState<string[]>([]);
+  const [publishing, setPublishing] = useState(false);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const tagInputRef = useRef<HTMLInputElement>(null);
+
+  const { data: technologiesData = [] } = useQuery({ queryKey: ['technologies'], queryFn: api.getTechnologies });
 
   const removeTag = (tag: string) => {
     setTags((prev) => prev.filter((t) => t !== tag));
   };
 
-  const [publishing, setPublishing] = useState(false);
+  const addTag = (raw: string) => {
+    const clean = raw.trim().replace(/^#/, '');
+    if (clean && !tags.includes(clean)) setTags((prev) => [...prev, clean]);
+  };
+
+  const tagSuggestions = technologiesData
+    .map((t) => t.name)
+    .filter((name) => !tags.includes(name))
+    .slice(0, 4);
+
+  const insertFormatting = (before: string, after = before, placeholder = '') => {
+    const el = textareaRef.current;
+    if (!el) return;
+    const start = el.selectionStart ?? body.length;
+    const end = el.selectionEnd ?? body.length;
+    const selected = body.slice(start, end) || placeholder;
+    const next = body.slice(0, start) + before + selected + after + body.slice(end);
+    setBody(next);
+    requestAnimationFrame(() => {
+      el.focus();
+      el.setSelectionRange(start + before.length, start + before.length + selected.length);
+    });
+  };
+
+  const applyLinePrefix = (prefix: string) => {
+    const el = textareaRef.current;
+    if (!el) return;
+    const start = el.selectionStart ?? body.length;
+    const end = el.selectionEnd ?? body.length;
+    const selected = body.slice(start, end) || body;
+    const lineStart = body.lastIndexOf('\n', start - 1) + 1;
+    const next = body.slice(0, lineStart) + selected.split('\n').map((l) => `${prefix}${l}`).join('\n') + body.slice(end);
+    setBody(next);
+  };
+
+  const toolbar = [
+    { icon: Bold, label: 'Bold', action: () => insertFormatting('**', '**', 'bold text') },
+    { icon: Italic, label: 'Italic', action: () => insertFormatting('_', '_', 'italic text') },
+    { icon: LinkIcon, label: 'Link', action: () => insertFormatting('[', '](https://)', 'link text') },
+    { icon: List, label: 'Unordered List', action: () => applyLinePrefix('- ') },
+    { icon: ListOrdered, label: 'Ordered List', action: () => applyLinePrefix('1. ') },
+    { icon: Code2, label: 'Code Block', action: () => insertFormatting('```\n', '\n```', '// code') },
+    { icon: ImageIcon, label: 'Image', action: () => insertFormatting('![', '](https://)', 'alt text') },
+    { icon: Table, label: 'Table', action: () => insertFormatting('| Col A | Col B |\n|---|---|\n| cell | cell |\n', '', '') },
+  ];
 
   const publish = async () => {
+    if (!body.trim() && !title.trim()) {
+      showToast('Add a title and some content first', 'info');
+      return;
+    }
     setPublishing(true);
     try {
       let created;
       if (forkId) {
         created = await api.forkPost(forkId);
+        if (title.trim() || body.trim() || tags.length > 0) {
+          created = await api.updatePost(created.id, {
+            title: title.trim() || created.title,
+            body: body.trim() || created.body,
+            excerpt: body.trim() ? body.trim().slice(0, 200) : created.excerpt,
+            tags,
+          });
+        }
       } else {
         created = await api.createPost({
           title: title.trim() || 'Untitled patch',
@@ -109,52 +168,72 @@ export function EditorPage() {
             />
           </div>
 
-          {/* Stack Tags + Impact Score */}
-          <div className="mt-5 grid gap-5 md:grid-cols-2">
-            {/* Stack Tags */}
-            <div>
-              <label className="text-sm font-semibold" style={{ color: colors.secondary }}>Stack Tags</label>
-              <div
-                className="mt-1.5 flex flex-wrap items-center gap-1.5 rounded-lg border px-3 py-2"
-                style={{ background: '#000', borderColor: colors.border, minHeight: '42px' }}
-              >
-                {tags.map((tag) => (
-                  <span
-                    key={tag}
-                    className="inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-xs font-semibold"
-                    style={{ background: 'rgba(45,212,163,0.12)', color: colors.mint }}
-                  >
-                    {tag}
-                    <button onClick={() => removeTag(tag)} className="hover:brightness-150" aria-label={`Remove ${tag}`}>
-                      <X size={13} />
-                    </button>
-                  </span>
-                ))}
-                <span className="text-xs" style={{ color: colors.muted }}>Add tech...</span>
-              </div>
-            </div>
-
-            {/* Expected Impact Score */}
-            <div>
-              <label className="text-sm font-semibold" style={{ color: colors.secondary }}>Expected Impact Score (1-100)</label>
-              <div className="mt-1.5 flex items-center gap-4">
-                <input
-                  type="range"
-                  min={1}
-                  max={100}
-                  value={impactScore}
-                  onChange={(e) => setImpactScore(Number(e.target.value))}
-                  className="flex-1 accent-[#2DD4A3]"
-                  style={{ height: '6px', cursor: 'pointer', accentColor: colors.mint }}
-                />
+          {/* Stack Tags */}
+          <div className="mt-5">
+            <label className="text-sm font-semibold" style={{ color: colors.secondary }}>Stack Tags</label>
+            <div
+              className="mt-1.5 flex flex-wrap items-center gap-1.5 rounded-lg border px-3 py-2"
+              style={{ background: '#000', borderColor: colors.border, minHeight: '42px' }}
+            >
+              {tags.map((tag) => (
                 <span
-                  className="inline-flex items-center rounded-md border px-3 py-1 font-mono text-sm font-bold"
-                  style={{ borderColor: 'rgba(45,212,163,0.3)', color: colors.mint, background: 'rgba(45,212,163,0.06)' }}
+                  key={tag}
+                  className="inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-xs font-semibold"
+                  style={{ background: 'rgba(45,212,163,0.12)', color: colors.mint }}
                 >
-                  {impactScore}%
+                  {tag}
+                  <button onClick={() => removeTag(tag)} className="hover:brightness-150" aria-label={`Remove ${tag}`}>
+                    <X size={13} />
+                  </button>
                 </span>
-              </div>
+              ))}
+              <input
+                ref={tagInputRef}
+                className="min-w-[120px] flex-1 bg-transparent text-sm outline-none"
+                style={{ color: colors.primary }}
+                placeholder="Add tech (e.g. Rust)…"
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ',') {
+                    e.preventDefault();
+                    addTag(e.currentTarget.value);
+                    e.currentTarget.value = '';
+                  }
+                }}
+                onBlur={(e) => {
+                  if (e.currentTarget.value.trim()) {
+                    addTag(e.currentTarget.value);
+                    e.currentTarget.value = '';
+                  }
+                }}
+              />
+              <button
+                className="grid h-7 w-7 shrink-0 place-items-center rounded-full transition-colors hover:bg-[#1a1d24]"
+                style={{ color: colors.mint, border: '1px solid #2f3336' }}
+                aria-label="Add technology"
+                onClick={() => {
+                  if (tagInputRef.current && tagInputRef.current.value.trim()) {
+                    addTag(tagInputRef.current.value);
+                    tagInputRef.current.value = '';
+                  }
+                }}
+              >
+                <Plus size={15} />
+              </button>
             </div>
+            {tagSuggestions.length > 0 && (
+              <div className="mt-2 flex flex-wrap gap-1.5">
+                {tagSuggestions.map((s) => (
+                  <button
+                    key={s}
+                    className="rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors hover:bg-[#2DD4A3]/20"
+                    style={{ borderColor: colors.border, color: colors.mint }}
+                    onClick={() => addTag(s)}
+                  >
+                    + {s}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
         </section>
 
@@ -168,132 +247,30 @@ export function EditorPage() {
             className="flex flex-wrap items-center gap-1 border-b px-4 py-2"
             style={{ borderColor: colors.border }}
           >
-            {[Bold, Italic, LinkIcon].map((Icon, i) => (
+            {toolbar.map(({ icon: Icon, label, action }) => (
               <button
-                key={i}
+                key={label}
                 className="grid h-8 w-8 place-items-center rounded transition-colors hover:bg-[#1a1d24]"
                 style={{ color: colors.secondary }}
-                aria-label={['Bold', 'Italic', 'Link'][i]}
+                aria-label={label}
+                title={label}
+                onClick={action}
               >
                 <Icon size={16} />
               </button>
             ))}
-            <span className="mx-1 h-5 w-px" style={{ background: colors.border }} />
-            {[List, ListOrdered].map((Icon, i) => (
-              <button
-                key={i}
-                className="grid h-8 w-8 place-items-center rounded transition-colors hover:bg-[#1a1d24]"
-                style={{ color: colors.secondary }}
-                aria-label={['Unordered List', 'Ordered List'][i]}
-              >
-                <Icon size={16} />
-              </button>
-            ))}
-            <button
-              className="grid h-8 w-8 place-items-center rounded"
-              style={{ background: 'rgba(45,212,163,0.15)', color: colors.mint }}
-              aria-label="Code Block"
-            >
-              <Code2 size={16} />
-            </button>
-            {[ImageIcon, Table].map((Icon, i) => (
-              <button
-                key={i + 3}
-                className="grid h-8 w-8 place-items-center rounded transition-colors hover:bg-[#1a1d24]"
-                style={{ color: colors.secondary }}
-                aria-label={['Image', 'Table'][i]}
-              >
-                <Icon size={16} />
-              </button>
-            ))}
-            <span className="ml-auto text-xs" style={{ color: 'rgba(45,212,163,0.6)' }}>• Draft Saved</span>
+            <span className="ml-auto font-mono text-xs" style={{ color: colors.muted }}>{body.length} chars</span>
           </div>
 
           {/* Textarea */}
           <textarea
-            className="min-h-[200px] flex-1 resize-none bg-transparent px-6 py-5 text-base leading-7 outline-none"
+            ref={textareaRef}
+            className="min-h-[300px] flex-1 resize-none bg-transparent px-6 py-5 text-base leading-7 outline-none"
             style={{ color: colors.primary }}
             placeholder="Describe your technical findings or architectural proposal here..."
             value={body}
             onChange={(e) => setBody(e.target.value)}
           />
-
-          {/* LIVE INTEGRATED CODE BLOCK */}
-          <div
-            className="mx-5 mb-5 overflow-hidden rounded-lg border"
-            style={{ borderColor: colors.border }}
-          >
-            {/* Code block header */}
-            <div
-              className="flex items-center justify-between px-4 py-2 text-xs font-semibold"
-              style={{ background: '#0a0c10', borderBottom: `1px solid ${colors.border}`, color: colors.secondary }}
-            >
-              <div className="flex items-center gap-2">
-                <Code2 size={14} style={{ color: colors.mint }} />
-                <span>CODE BLOCK: performance_module.rs</span>
-              </div>
-              <span
-                className="rounded px-2 py-0.5 font-mono text-[11px]"
-                style={{ background: 'rgba(45,212,163,0.1)', color: colors.mint }}
-              >
-                Rust ▾
-              </span>
-            </div>
-            {/* Syntax area */}
-            <div className="flex font-mono text-[13px] leading-6" style={{ background: '#0a0c10' }}>
-              <div className="select-none px-3 py-3 text-right" style={{ color: colors.muted }}>
-                {[1, 2, 3, 4, 5].map((n) => (
-                  <div key={n}>{n}</div>
-                ))}
-              </div>
-              <pre className="flex-1 overflow-x-auto py-3 pr-4">
-                <code
-                  dangerouslySetInnerHTML={{
-                    __html: [
-                      '<span style="color:#c9d1d9">pub </span>',
-                      '<span style="color:#d2a8ff">fn</span>',
-                      '<span style="color:#c9d1d9"> </span>',
-                      '<span style="color:#ffa657">optimize_pipeline</span>',
-                      '<span style="color:#c9d1d9">(</span>',
-                      '<span style="color:#79c0ff">config</span>',
-                      '<span style="color:#c9d1d9">: &amp;</span>',
-                      '<span style="color:#79c0ff">mut</span>',
-                      '<span style="color:#c9d1d9"> </span>',
-                      '<span style="color:#ffa657">PipelineConfig</span>',
-                      '<span style="color:#c9d1d9">) {</span>',
-                      '\n  ',
-                      '<span style="color:#7ee787">// Initialize shader cache</span>',
-                      '\n  ',
-                      '<span style="color:#d2a8ff">let</span>',
-                      '<span style="color:#c9d1d9"> </span>',
-                      '<span style="color:#79c0ff">cache</span>',
-                      '<span style="color:#c9d1d9"> = </span>',
-                      '<span style="color:#ffa657">ShaderCache::new</span>',
-                      '<span style="color:#c9d1d9">(</span>',
-                      '<span style="color:#79c0ff">config</span>',
-                      '<span style="color:#c9d1d9">.</span>',
-                      '<span style="color:#79c0ff">device</span>',
-                      '<span style="color:#c9d1d9">);</span>',
-                      '<span style="color:#7ee787">// Warm with common kernels</span>',
-                      '\n\n  ',
-                      '<span style="color:#d2a8ff">macro_rules!</span>',
-                      '<span style="color:#79c0ff"> profile_scope </span>',
-                      '<span style="color:#c9d1d9">{</span>',
-                      '\n      ',
-                      '<span style="color:#ffa657">trace!</span>',
-                      '<span style="color:#c9d1d9">(</span>',
-                      '<span style="color:#a5d6ff">"pipeline_optimize"</span>',
-                      '<span style="color:#c9d1d9">, $</span>',
-                      '<span style="color:#79c0ff">label</span>',
-                      '<span style="color:#c9d1d9">);</span>',
-                      '\n  }',
-                      '\n}',
-                    ].join(''),
-                  }}
-                />
-              </pre>
-            </div>
-          </div>
         </section>
       </div>
     </main>

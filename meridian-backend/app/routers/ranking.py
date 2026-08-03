@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 from app.database import get_db
 from app.models.post import Post
 from app.models.skills import CredibilityScore
-from app.models.user import User
+from app.models.user import StackProfile, User
 
 router = APIRouter(prefix="/ranking", tags=["ranking"])
 
@@ -59,6 +59,7 @@ def ranking_authors(
             "username": s.user.username if s.user else "",
             "display_name": s.user.display_name if s.user else "",
             "avatar_url": s.user.avatar_url or "" if s.user else "",
+            "stack": [sp.technology for sp in db.query(StackProfile).filter(StackProfile.user_id == s.user_id).all()],
         }
         for s in scores
     ]

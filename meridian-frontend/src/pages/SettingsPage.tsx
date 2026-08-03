@@ -54,6 +54,7 @@ export function SettingsPage() {
   const [editingField, setEditingField] = useState<string | null>(null);
   const [editValue, setEditValue] = useState('');
   const [showDangerConfirm, setShowDangerConfirm] = useState<'deactivate' | 'delete' | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   const queryClient = useQueryClient();
   const { data: stackData = [] } = useQuery({ queryKey: ['stack'], queryFn: api.getStack });
@@ -271,20 +272,29 @@ export function SettingsPage() {
                 <p className="text-sm" style={{ color: '#536471' }}>Permanently delete your account and all associated data. This cannot be undone.</p>
               </div>
               <button
-                className="rounded-md px-4 py-2 text-sm font-bold transition-colors"
+                className="rounded-md px-4 py-2 text-sm font-bold transition-colors disabled:opacity-50"
+                disabled={deleting}
                 style={showDangerConfirm === 'delete' ? { background: '#FF6B6B', color: '#000' } : { background: 'rgba(255,107,107,0.1)', color: '#FF6B6B' }}
-                onClick={() => {
+                onClick={async () => {
                   if (showDangerConfirm === 'delete') {
-                    showToast('Account deleted', 'info');
-                    setShowDangerConfirm(null);
-                    navigate('/');
+                    setDeleting(true);
+                    try {
+                      await api.deleteAccount();
+                      logout();
+                      showToast('Account permanently deleted', 'success');
+                      navigate('/');
+                    } catch {
+                      showToast('Failed to delete account', 'info');
+                    } finally {
+                      setDeleting(false);
+                    }
                   } else {
                     setShowDangerConfirm('delete');
                     showToast('Click again to confirm deletion', 'info');
                   }
                 }}
               >
-                {showDangerConfirm === 'delete' ? 'Confirm delete' : 'Delete account'}
+                {deleting ? 'Deleting...' : showDangerConfirm === 'delete' ? 'Confirm delete' : 'Delete account'}
               </button>
             </div>
           </div>

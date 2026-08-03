@@ -1,7 +1,9 @@
 import { Edit3, GraduationCap } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
 import { ContributionGraph } from './ContributionGraph';
 import { useUiStore } from '../store/uiStore';
+import { api } from '../services/api';
 
 const colors = {
   card: '#151515',
@@ -15,6 +17,8 @@ const colors = {
 export function RightPanel() {
   const navigate = useNavigate();
   const activeStack = useUiStore((state) => state.activeStack);
+  const { data: stackData = [] } = useQuery({ queryKey: ['stack'], queryFn: api.getStack });
+  const stack = stackData.length > 0 ? stackData.map((s) => s.technology) : activeStack;
 
   return (
     <aside className="hidden w-[330px] shrink-0 self-start border-l p-5 xl:sticky xl:top-0 xl:block" style={{ borderColor: colors.border, background: 'transparent' }}>
@@ -22,16 +26,19 @@ export function RightPanel() {
       <section className="rounded-xl p-5" style={{ background: colors.card, border: `1px solid ${colors.border}` }}>
         <div className="flex items-center justify-between">
           <h2 className="text-sm font-bold" style={{ color: colors.primary }}>Your Stack</h2>
-          <button aria-label="Edit stack" className="transition-colors" style={{ color: colors.muted }}>
+          <button aria-label="Edit stack" className="transition-colors" style={{ color: colors.muted }} onClick={() => navigate('/settings')}>
             <Edit3 size={15} />
           </button>
         </div>
         <div className="mt-4 flex flex-wrap gap-2">
-          {activeStack.map((tag) => (
+          {stack.map((tag) => (
             <span key={tag} className="rounded-full px-3 py-1 text-sm font-medium" style={{ background: 'rgba(45,212,163,0.12)', color: colors.verified }}>
               {tag}
             </span>
           ))}
+          {stack.length === 0 && (
+            <span className="text-sm" style={{ color: colors.muted }}>No technologies yet — add them in Settings.</span>
+          )}
         </div>
         <div className="mt-6 flex items-center justify-between font-mono text-[11px] uppercase tracking-[0.15em]" style={{ color: colors.muted }}>
           <span>Stack Velocity</span>

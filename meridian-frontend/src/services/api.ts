@@ -156,6 +156,16 @@ export type ApiSuggestion = {
   posts: { id: string; title: string; excerpt: string; author: AuthorBrief; tags: string[] }[];
 };
 
+export type ApiRankAuthor = {
+  user_id: string;
+  credibility_score: number;
+  verified_claims: number;
+  username: string;
+  display_name: string;
+  avatar_url: string;
+  stack: string[];
+};
+
 export const api = {
   login: (email: string, password: string) =>
     request<{ access_token: string; token_type: string; user_id: string }>('/auth/login', {
@@ -226,6 +236,12 @@ export const api = {
 
   publishPost: (id: string) => request<ApiPost>(`/posts/${id}/publish`, { method: 'POST' }),
 
+  updatePost: (id: string, payload: { title?: string; body?: string; excerpt?: string; tags?: string[] }) =>
+    request<ApiPost>(`/posts/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(payload),
+    }),
+
   forkPost: (postId: string) => request<ApiPost>(`/posts/${postId}/fork`, { method: 'POST' }),
 
   getNotifications: (opts: { category?: string; offset?: number; limit?: number } = {}) =>
@@ -248,4 +264,9 @@ export const api = {
     ),
 
   getProfile: (username: string) => request<ApiProfile>(`/users/profile/${username}`),
+
+  getRankingAuthors: (limit = 100) =>
+    request<ApiRankAuthor[]>(`/ranking/authors${queryString({ limit })}`),
+
+  deleteAccount: () => request<{ detail: string }>('/account/delete', { method: 'DELETE' }),
 };

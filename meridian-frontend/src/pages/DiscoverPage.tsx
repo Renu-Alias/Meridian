@@ -19,10 +19,12 @@ const colors = {
 
 export function DiscoverPage() {
   const { data } = useQuery({ queryKey: ['discover'], queryFn: () => api.getDiscover().then(toDiscover) });
+  const { data: stackData = [] } = useQuery({ queryKey: ['stack'], queryFn: api.getStack });
   const navigate = useNavigate();
   const showToast = useUiStore((s) => s.showToast);
   const [showExperts, setShowExperts] = useState(false);
   if (!data) return <div className="p-8" style={{ color: colors.secondary }}>Loading discovery graph...</div>;
+  const stackChips = stackData.map((s) => s.technology);
 
   return (
     <div className="mx-auto max-w-5xl p-5 lg:p-6">
@@ -33,12 +35,11 @@ export function DiscoverPage() {
       </div>
       <div className="mt-2 flex flex-wrap items-center gap-3">
         <h2 className="text-3xl font-black" style={{ color: colors.primary }}>Stack-Matched for You</h2>
-        <span className="rounded-full px-3 py-1 font-mono text-xs font-bold" style={{ background: 'rgba(45,212,163,0.14)', color: colors.verified }}>
-          Go · Kubernetes
-        </span>
-        <span className="rounded-full px-3 py-1 font-mono text-xs" style={{ background: 'rgba(45,212,163,0.14)', color: colors.verified }}>
-          Distributed Systems
-        </span>
+        {stackChips.slice(0, 3).map((tech) => (
+          <span key={tech} className="rounded-full px-3 py-1 font-mono text-xs font-bold" style={{ background: 'rgba(45,212,163,0.14)', color: colors.verified }}>
+            {tech}
+          </span>
+        ))}
       </div>
 
       {/* Featured */}

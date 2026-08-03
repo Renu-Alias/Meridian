@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from app.database import get_db
@@ -47,8 +47,10 @@ def request_payout(
     wallet = ensure_wallet(user.id, db)
     if amount <= 0:
         amount = wallet.balance
+    if wallet.balance <= 0 or amount <= 0:
+        raise HTTPException(status_code=400, detail="No balance available to pay out")
     if wallet.balance < amount:
-        return {"detail": "Insufficient balance", "balance": wallet.balance}
+        raise HTTPException(status_code=400, detail="Insufficient balance")
     wallet.balance -= amount
     wallet.pending += amount
     txn = Transaction(

@@ -363,8 +363,6 @@ def review_patch(
     if req.status == "approved":
         version_num = sum(1 for v in post.versions) + 1
         post.version = f"v{version_num}.0"
-        old_body = post.body
-        post.body = req_status = patch.diff or old_body
         new_version = PostVersion(
             post_id=post.id,
             version=post.version,
