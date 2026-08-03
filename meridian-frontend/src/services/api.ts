@@ -137,6 +137,25 @@ export type ApiDiscover = {
   mentors: { id: string; display_name: string; username: string; bio: string; avatar_url: string; stack: string[] }[];
 };
 
+export type ApiSearchUser = {
+  id: string;
+  username: string;
+  display_name: string;
+  avatar_url: string;
+  role: string;
+  seniority: string;
+  bio: string;
+  stack: string[];
+};
+
+export type ApiSearchTopic = { name: string; category: string; count: number };
+
+export type ApiSuggestion = {
+  topics: ApiSearchTopic[];
+  users: ApiSearchUser[];
+  posts: { id: string; title: string; excerpt: string; author: AuthorBrief; tags: string[] }[];
+};
+
 export const api = {
   login: (email: string, password: string) =>
     request<{ access_token: string; token_type: string; user_id: string }>('/auth/login', {
@@ -155,8 +174,31 @@ export const api = {
       '/auth/me',
     ),
 
-  getFeed: (opts: { filter?: string; offset?: number; limit?: number } = {}) =>
-    request<FeedResponse>(`/feed${queryString({ filter: opts.filter, offset: opts.offset, limit: opts.limit })}`),
+  getFeed: (opts: { filter?: string; tag?: string; offset?: number; limit?: number } = {}) =>
+    request<FeedResponse>(`/feed${queryString({ filter: opts.filter, tag: opts.tag, offset: opts.offset, limit: opts.limit })}`),
+
+  searchPosts: (q: string, limit = 20) =>
+    request<FeedResponse>(`/search/posts${queryString({ q, limit })}`),
+
+  searchUsers: (q: string, limit = 20) =>
+    request<ApiSearchUser[]>(`/search/users${queryString({ q, limit })}`),
+
+  searchTopics: (q: string, limit = 20) =>
+    request<ApiSearchTopic[]>(`/search/topics${queryString({ q, limit })}`),
+
+  suggest: (q: string, limit = 5) =>
+    request<ApiSuggestion>(`/search/suggest${queryString({ q, limit })}`),
+
+  getStack: () => request<{ technology: string }[]>(`/users/me/stack`),
+
+  updateStack: (technologies: string[]) =>
+    request<{ technology: string }[]>(`/users/me/stack`, {
+      method: 'PUT',
+      body: JSON.stringify({ technologies }),
+    }),
+
+  getTechnologies: () =>
+    request<{ id: string; name: string; category: string }[]>(`/users/technologies`),
 
   getDiscover: () => request<ApiDiscover>('/feed/discover'),
 

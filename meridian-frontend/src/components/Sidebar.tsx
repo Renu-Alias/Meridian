@@ -1,4 +1,4 @@
-import { Bell, Compass, Edit3, Home, Settings, User, WalletCards, X } from 'lucide-react';
+import { Bell, Compass, Edit3, Home, Settings, Trophy, User, X } from 'lucide-react';
 import { NavLink } from 'react-router-dom';
 import { BrandMark } from './Logo';
 import { useUiStore } from '../store/uiStore';
@@ -21,7 +21,7 @@ export function Sidebar() {
     { to: '/feed', label: 'Feed', icon: Home },
     { to: '/discover', label: 'Discover', icon: Compass },
     { to: '/notifications', label: 'Notifications', icon: Bell },
-    { to: '/wallet', label: 'Wallet', icon: WalletCards },
+    { to: '/leaderboard', label: 'Leaderboard', icon: Trophy },
     ...(me?.username ? [{ to: `/profile/${me.username}`, label: 'Profile', icon: User }] : []),
     { to: '/editor/new', label: 'Write', icon: Edit3 },
     { to: '/settings', label: 'Settings', icon: Settings },

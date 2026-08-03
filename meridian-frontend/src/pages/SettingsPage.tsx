@@ -1,7 +1,9 @@
-import { useState } from 'react';
-import { Bell, Eye, Key, LogOut, Shield, ShieldAlert, User } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { Bell, Check, Code2, Eye, Key, LogOut, Plus, Shield, ShieldAlert, User, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useUiStore, type Me } from '../store/uiStore';
+import { api } from '../services/api';
 
 const initialSections = [
   {
@@ -52,6 +54,44 @@ export function SettingsPage() {
   const [editingField, setEditingField] = useState<string | null>(null);
   const [editValue, setEditValue] = useState('');
   const [showDangerConfirm, setShowDangerConfirm] = useState<'deactivate' | 'delete' | null>(null);
+
+  const queryClient = useQueryClient();
+  const { data: stackData = [] } = useQuery({ queryKey: ['stack'], queryFn: api.getStack });
+  const { data: technologiesData = [] } = useQuery({ queryKey: ['technologies'], queryFn: api.getTechnologies });
+  const [stackChips, setStackChips] = useState<string[]>([]);
+  const [techInput, setTechInput] = useState('');
+  const [savingStack, setSavingStack] = useState(false);
+
+  useEffect(() => {
+    if (stackData.length > 0) {
+      setStackChips((prev) => (prev.length === 0 ? stackData.map((s) => s.technology) : prev));
+    }
+  }, [stackData]);
+
+  const stackSuggestions = technologiesData
+    .map((t) => t.name)
+    .filter((name) => name.toLowerCase().includes(techInput.trim().toLowerCase()) && !stackChips.includes(name))
+    .slice(0, 6);
+
+  const addTech = (t: string) => {
+    const clean = t.trim();
+    if (clean && !stackChips.includes(clean)) setStackChips((prev) => [...prev, clean]);
+    setTechInput('');
+  };
+
+  const saveStack = async () => {
+    setSavingStack(true);
+    try {
+      await api.updateStack(stackChips);
+      queryClient.invalidateQueries({ queryKey: ['stack'] });
+      queryClient.invalidateQueries({ queryKey: ['profile'] });
+      showToast('Tech stack updated', 'success');
+    } catch {
+      showToast('Failed to save tech stack', 'info');
+    } finally {
+      setSavingStack(false);
+    }
+  };
 
   const startEdit = (fieldKey: string, currentValue: string) => {
     setEditingField(fieldKey);
@@ -118,6 +158,80 @@ export function SettingsPage() {
           </section>
         ))}
       </div>
+
+      {/* Tech stack */}
+      <section className="rounded-xl border border-[#2f3336] bg-[#151515]">
+        <div className="flex items-center justify-between border-b border-[#2f3336] px-6 py-4">
+          <div className="flex items-center gap-3">
+            <Code2 size={18} style={{ color: '#2DD4A3' }} />
+            <h2 className="text-lg font-bold">Tech stack</h2>
+          </div>
+          <button
+            className="flex h-8 items-center gap-1.5 rounded-full px-4 text-xs font-bold transition-all hover:brightness-110 disabled:opacity-50"
+            style={{ background: '#2DD4A3', color: '#0a0a0a' }}
+            disabled={savingStack}
+            onClick={saveStack}
+          >
+            <Check size={14} /> {savingStack ? 'Saving…' : 'Save'}
+          </button>
+        </div>
+        <div className="px-6 py-4">
+          <div className="flex flex-wrap gap-2">
+            {stackChips.map((tech) => (
+              <span
+                key={tech}
+                className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-sm font-semibold"
+                style={{ background: 'rgba(45,212,163,0.14)', color: '#2DD4A3' }}
+              >
+                {tech}
+                <button
+                  aria-label={`Remove ${tech}`}
+                  className="grid h-4 w-4 place-items-center rounded-full transition-colors hover:bg-black/30"
+                  style={{ color: '#536471' }}
+                  onClick={() => setStackChips((prev) => prev.filter((t) => t !== tech))}
+                >
+                  <X size={11} />
+                </button>
+              </span>
+            ))}
+            {stackChips.length === 0 && (
+              <p className="text-sm" style={{ color: '#536471' }}>No technologies added yet.</p>
+            )}
+          </div>
+          <div className="mt-3 flex items-center gap-2">
+            <input
+              className="flex-1 rounded-md border border-[#2f3336] bg-[#0a0a0a] px-3 py-1.5 text-sm outline-none focus:border-[#2DD4A3]"
+              style={{ color: '#e7e9ea' }}
+              placeholder="Add a technology (e.g. Go, PostgreSQL)..."
+              value={techInput}
+              onChange={(e) => setTechInput(e.target.value)}
+              onKeyDown={(e) => { if (e.key === 'Enter') addTech(techInput); }}
+            />
+            <button
+              className="grid h-8 w-8 place-items-center rounded-full transition-colors hover:bg-[#1a1d24]"
+              style={{ color: '#2DD4A3', border: '1px solid #2f3336' }}
+              aria-label="Add technology"
+              onClick={() => addTech(techInput)}
+            >
+              <Plus size={15} />
+            </button>
+          </div>
+          {techInput.trim() && stackSuggestions.length > 0 && (
+            <div className="mt-2 flex flex-wrap gap-1.5">
+              {stackSuggestions.map((s) => (
+                <button
+                  key={s}
+                  className="rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors hover:bg-[#2DD4A3]/20"
+                  style={{ borderColor: '#2f3336', color: '#2DD4A3' }}
+                  onClick={() => addTech(s)}
+                >
+                  {s}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      </section>
 
       {/* Log out */}
       <section className="mt-6 rounded-xl border border-[#2f3336] bg-[#151515] p-6">

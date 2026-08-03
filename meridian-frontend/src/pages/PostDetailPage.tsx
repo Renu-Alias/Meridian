@@ -331,9 +331,14 @@ export function PostDetailPage() {
         {/* Tags */}
         <div className="mt-5 flex flex-wrap gap-2">
           {post.tags.map((tag) => (
-            <span key={tag} className="rounded-full px-3 py-1 text-sm font-semibold" style={{ background: 'rgba(45,212,163,0.14)', color: colors.verified }}>
-              {tag}
-            </span>
+            <button
+              key={tag}
+              className="rounded-full px-3 py-1 text-sm font-semibold transition-colors hover:bg-[#2DD4A3]/25"
+              style={{ background: 'rgba(45,212,163,0.14)', color: colors.verified }}
+              onClick={() => navigate(`/tag/${encodeURIComponent(tag)}`)}
+            >
+              #{tag}
+            </button>
           ))}
         </div>
 

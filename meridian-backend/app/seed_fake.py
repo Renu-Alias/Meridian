@@ -556,18 +556,34 @@ def seed(db, num_users: int, num_posts: int) -> dict:
 
     published = [p for p in posts if p.status == "published"]
 
+    # A handful of posts get boosted into "popular" territory
+    popular = set(random.sample(published, min(12, len(published))))
+    for p in popular:
+        p.impact_score = int((p.impact_score or 0) * random.uniform(2.5, 4.5))
+    db.commit()
+
     # Reactions (likes)
     reactions = 0
     for post in published:
-        sample = random.sample(users, min(random.randint(0, 24), len(users)))
+        if post in popular:
+            max_reactions = random.randint(60, 200)
+        else:
+            max_reactions = random.randint(0, 24)
+        sample = random.sample(users, min(max_reactions, len(users)))
         for user in sample:
             if user.id == post.author_id:
                 continue
+            if post in popular:
+                reaction_type = random.choices(
+                    VALID_REACTION_TYPES, weights=[10, 10, 10, 70], k=1
+                )[0]
+            else:
+                reaction_type = random.choice(VALID_REACTION_TYPES)
             db.add(
                 Reaction(
                     post_id=post.id,
                     user_id=user.id,
-                    reaction_type=random.choice(VALID_REACTION_TYPES),
+                    reaction_type=reaction_type,
                     created_at=post.published_at + timedelta(hours=random.uniform(0, 300)),
                 )
             )
@@ -578,7 +594,8 @@ def seed(db, num_users: int, num_posts: int) -> dict:
     # Comments / Q&A threads
     comments = 0
     for post in published:
-        for _ in range(random.randint(0, 8)):
+        max_comments = random.randint(12, 40) if post in popular else random.randint(0, 8)
+        for _ in range(max_comments):
             make_comment(db, faker, post, random.choice(users), post.published_at + timedelta(hours=random.uniform(1, 300)), users)
             comments += 1
     db.commit()
@@ -587,7 +604,8 @@ def seed(db, num_users: int, num_posts: int) -> dict:
     # Forks (each fork also creates a fork post)
     forks = 0
     for post in published:
-        for _ in range(random.randint(0, 3)):
+        max_forks = random.randint(6, 18) if post in popular else random.randint(0, 3)
+        for _ in range(max_forks):
             forker = random.choice(users)
             if forker.id == post.author_id:
                 continue
@@ -872,7 +890,7 @@ def seed(db, num_users: int, num_posts: int) -> dict:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Seed Meridian with realistic fake data.")
-    parser.add_argument("--users", type=int, default=25, help="number of fake accounts (default 25)")
+    parser.add_argument("--users", type=int, default=80, help="number of fake accounts (default 80)")
     parser.add_argument("--posts", type=int, default=60, help="number of fake posts (default 60)")
     parser.add_argument("--seed", type=int, default=None, help="random seed for reproducibility")
     parser.add_argument(

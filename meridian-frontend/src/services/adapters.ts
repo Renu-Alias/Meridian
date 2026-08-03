@@ -11,38 +11,63 @@ import type { Notification, Post } from './mockApi';
 
 const AVATAR_IMG = (index: number) => `https://i.pravatar.cc/900?img=${(index % 70) + 1}`;
 
-/** Map a technology tag to a relevant Unsplash keyword for engineering imagery */
-const TAG_IMAGE_SEEDS: Record<string, string> = {
-  Rust:           'rust-systems',
-  Go:             'golang-server',
-  Python:         'python-programming',
-  TypeScript:     'typescript-code',
-  Kubernetes:     'kubernetes-cloud',
-  Docker:         'docker-containers',
-  PostgreSQL:     'database-server',
-  Redis:          'redis-cache',
-  Kafka:          'data-streaming',
-  AWS:            'cloud-computing',
-  GCP:            'google-cloud',
-  Azure:          'azure-cloud',
-  LLM:            'artificial-intelligence',
-  eBPF:           'linux-kernel',
-  React:          'react-frontend',
-  'Next.js':      'nextjs-web',
-  GraphQL:        'graphql-api',
-  Terraform:      'infrastructure-code',
-  Prometheus:     'monitoring-metrics',
-  Grafana:        'observability-dashboard',
-  PyTorch:        'machine-learning',
-  WebRTC:         'realtime-communication',
-  Elixir:         'elixir-concurrency',
-  'Linux Kernel': 'linux-systems',
+// Stable Unsplash engineering imagery, keyed by theme. Each URL maps to a
+// fixed, topic-relevant photo so post covers no longer render random images.
+const THEME_IMG: Record<string, string> = {
+  code:    'https://images.unsplash.com/photo-1461749280684-dccba630e2f6?auto=format&fit=crop&w=800&q=80',
+  systems: 'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=800&q=80',
+  web:     'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&w=800&q=80',
+  laptop:  'https://images.unsplash.com/photo-1515879218367-8466d910aaa4?auto=format&fit=crop&w=800&q=80',
+  cloud:   'https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=800&q=80',
+  server:  'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&w=800&q=80',
+  ai:      'https://images.unsplash.com/photo-1620712943543-bcc4688e7485?auto=format&fit=crop&w=800&q=80',
+  network: 'https://images.unsplash.com/photo-1544197150-b99a580bb7a8?auto=format&fit=crop&w=800&q=80',
+  circuit: 'https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=800&q=80',
+  ops:     'https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=800&q=80',
+};
+
+/** Map a technology tag to the most contextually relevant theme image. */
+const TAG_THEME: Record<string, string> = {
+  Rust:           'systems',
+  'Linux Kernel': 'systems',
+  eBPF:           'systems',
+  Elixir:         'systems',
+  Go:             'web',
+  Python:         'laptop',
+  TypeScript:     'code',
+  React:          'web',
+  'Next.js':      'web',
+  GraphQL:        'code',
+  WebRTC:         'network',
+  LLM:            'ai',
+  PyTorch:        'ai',
+  Kubernetes:     'cloud',
+  Docker:         'cloud',
+  Terraform:      'cloud',
+  AWS:            'cloud',
+  GCP:            'cloud',
+  Azure:          'cloud',
+  PostgreSQL:     'server',
+  Redis:          'server',
+  Kafka:          'server',
+  Prometheus:     'server',
+  Grafana:        'server',
+};
+
+const FALLBACK_THEMES = ['code', 'server', 'cloud', 'circuit', 'web', 'network', 'ai', 'ops'];
+
+const hashString = (s: string) => {
+  let h = 0;
+  for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) >>> 0;
+  return h;
 };
 
 function topicImageUrl(tags: string[], seed: number): string {
-  const tag = tags.find((t) => TAG_IMAGE_SEEDS[t]) ?? tags[0] ?? 'engineering';
-  const keyword = TAG_IMAGE_SEEDS[tag] ?? tag.toLowerCase().replace(/[^a-z0-9]/g, '-');
-  return `https://picsum.photos/seed/${keyword}-${seed % 97}/800/360`;
+  const tag = tags.find((t) => TAG_THEME[t]) ?? tags[0];
+  if (tag && TAG_THEME[tag]) return THEME_IMG[TAG_THEME[tag]];
+  const key = (tag ?? 'engineering').toLowerCase().replace(/[^a-z0-9]/g, '');
+  const theme = FALLBACK_THEMES[(hashString(key) + seed) % FALLBACK_THEMES.length];
+  return THEME_IMG[theme];
 }
 
 const truncate = (s: string, n: number) => (s.length > n ? `${s.slice(0, n - 1)}…` : s);

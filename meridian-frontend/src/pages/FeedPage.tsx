@@ -18,11 +18,11 @@ const colors = {
   verified: '#2DD4A3',
 };
 
-export function FeedPage() {
+export function FeedPage({ tag }: { tag?: string }) {
   const queryClient = useQueryClient();
   const { data: posts = [] } = useQuery({
-    queryKey: ['feed'],
-    queryFn: async () => (await api.getFeed({ limit: 50 })).items.map(toPost),
+    queryKey: ['feed', tag ?? 'all'],
+    queryFn: async () => (await api.getFeed({ limit: 50, tag })).items.map(toPost),
   });
   const navigate = useNavigate();
   const showToast = useUiStore((s) => s.showToast);
@@ -128,6 +128,19 @@ export function FeedPage() {
         </div>
       </section>
 
+      {/* Hashtag header */}
+      {tag && (
+        <div className="flex items-center justify-between border-b px-4 py-3 sm:px-5" style={{ borderColor: '#2a2a2a' }}>
+          <div className="flex items-center gap-2 text-[15px] font-bold" style={{ color: colors.primary }}>
+            <span style={{ color: colors.verified }}>#{tag}</span>
+            <span className="font-normal" style={{ color: colors.muted }}>{posts.length} posts</span>
+          </div>
+          <button className="text-sm font-semibold transition-colors hover:text-[#2DD4A3]" style={{ color: colors.muted }} onClick={() => navigate('/feed')}>
+            Clear filter
+          </button>
+        </div>
+      )}
+
       {/* Feed */}
       {posts.map((post) => (
         <article
@@ -204,6 +217,9 @@ export function FeedPage() {
                 <span style={{ color: colors.muted }}>
                   Impact: <b style={{ color: colors.primary }}>{post.impactScore}</b>
                 </span>
+                <span style={{ color: colors.muted }}>
+                  · <b style={{ color: colors.primary }}>{post.forks}</b> forks
+                </span>
               </div>
 
               {/* Excerpt */}
@@ -221,9 +237,14 @@ export function FeedPage() {
               {/* Tags */}
               <div className="mt-2 flex flex-wrap gap-1.5">
                 {post.tags.map((tag) => (
-                  <span key={tag} className="rounded-full px-3 py-1 text-xs font-semibold" style={{ background: 'rgba(45,212,163,0.14)', color: colors.verified }}>
-                    {tag}
-                  </span>
+                  <button
+                    key={tag}
+                    className="rounded-full px-3 py-1 text-xs font-semibold transition-colors hover:bg-[#2DD4A3]/25"
+                    style={{ background: 'rgba(45,212,163,0.14)', color: colors.verified }}
+                    onClick={(e) => { e.stopPropagation(); navigate(`/tag/${encodeURIComponent(tag)}`); }}
+                  >
+                    #{tag}
+                  </button>
                 ))}
               </div>
 

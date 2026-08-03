@@ -7,6 +7,8 @@ import { api } from '../services/api';
 import { toProfile } from '../services/adapters';
 
 function ProfileContent({ username }: { username: string }) {
+  const me = useUiStore((s) => s.me);
+  const isMe = !!me && me.username === username;
   const { data: profile } = useQuery({
     queryKey: ['profile', username],
     queryFn: () => api.getProfile(username).then(toProfile),
@@ -19,7 +21,7 @@ function ProfileContent({ username }: { username: string }) {
       <section className="rounded-xl border border-[#2f3336] bg-[#151515] p-5">
         <div className="flex flex-col gap-6 sm:flex-row">
           <img
-            src={profile.avatar}
+            src={isMe && me?.avatar_url ? me.avatar_url : profile.avatar}
             alt=""
             className="h-24 w-24 rounded-full object-cover grayscale"
           />

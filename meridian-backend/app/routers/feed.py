@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 from app.database import get_db
 from app.models.interaction import Reaction
 from app.models.post import Post
-from app.models.user import StackProfile, User
+from app.models.user import StackProfile, Technology, User
 from app.routers.posts import _author_brief, _post_to_read
 from app.services.auth import get_current_user
 from app.services.matching import compute_relevance
@@ -15,12 +15,16 @@ router = APIRouter(prefix="/feed", tags=["feed"])
 @router.get("")
 def get_feed(
     filter: str = "for_your_stack",
+    tag: str = "",
     offset: int = Query(0, ge=0),
     limit: int = Query(20, ge=1, le=100),
     db: Session = Depends(get_db),
     user: User = Depends(get_current_user),
 ):
     posts = db.query(Post).filter(Post.status == "published").order_by(Post.created_at.desc()).all()
+    if tag:
+        needle = tag.lower()
+        posts = [p for p in posts if any(t.name.lower() == needle for t in p.tags)]
     if filter == "for_your_stack":
         stack = [s.technology for s in db.query(StackProfile).filter(StackProfile.user_id == user.id).all()]
         scored = []

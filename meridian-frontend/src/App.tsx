@@ -13,7 +13,9 @@ import { NotificationsPage } from './pages/NotificationsPage';
 import { PostDetailPage } from './pages/PostDetailPage';
 import { ProfilePage, ProfileShell } from './pages/ProfilePage';
 import { AuthPage } from './pages/AuthPage';
-import { WalletPage } from './pages/WalletPage';
+import { LeaderboardPage } from './pages/LeaderboardPage';
+import { SearchPage } from './pages/SearchPage';
+import { HashtagPage } from './pages/HashtagPage';
 import { SettingsPage } from './pages/SettingsPage';
 import { useUiStore } from './store/uiStore';
 
@@ -33,7 +35,9 @@ function AppShell() {
                 <Route path="/post/:id" element={<PostDetailPage />} />
                 <Route path="/discover" element={<DiscoverPage />} />
                 <Route path="/notifications" element={<NotificationsPage />} />
-                <Route path="/wallet" element={<WalletPage />} />
+                <Route path="/search" element={<SearchPage />} />
+                <Route path="/tag/:tag" element={<HashtagPage />} />
+                <Route path="/leaderboard" element={<LeaderboardPage />} />
                 <Route path="/profile/:username/*" element={<ProfileShell />} />
                 <Route path="/mentored" element={<DiscoverPage />} />
                 <Route path="/settings" element={<SettingsPage />} />

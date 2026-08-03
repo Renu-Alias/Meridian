@@ -8,6 +8,9 @@ const LEVEL_COLORS_MINI = ['#161b22', '#0b3530', '#0d5e49', '#14956b', '#27b890'
 
 const MONTH_NAMES = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 
+// Earliest year the switcher can navigate back to.
+const MIN_YEAR = 2023;
+
 // Cell geometry
 const CELL   = 11;   // px — square cell
 const GAP    =  2;   // px — gap between cells
@@ -130,8 +133,9 @@ export function ContributionGraph({ variant = 'full', weeks: weekProp, year }: P
           <div className="flex items-center gap-0.5">
             <button
               className="grid h-7 w-7 place-items-center rounded-full transition-colors hover:bg-[#1a1d24]"
-              style={{ color: '#536471' }}
-              onClick={() => setSelYear((y) => y - 1)}
+              style={{ color: selYear <= MIN_YEAR ? '#2f3336' : '#536471' }}
+              onClick={() => setSelYear((y) => Math.max(MIN_YEAR, y - 1))}
+              disabled={selYear <= MIN_YEAR}
               aria-label="Previous year"
             >
               <ChevronLeft size={14} />
