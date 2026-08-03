@@ -47,12 +47,36 @@ function ProfileContent({ username }: { username: string }) {
 
       <section className="rounded-xl border border-[#2f3336] bg-[#151515] p-5">
         <h3 className="text-xl font-bold">Tech stack</h3>
+        <p className="mt-1 text-xs" style={{ color: '#536471' }}>Proficiency derived from post depth signals.</p>
         <div className="mt-4 flex flex-wrap gap-2">
-          {profile.stack.map((tag) => (
-            <span key={tag} className="rounded-full px-3 py-1 text-sm font-semibold" style={{ background: 'rgba(45,212,163,0.14)', color: '#2DD4A3' }}>
-              {tag}
-            </span>
-          ))}
+          {profile.stack.map((tag) => {
+            const skillEntry = profile.skills.find(([s]) => s === tag);
+            const depth = skillEntry ? (skillEntry[1] as number) : null;
+            const level =
+              depth === null ? null
+              : depth >= 80 ? { label: 'Expert', color: '#2DD4A3' }
+              : depth >= 55 ? { label: 'Proficient', color: '#71c7b0' }
+              : depth >= 30 ? { label: 'Familiar', color: '#71767b' }
+              : { label: 'Learning', color: '#536471' };
+            return (
+              <span
+                key={tag}
+                className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-sm font-semibold"
+                style={{ background: 'rgba(45,212,163,0.10)', color: '#2DD4A3', border: '1px solid rgba(45,212,163,0.2)' }}
+                title={depth !== null ? `${depth}% depth signal` : undefined}
+              >
+                {tag}
+                {level && (
+                  <span
+                    className="rounded-full px-1.5 py-0 text-[10px] font-bold"
+                    style={{ background: 'rgba(0,0,0,0.3)', color: level.color }}
+                  >
+                    {level.label}
+                  </span>
+                )}
+              </span>
+            );
+          })}
         </div>
       </section>
 

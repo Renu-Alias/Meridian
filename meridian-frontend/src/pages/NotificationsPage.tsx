@@ -44,60 +44,80 @@ export function NotificationsPage() {
     showToast('All notifications marked as read', 'success');
   };
 
+  const showActions = activeCat !== 'All';
+
   return (
     <div className="mx-auto max-w-4xl p-6 lg:p-8">
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <div>
-          <p className="font-mono text-xs uppercase tracking-[0.28em] text-muted">Activity center</p>
-          <h2 className="mt-2 text-3xl font-black">Patch decisions, answers, forks, and payouts</h2>
-        </div>
-        <div className="flex items-center gap-2">
-          <button
-            className="inline-flex h-10 items-center rounded-full px-4 text-sm font-bold transition-colors hover:bg-[#1a1d24]"
-            style={{ border: '1px solid #2f3336' }}
-            onClick={markAllRead}
-          >
-            Mark all read
-          </button>
-          <div className="relative">
-            <button className="inline-flex h-10 items-center gap-2 rounded-full border border-[#2f3336] px-4 font-bold" onClick={() => setFilterOpen(!filterOpen)}>
-              <Filter size={16} />
-              {activeFilter}
+      {/* Page header */}
+      <div>
+        <p className="font-mono text-xs uppercase tracking-[0.28em] text-muted">Activity center</p>
+        <h2 className="mt-2 text-3xl font-black">Patch decisions, answers, forks, and payouts</h2>
+      </div>
+
+      {/* Category tabs + action buttons in one row */}
+      <div className="mt-6 flex flex-wrap items-center gap-2">
+        {/* Category pills */}
+        <div className="flex flex-1 gap-2 overflow-x-auto pb-1 thin-scrollbar">
+          {categories.map((category) => (
+            <button
+              key={category}
+              className="h-9 shrink-0 rounded-full px-4 text-sm font-semibold transition-colors"
+              style={
+                activeCat === category
+                  ? { background: '#2DD4A3', color: '#0a0a0a' }
+                  : { background: '#1a1d24', color: '#71767b' }
+              }
+              onClick={() => setActiveCat(category)}
+            >
+              {category}
             </button>
-            {filterOpen && (
-              <>
-                <div className="fixed inset-0 z-10" onClick={() => setFilterOpen(false)} />
-                <div className="absolute right-0 top-12 z-20 w-40 rounded-lg border py-1 shadow-xl" style={{ background: '#14171c', borderColor: '#2f3336' }}>
-                  {filterOptions.map((opt) => (
-                    <button key={opt} className={`flex w-full items-center px-4 py-2 text-left text-sm transition-colors hover:bg-[#1a1d24] ${activeFilter === opt ? 'font-bold' : ''}`} style={{ color: activeFilter === opt ? '#2DD4A3' : '#e7e9ea' }} onClick={() => { setActiveFilter(opt); setFilterOpen(false); }}>
-                      {opt}
-                    </button>
-                  ))}
-                </div>
-              </>
-            )}
-          </div>
+          ))}
         </div>
+
+        {/* Action buttons — only visible when a specific category is selected */}
+        {showActions && (
+          <div className="flex shrink-0 items-center gap-2">
+            <button
+              className="inline-flex h-9 items-center rounded-full px-4 text-sm font-bold transition-colors hover:bg-[#1a1d24]"
+              style={{ border: '1px solid #2f3336' }}
+              onClick={markAllRead}
+            >
+              Mark all read
+            </button>
+            <div className="relative">
+              <button
+                className="inline-flex h-9 items-center gap-2 rounded-full border border-[#2f3336] px-4 text-sm font-bold"
+                onClick={() => setFilterOpen(!filterOpen)}
+              >
+                <Filter size={14} />
+                {activeFilter}
+              </button>
+              {filterOpen && (
+                <>
+                  <div className="fixed inset-0 z-10" onClick={() => setFilterOpen(false)} />
+                  <div
+                    className="absolute right-0 top-11 z-20 w-40 rounded-lg border py-1 shadow-xl"
+                    style={{ background: '#14171c', borderColor: '#2f3336' }}
+                  >
+                    {filterOptions.map((opt) => (
+                      <button
+                        key={opt}
+                        className={`flex w-full items-center px-4 py-2 text-left text-sm transition-colors hover:bg-[#1a1d24] ${activeFilter === opt ? 'font-bold' : ''}`}
+                        style={{ color: activeFilter === opt ? '#2DD4A3' : '#e7e9ea' }}
+                        onClick={() => { setActiveFilter(opt); setFilterOpen(false); }}
+                      >
+                        {opt}
+                      </button>
+                    ))}
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
+        )}
       </div>
 
-      <div className="mt-6 flex gap-2 overflow-x-auto pb-2 thin-scrollbar">
-        {categories.map((category) => (
-          <button
-            key={category}
-            className="h-9 shrink-0 rounded-full px-4 text-sm font-semibold transition-colors"
-            style={
-              activeCat === category
-                ? { background: '#2DD4A3', color: '#0a0a0a' }
-                : { background: '#1a1d24', color: '#71767b' }
-            }
-            onClick={() => setActiveCat(category)}
-          >
-            {category}
-          </button>
-        ))}
-      </div>
-
-      <section className="mt-6 border border-[#333] bg-[#14171C]">
+      <section className="mt-4 border border-[#333] bg-[#14171C]">
         {filtered.map((notification) => (
           <article key={notification.id} className="flex gap-4 border-b border-[#333] p-5 last:border-b-0">
             <span className={`mt-1 h-3 w-3 shrink-0 rounded-full ${accentClass[notification.accent]} ${notification.is_read ? 'opacity-30' : ''}`} />

@@ -609,8 +609,13 @@ def seed(db, num_users: int, num_posts: int) -> dict:
                 Notification(
                     user_id=post.author_id,
                     category="Forks",
-                    title=f"{forker.display_name} forked your post",
-                    detail=f"'{post.title}' was forked with attribution chain preserved.",
+                    title=f"{forker.display_name} forked '{post.title[:50]}'",
+                    detail=random.choice([
+                        f"{forker.display_name} forked your post and is building on your work. Attribution chain preserved.",
+                        f"Your post '{post.title[:45]}' was forked by {forker.display_name} — a new derivative is live.",
+                        f"{forker.display_name} extended '{post.title[:45]}' with a fork. Review the changes.",
+                        f"Fork created from '{post.title[:45]}' by {forker.display_name}. Your contribution was credited.",
+                    ]),
                     link=f"/posts/{fork_post.id}",
                     created_at=fork_post.created_at,
                 )
@@ -638,13 +643,32 @@ def seed(db, num_users: int, num_posts: int) -> dict:
                 created_at=post.published_at + timedelta(hours=random.uniform(1, 200)),
                 updated_at=post.published_at + timedelta(hours=random.uniform(1, 260)),
             )
+            PATCH_DETAILS = {
+                "approved": [
+                    f"Your patch on '{post.title[:45]}' was approved. Changes will be merged soon.",
+                    f"Great work — {submitter.display_name}'s correction to '{post.title[:45]}' was accepted.",
+                ],
+                "merged": [
+                    f"Patch by {submitter.display_name} has been merged into '{post.title[:45]}'.",
+                    f"'{post.title[:45]}' was updated with a merged patch from {submitter.display_name}.",
+                ],
+                "rejected": [
+                    f"The patch on '{post.title[:45]}' was reviewed but not merged. See reviewer notes.",
+                    f"Patch by {submitter.display_name} on '{post.title[:45]}' was declined with feedback.",
+                ],
+                "pending": [
+                    f"{submitter.display_name} submitted a patch to '{post.title[:45]}'. Review it when you're ready.",
+                    f"New patch waiting for review on '{post.title[:45]}' — submitted by {submitter.display_name}.",
+                ],
+            }
+            patch_detail = random.choice(PATCH_DETAILS.get(status, PATCH_DETAILS["pending"]))
             db.add(patch)
             db.add(
                 Notification(
                     user_id=post.author_id if random.random() < 0.5 else submitter.id,
                     category="Patches",
-                    title=f"Patch {status} on '{post.title}'",
-                    detail=f"{submitter.display_name}'s patch was {status}.",
+                    title=f"Patch {status}: '{post.title[:50]}'",
+                    detail=patch_detail,
                     link=f"/posts/{post.id}",
                     created_at=patch.updated_at,
                 )
@@ -676,52 +700,96 @@ def seed(db, num_users: int, num_posts: int) -> dict:
     db.commit()
     print(f"Seeded {submissions} mentorship submissions")
 
-    # Wallet transactions + Q&A notifications
+    # Wallet transactions (bookmark / share_internal / used_at_work) + Q&A notifications
+    TRANSACTION_RATES = {
+        "bookmark":       (0.04, 0.12),   # (amount_min, amount_max)
+        "share_internal": (0.08, 0.20),
+        "used_at_work":   (0.25, 1.50),
+    }
+    TRANSACTION_DETAILS = {
+        "bookmark": [
+            "Reader bookmarked '{title}' for later reference.",
+            "'{title}' was saved to a reading list.",
+            "Bookmark reaction on '{title}'.",
+        ],
+        "share_internal": [
+            "'{title}' was shared internally within a team.",
+            "A reader forwarded '{title}' to a colleague.",
+            "Internal share of '{title}' in a work channel.",
+        ],
+        "used_at_work": [
+            "Someone applied advice from '{title}' on the job.",
+            "'{title}' was cited as useful during a code review.",
+            "A team used '{title}' to guide an architectural decision.",
+            "'{title}' influenced a production deployment decision.",
+        ],
+    }
     transactions = 0
     qa_notifs = 0
     for post in published:
-        like_count = sum(1 for r in post.reactions) if hasattr(post, "reactions") else 0
-        earnings = round(like_count * random.choice([0.05, 0.1, 0.25, 0.5]), 2)
-        if earnings > 0:
-            wallet = db.query(Wallet).filter(Wallet.user_id == post.author_id).first()
-            if wallet:
-                db.add(
-                    Transaction(
-                        wallet_id=wallet.id,
-                        post_id=post.id,
-                        amount=earnings,
-                        transaction_type="used_at_work",
-                        description=f"used_at_work reaction on '{post.title}'",
-                        created_at=post.published_at + timedelta(days=random.uniform(0, 30)),
-                    )
-                )
-                wallet.balance = round(wallet.balance + earnings, 2)
-                wallet.lifetime_paid = round(wallet.lifetime_paid + earnings, 2)
-                transactions += 1
-                db.add(
-                    Notification(
-                        user_id=post.author_id,
-                        category="Payouts",
-                        title=f"Wallet credited ${earnings:.2f}",
-                        detail=f"Earned from reactions on '{post.title}'.",
-                        link="/wallet",
-                        created_at=post.published_at + timedelta(days=random.uniform(0, 30)),
-                    )
-                )
+        wallet = db.query(Wallet).filter(Wallet.user_id == post.author_id).first()
+        if not wallet:
+            continue
 
-        # Notify author about comments
+        # Generate varied transactions for every published post
+        for tx_type, (amt_min, amt_max) in TRANSACTION_RATES.items():
+            count = random.randint(0, 6)
+            for _ in range(count):
+                amount = round(random.uniform(amt_min, amt_max), 2)
+                detail_tpl = random.choice(TRANSACTION_DETAILS[tx_type])
+                description = detail_tpl.format(title=post.title[:60])
+                db.add(Transaction(
+                    wallet_id=wallet.id,
+                    post_id=post.id,
+                    amount=amount,
+                    transaction_type=tx_type,
+                    description=description,
+                    created_at=post.published_at + timedelta(days=random.uniform(0, 60)),
+                ))
+                wallet.balance = round(wallet.balance + amount, 2)
+                wallet.lifetime_paid = round(wallet.lifetime_paid + amount, 2)
+                transactions += 1
+
+        # Payout notification summarising earnings for this post
+        total_earned = round(random.uniform(0.5, 8.0), 2)
+        db.add(Notification(
+            user_id=post.author_id,
+            category="Payouts",
+            title=f"Wallet credited ${total_earned:.2f}",
+            detail=(
+                f"Earned ${total_earned:.2f} from bookmarks, internal shares, and Used This At Work "
+                f"reactions on '{post.title[:50]}'."
+            ),
+            link="/wallet",
+            created_at=post.published_at + timedelta(days=random.uniform(1, 30)),
+        ))
+
+        # Q&A notification
         qa = db.query(QAThread).filter(QAThread.post_id == post.id).first()
         if qa and qa.questioner:
-            db.add(
-                Notification(
-                    user_id=post.author_id,
-                    category="Q&A",
-                    title=f"New question from {qa.questioner.display_name}",
-                    detail=f"A reader asked a question on '{post.title}'.",
-                    link=f"/posts/{post.id}",
-                    created_at=qa.created_at,
-                )
-            )
+            qa_notif_templates = [
+                (
+                    f"{qa.questioner.display_name} asked a question on '{post.title[:45]}'",
+                    f'"{qa.question[:120]}" — reply to keep the discussion going.',
+                ),
+                (
+                    f"New question on your post from {qa.questioner.display_name}",
+                    f"A reader wants to know more about '{post.title[:45]}'. Check the comments.",
+                ),
+                (
+                    f"Reader question: {qa.question[:60]}",
+                    f"{qa.questioner.display_name} is asking about '{post.title[:45]}'.",
+                ),
+            ]
+            title, detail = random.choice(qa_notif_templates)
+            db.add(Notification(
+                user_id=post.author_id,
+                category="Q&A",
+                title=title,
+                detail=detail,
+                link=f"/posts/{post.id}",
+                created_at=qa.created_at,
+            ))
             qa_notifs += 1
 
     db.commit()
@@ -732,12 +800,31 @@ def seed(db, num_users: int, num_posts: int) -> dict:
     for post in published:
         qa = db.query(QAThread).filter(QAThread.post_id == post.id).first()
         if qa and qa.questioner and random.random() < 0.5:
+            mention_templates = [
+                (
+                    f"{qa.questioner.display_name} mentioned you in a comment",
+                    f"You were tagged in a discussion on '{post.title[:50]}'. Check what they said.",
+                ),
+                (
+                    f"@{qa.questioner.username} referenced your work",
+                    f"Someone cited '{post.title[:50]}' in a comment thread. Your post got noticed.",
+                ),
+                (
+                    f"You were mentioned by {qa.questioner.display_name}",
+                    f"'{post.title[:50]}' came up in a conversation — {qa.questioner.display_name} brought you in.",
+                ),
+                (
+                    f"New mention in a comment on '{post.title[:40]}'",
+                    f"{qa.questioner.display_name} referenced you directly in the Q&A thread.",
+                ),
+            ]
+            title, detail = random.choice(mention_templates)
             db.add(
                 Notification(
                     user_id=post.author_id,
                     category="Mentions",
-                    title=f"{qa.questioner.display_name} mentioned you",
-                    detail=f"You were mentioned in a comment on '{post.title}'.",
+                    title=title,
+                    detail=detail,
                     link=f"/posts/{post.id}",
                     created_at=qa.created_at + timedelta(hours=random.uniform(0, 24)),
                 )
