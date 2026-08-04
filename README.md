@@ -4,10 +4,6 @@
 > A peer-driven blogging platform built for tech enthusiasts and engineers.  
 > Great posts don't go unread here.
  
-![Frontend](https://img.shields.io/badge/frontend-React-61DAFB?logo=react)
-![Backend](https://img.shields.io/badge/backend-Python-3776AB?logo=python)
-![Status](https://img.shields.io/badge/status-In%20Development-yellow)
- 
 ---
  
 ## 🚀 What is Meridian?
