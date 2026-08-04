@@ -168,7 +168,7 @@ export function SettingsPage() {
             <h2 className="text-lg font-bold">Tech stack</h2>
           </div>
           <button
-            className="flex h-8 items-center gap-1.5 rounded-full px-4 text-xs font-bold transition-all hover:brightness-110 disabled:opacity-50"
+            className="flex h-8 items-center gap-1.5 rounded-md px-4 text-xs font-bold transition-all hover:brightness-110 disabled:opacity-50"
             style={{ background: '#2DD4A3', color: '#0a0a0a' }}
             disabled={savingStack}
             onClick={saveStack}
@@ -181,7 +181,7 @@ export function SettingsPage() {
             {stackChips.map((tech) => (
               <span
                 key={tech}
-                className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-sm font-semibold"
+                className="inline-flex items-center gap-1.5 rounded-md px-3 py-1 text-sm font-semibold"
                 style={{ background: 'rgba(45,212,163,0.14)', color: '#2DD4A3' }}
               >
                 {tech}
@@ -222,7 +222,7 @@ export function SettingsPage() {
               {stackSuggestions.map((s) => (
                 <button
                   key={s}
-                  className="rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors hover:bg-[#2DD4A3]/20"
+                  className="rounded-md border px-2.5 py-0.5 text-xs font-semibold transition-colors hover:bg-[#2DD4A3]/20"
                   style={{ borderColor: '#2f3336', color: '#2DD4A3' }}
                   onClick={() => addTech(s)}
                 >
@@ -237,7 +237,7 @@ export function SettingsPage() {
       {/* Log out */}
       <section className="mt-6 rounded-xl border border-[#2f3336] bg-[#151515] p-6">
         <button
-          className="flex h-10 w-full items-center justify-center gap-2 rounded-full text-sm font-bold transition-all hover:brightness-110"
+          className="flex h-10 w-full items-center justify-center gap-2 rounded-md text-sm font-bold transition-all hover:brightness-110"
           style={{ background: '#2DD4A3', color: '#0a0a0a' }}
           onClick={() => { logout(); showToast('Logged out', 'success'); navigate('/'); }}
         >

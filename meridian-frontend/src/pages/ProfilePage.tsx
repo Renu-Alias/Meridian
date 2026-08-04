@@ -34,7 +34,7 @@ function ProfileContent({ username }: { username: string }) {
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-3">
               <h2 className="text-3xl font-black">{profile.name}</h2>
-              <span className="inline-flex items-center gap-1 rounded-full px-3 py-1 text-sm font-bold" style={{ background: 'rgba(45,212,163,0.14)', color: '#2DD4A3' }}>
+              <span className="inline-flex items-center gap-1 rounded-md px-3 py-1 text-sm font-bold" style={{ background: 'rgba(45,212,163,0.14)', color: '#2DD4A3' }}>
                 <ShieldCheck size={16} />
                 {profile.credibility}% credible
               </span>
@@ -88,14 +88,14 @@ function ProfileContent({ username }: { username: string }) {
             return (
               <span
                 key={tag}
-                className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-sm font-semibold"
+                className="inline-flex items-center gap-1.5 rounded-md px-3 py-1 text-sm font-semibold"
                 style={{ background: 'rgba(45,212,163,0.10)', color: '#2DD4A3', border: '1px solid rgba(45,212,163,0.2)' }}
                 title={depth !== null ? `${depth}% depth signal` : undefined}
               >
                 {tag}
                 {level && (
                   <span
-                    className="rounded-full px-1.5 py-0 text-[10px] font-bold"
+                    className="rounded-md px-1.5 py-0 text-[10px] font-bold"
                     style={{ background: 'rgba(0,0,0,0.3)', color: level.color }}
                   >
                     {level.label}
@@ -111,7 +111,8 @@ function ProfileContent({ username }: { username: string }) {
         <div className="flex items-center justify-between">
           <h3 className="text-xl font-bold">Auto-built skills graph</h3>
           <label className="flex items-center gap-2 text-sm font-semibold">
-            <input type="checkbox" defaultChecked className="h-4 w-4 accent-[#2DD4A3]" />
+            <input type="checkbox" defaultChecked className="peer sr-only" />
+            <span className="relative h-5 w-9 shrink-0 cursor-pointer rounded-[4px] border border-[#2f3336] bg-[#1a1d24] transition-colors after:absolute after:left-[3px] after:top-[3px] after:h-[12px] after:w-[12px] after:rounded-[2px] after:bg-[#536471] after:transition-all peer-checked:border-[#2DD4A3] peer-checked:bg-[#2DD4A3] peer-checked:after:translate-x-4 peer-checked:after:bg-black" />
             Visible to recruiters
           </label>
         </div>

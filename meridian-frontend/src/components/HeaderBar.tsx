@@ -102,7 +102,7 @@ export function HeaderBar() {
         className="relative hidden w-full max-w-[300px] sm:block"
       >
         <div
-          className="flex items-center gap-2 rounded-full px-3 py-1.5 text-sm"
+          className="flex items-center gap-2 rounded-md px-3 py-1.5 text-sm"
           style={{ background: '#151515', border: `1px solid ${searchFocused ? colors.verified : colors.border}` }}
         >
           <Search size={15} style={{ color: colors.muted }} aria-hidden="true" />

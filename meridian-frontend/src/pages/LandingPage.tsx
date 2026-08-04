@@ -162,7 +162,7 @@ export function LandingPage() {
             </Link>
             <Link
               to="/auth"
-              className="inline-flex h-8 items-center gap-1 rounded-full px-4 text-base font-medium transition-all hover:bg-black/10"
+              className="inline-flex h-8 items-center gap-1 rounded-md px-4 text-base font-medium transition-all hover:bg-black/10"
               style={{
                 fontFamily: 'Inter, sans-serif',
                 background: 'transparent',
@@ -180,7 +180,7 @@ export function LandingPage() {
           {/* Left column: Typography + CTAs */}
           <div className="flex w-full flex-col justify-center gap-6 md:w-1/2 md:pr-4">
             <motion.div custom={0.2} variants={fadeUp} initial="hidden" animate="visible" className="-mt-8">
-              <span className="inline-flex items-center gap-2 rounded-full px-3.5 py-1 text-[11px] font-semibold uppercase tracking-widest" style={{ fontFamily: 'Inter, sans-serif', background: 'rgba(45,212,163,0.08)', border: '1px solid rgba(45,212,163,0.3)', color: 'var(--color-verified)', letterSpacing: '0.13em' }}>
+              <span className="inline-flex items-center gap-2 rounded-md px-3.5 py-1 text-[11px] font-semibold uppercase tracking-widest" style={{ fontFamily: 'Inter, sans-serif', background: 'rgba(45,212,163,0.08)', border: '1px solid rgba(45,212,163,0.3)', color: 'var(--color-verified)', letterSpacing: '0.13em' }}>
                 <span className="h-1.5 w-1.5 rounded-full" style={{ background: 'var(--color-verified)' }} />
                 Built for Engineers
               </span>

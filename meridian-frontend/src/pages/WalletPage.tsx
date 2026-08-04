@@ -57,7 +57,7 @@ export function WalletPage() {
             <h2 className="text-2xl font-bold">Monthly impact analytics</h2>
             <p className="mt-1 text-sm" style={{ color: '#71767b' }}>Earnings from bookmarks, internal shares, and Used This At Work reactions.</p>
           </div>
-          <button className="hidden h-10 rounded-full px-5 font-bold text-black sm:block" style={{ background: '#2DD4A3' }} onClick={() => setShowPayout(true)}>Request payout</button>
+          <button className="hidden h-10 rounded-md px-5 font-bold text-black sm:block" style={{ background: '#2DD4A3' }} onClick={() => setShowPayout(true)}>Request payout</button>
         </div>
         <div className="mt-8 flex items-end gap-0 rounded-lg border border-[#2f3336] bg-[#0a0a0a] p-4" style={{ height: 260 }}>
           <div className="flex flex-1 items-end gap-1.5">
@@ -122,8 +122,8 @@ export function WalletPage() {
             </div>
             <p className="mt-3 text-sm" style={{ color: '#71767b' }}>Request a payout of <b style={{ color: '#e7e9ea' }}>{currency(data.balance)}</b> to your connected wallet.</p>
             <div className="mt-5 flex gap-3">
-              <button onClick={() => setShowPayout(false)} className="flex-1 h-10 rounded-full text-sm font-bold" style={{ border: '1px solid #2f3336', color: '#71767b' }}>Cancel</button>
-              <button onClick={confirmPayout} disabled={paying} className="flex-1 h-10 rounded-full text-sm font-bold text-black disabled:opacity-50" style={{ background: '#2DD4A3' }}>{paying ? 'Processing...' : 'Confirm Payout'}</button>
+              <button onClick={() => setShowPayout(false)} className="flex-1 h-10 rounded-md text-sm font-bold" style={{ border: '1px solid #2f3336', color: '#71767b' }}>Cancel</button>
+              <button onClick={confirmPayout} disabled={paying} className="flex-1 h-10 rounded-md text-sm font-bold text-black disabled:opacity-50" style={{ background: '#2DD4A3' }}>{paying ? 'Processing...' : 'Confirm Payout'}</button>
             </div>
           </div>
         </>

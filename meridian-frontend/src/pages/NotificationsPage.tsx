@@ -61,7 +61,7 @@ export function NotificationsPage() {
           {categories.map((category) => (
             <button
               key={category}
-              className="h-9 shrink-0 rounded-full px-4 text-sm font-semibold transition-colors"
+              className="h-9 shrink-0 rounded-md px-4 text-sm font-semibold transition-colors"
               style={
                 activeCat === category
                   ? { background: '#2DD4A3', color: '#0a0a0a' }
@@ -78,7 +78,7 @@ export function NotificationsPage() {
         {showActions && (
           <div className="flex shrink-0 items-center gap-2">
             <button
-              className="inline-flex h-9 items-center rounded-full px-4 text-sm font-bold transition-colors hover:bg-[#1a1d24]"
+              className="inline-flex h-9 items-center rounded-md px-4 text-sm font-bold transition-colors hover:bg-[#1a1d24]"
               style={{ border: '1px solid #2f3336' }}
               onClick={markAllRead}
             >
@@ -86,7 +86,7 @@ export function NotificationsPage() {
             </button>
             <div className="relative">
               <button
-                className="inline-flex h-9 items-center gap-2 rounded-full border border-[#2f3336] px-4 text-sm font-bold"
+                className="inline-flex h-9 items-center gap-2 rounded-md border border-[#2f3336] px-4 text-sm font-bold"
                 onClick={() => setFilterOpen(!filterOpen)}
               >
                 <Filter size={14} />

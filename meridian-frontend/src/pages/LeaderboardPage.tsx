@@ -49,7 +49,7 @@ function TierBadge({ tier }: { tier: string }) {
   const Icon = t.icon;
   return (
     <span
-      className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-bold"
+      className="inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[11px] font-bold"
       style={{ background: t.bg, color: t.color }}
     >
       <Icon size={12} />
@@ -100,7 +100,7 @@ export function LeaderboardPage() {
             under peer review, not follower counts.
           </p>
         </div>
-        <span className="inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-bold" style={{ background: 'rgba(45,212,163,0.1)', color: colors.verified, border: '1px solid rgba(45,212,163,0.2)' }}>
+        <span className="inline-flex items-center gap-2 rounded-md px-4 py-2 text-sm font-bold" style={{ background: 'rgba(45,212,163,0.1)', color: colors.verified, border: '1px solid rgba(45,212,163,0.2)' }}>
           <Crown size={15} /> {authors.length.toLocaleString()} ranked engineers
         </span>
       </div>
@@ -173,7 +173,7 @@ export function LeaderboardPage() {
               </span>
               <span className="flex-1 text-sm" style={{ color: colors.primary }}>{label}</span>
               {weight === 'high' && (
-                <span className="hidden sm:inline rounded-full px-2 py-0.5 text-[10px] font-bold" style={{ background: 'rgba(45,212,163,0.1)', color: colors.verified }}>
+                <span className="hidden sm:inline rounded-md px-2 py-0.5 text-[10px] font-bold" style={{ background: 'rgba(45,212,163,0.1)', color: colors.verified }}>
                   High impact
                 </span>
               )}
@@ -213,11 +213,11 @@ export function LeaderboardPage() {
       <section className="mt-8">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-bold" style={{ color: colors.primary }}>Global Rankings</h2>
-          <div className="flex rounded-full p-0.5" style={{ background: colors.cardAlt }}>
+          <div className="flex rounded-md p-0.5" style={{ background: colors.cardAlt }}>
             {(['global', 'stack'] as const).map((tab) => (
               <button
                 key={tab}
-                className="rounded-full px-4 py-1.5 text-xs font-bold capitalize transition-colors"
+                className="rounded-md px-4 py-1.5 text-xs font-bold capitalize transition-colors"
                 style={{
                   background: activeTab === tab ? colors.verified : 'transparent',
                   color: activeTab === tab ? '#000' : colors.muted,
@@ -300,7 +300,7 @@ export function LeaderboardPage() {
                   {entry.stack.slice(0, 2).map((tag) => (
                     <span
                       key={tag}
-                      className="rounded-full px-2 py-0.5 text-[10px] font-semibold"
+                      className="rounded-md px-2 py-0.5 text-[10px] font-semibold"
                       style={{ background: 'rgba(45,212,163,0.08)', color: colors.verified }}
                     >
                       {tag}

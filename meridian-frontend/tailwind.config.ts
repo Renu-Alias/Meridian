@@ -20,6 +20,15 @@ export default {
         panel: '0 18px 50px rgba(0, 0, 0, 0.08)',
         glow: '0 0 32px rgba(45, 212, 163, 0.28)',
       },
+      borderRadius: {
+        DEFAULT: '4px',
+        sm: '4px',
+        md: '6px',
+        lg: '6px',
+        xl: '6px',
+        '2xl': '6px',
+        full: '9999px',
+      },
       keyframes: {
         pulseGlow: {
           '0%, 100%': { boxShadow: '0 0 0 rgba(45, 212, 163, 0)' },

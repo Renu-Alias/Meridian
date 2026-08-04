@@ -13,7 +13,7 @@ export function Badge({ status, label }: BadgeProps) {
 
   return (
     <span
-      className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-semibold leading-4"
+      className="inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[11px] font-semibold leading-4"
       style={{
         background: isFlagged ? 'rgba(255,107,107,0.1)' : 'rgba(45,212,163,0.12)',
         color,

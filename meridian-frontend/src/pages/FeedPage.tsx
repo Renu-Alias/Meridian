@@ -119,7 +119,7 @@ export function FeedPage({ tag }: { tag?: string }) {
             ))}
           </div>
           <button
-            className="h-9 rounded-full px-5 text-[15px] font-bold transition-all hover:brightness-110"
+            className="h-9 rounded-md px-5 text-[15px] font-bold transition-all hover:brightness-110"
             style={{ background: colors.verified, color: '#000' }}
             onClick={publishPost}
           >
@@ -239,7 +239,7 @@ export function FeedPage({ tag }: { tag?: string }) {
                 {post.tags.map((tag) => (
                   <button
                     key={tag}
-                    className="rounded-full px-3 py-1 text-xs font-semibold transition-colors hover:bg-[#2DD4A3]/25"
+                    className="rounded-md px-3 py-1 text-xs font-semibold transition-colors hover:bg-[#2DD4A3]/25"
                     style={{ background: 'rgba(45,212,163,0.14)', color: colors.verified }}
                     onClick={(e) => { e.stopPropagation(); navigate(`/tag/${encodeURIComponent(tag)}`); }}
                   >
@@ -322,7 +322,7 @@ export function FeedPage({ tag }: { tag?: string }) {
                     onChange={(e) => setReplyText(e.target.value)}
                   />
                   <button
-                    className="h-fit rounded-full px-4 py-1.5 text-xs font-bold transition-all hover:brightness-110"
+                    className="h-fit rounded-md px-4 py-1.5 text-xs font-bold transition-all hover:brightness-110"
                     style={{ background: colors.verified, color: '#000' }}
                     onClick={() => submitReply(post.id)}
                   >

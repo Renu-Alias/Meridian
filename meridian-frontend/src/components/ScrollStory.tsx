@@ -687,7 +687,7 @@ function FinalConstellation() {
         >
           <Link
             to={isAuthenticated ? '/editor/new' : '/auth'}
-            className="group inline-flex h-10 items-center gap-2 rounded-full px-6 text-sm font-semibold transition-all hover:scale-[1.03] active:scale-[0.98]"
+            className="group inline-flex h-10 items-center gap-2 rounded-md px-6 text-sm font-semibold transition-all hover:scale-[1.03] active:scale-[0.98]"
             style={{
               fontFamily: 'Inter, sans-serif',
               background: VERIFIED,
@@ -701,7 +701,7 @@ function FinalConstellation() {
 
           <Link
             to={isAuthenticated ? '/feed' : '/auth'}
-            className="inline-flex h-10 items-center gap-2 rounded-full px-6 text-sm font-medium transition-all hover:scale-[1.03] active:scale-[0.98]"
+            className="inline-flex h-10 items-center gap-2 rounded-md px-6 text-sm font-medium transition-all hover:scale-[1.03] active:scale-[0.98]"
             style={{
               fontFamily: 'Inter, sans-serif',
               background: 'transparent',

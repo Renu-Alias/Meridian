@@ -48,7 +48,7 @@ function PostRow({ post }: { post: Post }) {
             {post.tags.map((tag) => (
               <button
                 key={tag}
-                className="rounded-full px-2.5 py-0.5 text-xs font-semibold transition-colors hover:bg-[#2DD4A3]/25"
+                className="rounded-md px-2.5 py-0.5 text-xs font-semibold transition-colors hover:bg-[#2DD4A3]/25"
                 style={{ background: 'rgba(45,212,163,0.14)', color: colors.verified }}
                 onClick={(e) => { e.stopPropagation(); navigate(`/tag/${encodeURIComponent(tag)}`); }}
               >
@@ -110,7 +110,7 @@ export function SearchPage() {
                 {topics.map((t) => (
                   <button
                     key={t.name}
-                    className="rounded-full px-3 py-1.5 text-sm font-semibold transition-colors hover:bg-[#2DD4A3]/25"
+                    className="rounded-md px-3 py-1.5 text-sm font-semibold transition-colors hover:bg-[#2DD4A3]/25"
                     style={{ background: 'rgba(45,212,163,0.14)', color: colors.verified }}
                     onClick={() => navigate(`/tag/${encodeURIComponent(t.name)}`)}
                   >

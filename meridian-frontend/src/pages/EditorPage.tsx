@@ -225,7 +225,7 @@ export function EditorPage() {
                 {tagSuggestions.map((s) => (
                   <button
                     key={s}
-                    className="rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors hover:bg-[#2DD4A3]/20"
+                    className="rounded-md border px-2.5 py-0.5 text-xs font-semibold transition-colors hover:bg-[#2DD4A3]/20"
                     style={{ borderColor: colors.border, color: colors.mint }}
                     onClick={() => addTag(s)}
                   >

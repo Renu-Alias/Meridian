@@ -33,7 +33,7 @@ export function RightPanel() {
         </div>
         <div className="mt-4 flex flex-wrap gap-2">
           {stack.map((tag) => (
-            <span key={tag} className="rounded-full px-3 py-1 text-sm font-medium" style={{ background: 'rgba(45,212,163,0.12)', color: colors.verified }}>
+            <span key={tag} className="rounded-md px-3 py-1 text-sm font-medium" style={{ background: 'rgba(45,212,163,0.12)', color: colors.verified }}>
               {tag}
             </span>
           ))}
@@ -89,7 +89,7 @@ export function RightPanel() {
           </div>
         ))}
         <button
-          className="mt-5 h-10 w-full rounded-full text-sm font-bold transition-all hover:brightness-110"
+          className="mt-5 h-10 w-full rounded-md text-sm font-bold transition-all hover:brightness-110"
           style={{ background: colors.verified, color: '#0a0a0a' }}
           onClick={() => navigate('/discover')}
         >

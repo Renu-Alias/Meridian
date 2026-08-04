@@ -205,7 +205,7 @@ export function PostDetailPage() {
     return (
       <div className="flex flex-col items-center justify-center px-4 py-20" style={{ color: colors.muted }}>
         <p className="text-lg">Post not found</p>
-        <button className="mt-4 rounded-full px-4 py-2 text-sm font-bold" style={{ background: colors.verified, color: '#000' }} onClick={() => navigate('/feed')}>
+        <button className="mt-4 rounded-md px-4 py-2 text-sm font-bold" style={{ background: colors.verified, color: '#000' }} onClick={() => navigate('/feed')}>
           Back to Feed
         </button>
       </div>
@@ -333,7 +333,7 @@ export function PostDetailPage() {
           {post.tags.map((tag) => (
             <button
               key={tag}
-              className="rounded-full px-3 py-1 text-sm font-semibold transition-colors hover:bg-[#2DD4A3]/25"
+              className="rounded-md px-3 py-1 text-sm font-semibold transition-colors hover:bg-[#2DD4A3]/25"
               style={{ background: 'rgba(45,212,163,0.14)', color: colors.verified }}
               onClick={() => navigate(`/tag/${encodeURIComponent(tag)}`)}
             >
@@ -352,7 +352,7 @@ export function PostDetailPage() {
               'v1.0 initial submission'
             ]).map((entry, i) => (
               <li key={i} className="flex items-start gap-2 text-sm">
-                <span className="mt-0.5 grid h-4 w-4 shrink-0 place-items-center rounded-full text-[10px] font-bold" style={{ background: 'rgba(45,212,163,0.15)', color: colors.verified }}>{i + 1}</span>
+                <span className="mt-0.5 grid h-4 w-4 shrink-0 place-items-center rounded-md text-[10px] font-bold" style={{ background: 'rgba(45,212,163,0.15)', color: colors.verified }}>{i + 1}</span>
                 {entry}
               </li>
             ))}

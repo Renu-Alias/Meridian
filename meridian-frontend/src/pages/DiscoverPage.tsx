@@ -34,7 +34,7 @@ export function DiscoverPage() {
       <div className="mt-2 flex flex-wrap items-center gap-3">
         <h2 className="text-3xl font-black" style={{ color: colors.primary }}>Stack-Matched for You</h2>
         {stackChips.slice(0, 3).map((tech) => (
-          <span key={tech} className="rounded-full px-3 py-1 font-mono text-xs font-bold" style={{ background: 'rgba(45,212,163,0.14)', color: colors.verified }}>
+          <span key={tech} className="rounded-md px-3 py-1 font-mono text-xs font-bold" style={{ background: 'rgba(45,212,163,0.14)', color: colors.verified }}>
             {tech}
           </span>
         ))}
@@ -152,11 +152,11 @@ export function DiscoverPage() {
               <p className="text-sm" style={{ color: colors.secondary }}>{m.role}</p>
               <div className="mt-3 flex justify-center gap-2">
                 {m.tags.map((tag) => (
-                  <span key={tag} className="rounded-full px-3 py-1 text-xs font-semibold" style={{ background: 'rgba(45,212,163,0.14)', color: colors.verified }}>{tag}</span>
+                  <span key={tag} className="rounded-md px-3 py-1 text-xs font-semibold" style={{ background: 'rgba(45,212,163,0.14)', color: colors.verified }}>{tag}</span>
                 ))}
               </div>
               <button
-                className="mt-4 h-10 w-full rounded-full text-sm font-bold transition-all"
+                className="mt-4 h-10 w-full rounded-md text-sm font-bold transition-all"
                 style={{ background: colors.verified, color: '#0a0a0a' }}
                 onClick={(e) => { e.stopPropagation(); navigate(`/profile/${m.username}`); }}
               >
@@ -187,7 +187,7 @@ export function DiscoverPage() {
                     <p className="truncate font-bold" style={{ color: colors.primary }}>{m.name}</p>
                     <p className="truncate text-sm" style={{ color: colors.secondary }}>{m.role} · {m.tags.join(' · ')}</p>
                   </div>
-                  <span className="shrink-0 rounded-full px-3 py-1.5 text-xs font-bold" style={{ background: 'rgba(45,212,163,0.14)', color: colors.verified }}>View</span>
+                  <span className="shrink-0 rounded-md px-3 py-1.5 text-xs font-bold" style={{ background: 'rgba(45,212,163,0.14)', color: colors.verified }}>View</span>
                 </button>
               ))}
             </div>
