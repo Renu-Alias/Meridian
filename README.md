@@ -162,7 +162,6 @@ meridian-backend/
 - `Redis` — caching and session management
 - `Celery` — async background jobs (patch notifications, payouts)
 - `sentence-transformers` — NLP for stack-matching posts to readers
-- `Stripe SDK` — micro-payment processing
 ---
  
 ## 🗂️ Architecture Overview
