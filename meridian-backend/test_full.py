@@ -163,8 +163,8 @@ print("23c. Bad password rejected (401)")
 
 # 24. Post search (before deletion so post exists)
 search = ok(req("GET", "/search/posts?q=Rust"), "search_posts")
-assert isinstance(search, list) and len(search) >= 1
-print(f"24. Post search: {len(search)} result(s)")
+assert isinstance(search, dict) and len(search.get("items", [])) >= 1, f"Expected search items, got {search}"
+print(f"24. Post search: {len(search['items'])} result(s)")
 
 # 25. Claim resolution
 cflag = ok(req("POST", f"/posts/{pid}/flags", {"reason":"test flag"}, token), "flag")

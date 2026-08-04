@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { GitFork, Repeat2, Briefcase, GitPullRequest, GraduationCap, Crown, BadgeCheck } from 'lucide-react';
+import { GitFork, Repeat2, Briefcase, GitPullRequest, GraduationCap, Crown, BadgeCheck, Sprout, Zap, Wrench, ShieldCheck, Landmark } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { useUiStore } from '../store/uiStore';
@@ -20,12 +20,12 @@ const colors = {
 // ─── Rank tier definitions (credibility-score scale, 0–100) ─────────────────
 
 const TIERS = [
-  { name: 'Newcomer',    min: 0,   max: 69,  color: '#536471', bg: 'rgba(83,100,113,0.12)',  icon: '🌱' },
-  { name: 'Contributor', min: 70,  max: 79,  color: '#71767b', bg: 'rgba(113,118,123,0.12)', icon: '⚡' },
-  { name: 'Engineer',    min: 80,  max: 84,  color: '#60a5fa', bg: 'rgba(96,165,250,0.12)',  icon: '⚙️' },
-  { name: 'Senior',      min: 85,  max: 89,  color: '#a78bfa', bg: 'rgba(167,139,250,0.12)', icon: '🔷' },
-  { name: 'Architect',   min: 90,  max: 94,  color: '#f59e0b', bg: 'rgba(245,158,11,0.12)',  icon: '🏛️' },
-  { name: 'Fellow',      min: 95,  max: Infinity, color: '#2DD4A3', bg: 'rgba(45,212,163,0.14)', icon: '🏆' },
+  { name: 'Newcomer',    min: 0,   max: 69,  color: '#536471', bg: 'rgba(83,100,113,0.12)',  icon: Sprout },
+  { name: 'Contributor', min: 70,  max: 79,  color: '#71767b', bg: 'rgba(113,118,123,0.12)', icon: Zap },
+  { name: 'Engineer',    min: 80,  max: 84,  color: '#60a5fa', bg: 'rgba(96,165,250,0.12)',  icon: Wrench },
+  { name: 'Senior',      min: 85,  max: 89,  color: '#a78bfa', bg: 'rgba(167,139,250,0.12)', icon: ShieldCheck },
+  { name: 'Architect',   min: 90,  max: 94,  color: '#f59e0b', bg: 'rgba(245,158,11,0.12)',  icon: Landmark },
+  { name: 'Fellow',      min: 95,  max: Infinity, color: '#2DD4A3', bg: 'rgba(45,212,163,0.14)', icon: Crown },
 ];
 
 function getTier(points: number) {
@@ -46,12 +46,13 @@ const POINT_ACTIONS = [
 
 function TierBadge({ tier }: { tier: string }) {
   const t = TIERS.find((x) => x.name === tier) ?? TIERS[0];
+  const Icon = t.icon;
   return (
     <span
       className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-bold"
       style={{ background: t.bg, color: t.color }}
     >
-      <span>{t.icon}</span>
+      <Icon size={12} />
       {t.name}
     </span>
   );
@@ -186,22 +187,25 @@ export function LeaderboardPage() {
       <section className="mt-6">
         <h2 className="mb-3 text-lg font-bold" style={{ color: colors.primary }}>Rank Tiers</h2>
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
-          {TIERS.map((tier) => (
-            <div
-              key={tier.name}
-              className="rounded-xl px-3 py-3 text-center"
-              style={{
-                background: tier.name === myTier.name ? tier.bg : colors.card,
-                border: `1px solid ${tier.name === myTier.name ? tier.color : colors.border}`,
-              }}
-            >
-              <div className="text-2xl">{tier.icon}</div>
-              <p className="mt-1.5 text-sm font-bold" style={{ color: tier.color }}>{tier.name}</p>
-              <p className="mt-0.5 font-mono text-[10px]" style={{ color: colors.muted }}>
-                {tier.max === Infinity ? `${tier.min}+` : `${tier.min}–${tier.max}`} pts
-              </p>
-            </div>
-          ))}
+          {TIERS.map((tier) => {
+            const Icon = tier.icon;
+            return (
+              <div
+                key={tier.name}
+                className="rounded-xl px-3 py-3 text-center"
+                style={{
+                  background: tier.name === myTier.name ? tier.bg : colors.card,
+                  border: `1px solid ${tier.name === myTier.name ? tier.color : colors.border}`,
+                }}
+              >
+                <Icon size={22} style={{ color: tier.color, margin: '0 auto' }} />
+                <p className="mt-1.5 text-sm font-bold" style={{ color: tier.color }}>{tier.name}</p>
+                <p className="mt-0.5 font-mono text-[10px]" style={{ color: colors.muted }}>
+                  {tier.max === Infinity ? `${tier.min}+` : `${tier.min}–${tier.max}`} pts
+                </p>
+              </div>
+            );
+          })}
         </div>
       </section>
 
@@ -271,7 +275,7 @@ export function LeaderboardPage() {
                 {/* Engineer */}
                 <div className="flex items-center gap-2.5 min-w-0">
                   <img
-                    src={entry.avatar_url || 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&w=120&q=80'}
+                    src={entry.avatar_url || DEFAULT_AVATAR}
                     alt=""
                     className="h-8 w-8 shrink-0 rounded-full object-cover grayscale cursor-pointer"
                     onClick={() => navigate(`/profile/${entry.username}`)}
