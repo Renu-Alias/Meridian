@@ -9,7 +9,10 @@ import type {
 } from './api';
 import type { Notification, Post } from './mockApi';
 
-const AVATAR_IMG = (index: number) => `https://i.pravatar.cc/900?img=${(index % 70) + 1}`;
+const AVATAR_IMG = (index: number) => `https://i.pravatar.cc/150?img=${(index % 70) + 1}`;
+
+/** Single source of truth for the fallback avatar, matching the seeded style. */
+export const DEFAULT_AVATAR = AVATAR_IMG(1);
 
 // Stable Unsplash engineering imagery, keyed by theme. Each URL maps to a
 // fixed, topic-relevant photo so post covers no longer render random images.
@@ -95,7 +98,7 @@ export function toPost(p: ApiPost): Post {
     title: p.title,
     author: p.author.display_name,
     handle: `@${p.author.username}`,
-    avatar: p.author.avatar_url || AVATAR_IMG(0),
+    avatar: p.author.avatar_url || DEFAULT_AVATAR,
     role: '',
     age: relativeTime(p.published_at || p.created_at),
     version: p.version,
@@ -157,7 +160,7 @@ export function toComments(threads: ApiQA[]): Comment[] {
       id: t.id,
       author: t.answerer ? t.answerer.display_name : t.questioner.display_name,
       handle: `@${person.username}`,
-      avatar: person.avatar_url || AVATAR_IMG(0),
+      avatar: person.avatar_url || DEFAULT_AVATAR,
       body: t.answer || t.question,
       time: relativeTime(t.answered_at || t.created_at),
       likes: 0,
@@ -229,10 +232,13 @@ export type ProfileShape = {
   designation: string;
   bio: string;
   joined: string;
+  created_at: string;
   credibility: number;
   stack: string[];
   skills: [string, number][];
   avatar: string;
+  github: string | null;
+  linkedin: string | null;
 };
 
 export function toProfile(p: ApiProfile): ProfileShape {
@@ -246,16 +252,26 @@ export function toProfile(p: ApiProfile): ProfileShape {
     joined: Number.isNaN(joined.getTime())
       ? ''
       : `Joined ${joined.toLocaleString('en-US', { month: 'long', year: 'numeric' })}`,
+    created_at: u.created_at,
     credibility: Math.round(p.credibility?.score ?? 100),
     stack: (u.stack ?? []).map((s) => s.technology),
     skills: (p.skills ?? []).map((s) => [s.skill_name, Math.round(s.depth)] as [string, number]),
-    avatar: u.avatar_url || AVATAR_IMG(0),
+    avatar: u.avatar_url || DEFAULT_AVATAR,
+    github: u.github_username || null,
+    linkedin: u.linkedin_username || null,
   };
 }
 
 export type Card = { id: string; title: string; status: string; ripples: number; image: string };
 export type TrendingRow = { title: string; growth: string; author: string; forks: number };
-export type MentorRow = [string, string, string, string];
+export type MentorRow = {
+  id: string;
+  username: string;
+  name: string;
+  role: string;
+  tags: [string, string];
+  avatar: string;
+};
 
 export type DiscoverShape = {
   featured: Post | null;
@@ -279,11 +295,13 @@ export function toDiscover(d: ApiDiscover): DiscoverShape {
     author: p.author.username,
     forks: p.fork_count ?? 0,
   }));
-  const mentors: MentorRow[] = d.mentors.map((m) => [
-    m.display_name,
-    'Mentor',
-    m.stack?.[0] || 'Engineering',
-    m.stack?.[1] || 'Leadership',
-  ]);
+  const mentors: MentorRow[] = d.mentors.map((m) => ({
+    id: m.id,
+    username: m.username,
+    name: m.display_name,
+    role: 'Mentor',
+    tags: [m.stack?.[0] || 'Engineering', m.stack?.[1] || 'Leadership'],
+    avatar: m.avatar_url || DEFAULT_AVATAR,
+  }));
   return { featured, cards, trending, mentors };
 }

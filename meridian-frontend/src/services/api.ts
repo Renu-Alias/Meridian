@@ -180,7 +180,7 @@ export const api = {
     }),
 
   getMe: () =>
-    request<{ id: string; email: string; username: string; display_name: string; avatar_url: string; bio: string }>(
+    request<{ id: string; email: string; username: string; display_name: string; avatar_url: string; bio: string; created_at: string }>(
       '/auth/me',
     ),
 
@@ -264,6 +264,9 @@ export const api = {
     ),
 
   getProfile: (username: string) => request<ApiProfile>(`/users/profile/${username}`),
+
+  getProfilePosts: (username: string) =>
+    request<ApiPost[]>(`/users/profile/${username}/posts`),
 
   getRankingAuthors: (limit = 100) =>
     request<ApiRankAuthor[]>(`/ranking/authors${queryString({ limit })}`),

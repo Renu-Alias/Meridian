@@ -1,17 +1,23 @@
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { Github, Globe, Linkedin, ShieldCheck } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { ContributionGraph } from '../components/ContributionGraph';
 import { useUiStore } from '../store/uiStore';
 import { api } from '../services/api';
-import { toProfile } from '../services/adapters';
+import { toProfile, toPost } from '../services/adapters';
 
 function ProfileContent({ username }: { username: string }) {
   const me = useUiStore((s) => s.me);
+  const navigate = useNavigate();
   const isMe = !!me && me.username === username;
   const { data: profile } = useQuery({
     queryKey: ['profile', username],
     queryFn: () => api.getProfile(username).then(toProfile),
+    enabled: !!username,
+  });
+  const { data: posts = [] } = useQuery({
+    queryKey: ['profile-posts', username],
+    queryFn: () => api.getProfilePosts(username).then((items) => items.map(toPost)),
     enabled: !!username,
   });
   if (!profile) return <div className="p-8">Loading profile...</div>;
@@ -21,7 +27,7 @@ function ProfileContent({ username }: { username: string }) {
       <section className="rounded-xl border border-[#2f3336] bg-[#151515] p-5">
         <div className="flex flex-col gap-6 sm:flex-row">
           <img
-            src={isMe && me?.avatar_url ? me.avatar_url : profile.avatar}
+            src={profile.avatar}
             alt=""
             className="h-24 w-24 rounded-full object-cover grayscale"
           />
@@ -38,9 +44,28 @@ function ProfileContent({ username }: { username: string }) {
             </p>
             <p className="mt-4 max-w-2xl leading-7">{profile.bio}</p>
             <div className="mt-4 flex flex-wrap items-center gap-3" style={{ color: '#71767b' }}>
-              <Github size={19} />
-              <Linkedin size={19} />
-              <Globe size={19} />
+              {profile.github && (
+                <a
+                  href={`https://github.com/${profile.github}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  title={`github.com/${profile.github}`}
+                  className="transition-colors hover:text-[#2DD4A3]"
+                >
+                  <Github size={19} />
+                </a>
+              )}
+              {profile.linkedin && (
+                <a
+                  href={`https://linkedin.com/in/${profile.linkedin}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  title={`linkedin.com/in/${profile.linkedin}`}
+                  className="transition-colors hover:text-[#2DD4A3]"
+                >
+                  <Linkedin size={19} />
+                </a>
+              )}
               <span>{profile.joined}</span>
             </div>
           </div>
@@ -110,7 +135,33 @@ function ProfileContent({ username }: { username: string }) {
         <h3 className="text-xl font-bold">Meridian contributions</h3>
         <p className="mt-1 text-sm" style={{ color: '#71767b' }}>Patches, answers, citations, and published writing over the last year.</p>
         <div className="mt-5">
-          <ContributionGraph variant="full" />
+          <ContributionGraph variant="full" seedKey={username} since={profile.created_at} />
+        </div>
+      </section>
+
+      <section className="rounded-xl border border-[#2f3336] bg-[#151515] p-5">
+        <h3 className="text-xl font-bold">{isMe ? 'My posts' : 'Posts'}</h3>
+        <p className="mt-1 text-sm" style={{ color: '#71767b' }}>Published writing by {isMe ? 'you' : profile.name}.</p>
+        <div className="mt-4 space-y-2">
+          {posts.length === 0 && (
+            <p className="text-sm" style={{ color: '#536471' }}>No published posts yet.</p>
+          )}
+          {posts.map((post) => (
+            <button
+              key={post.id}
+              className="block w-full rounded-lg px-4 py-3 text-left transition-colors hover:bg-[#1a1d24]"
+              style={{ border: '1px solid #2f3336' }}
+              onClick={() => navigate(`/post/${post.id}`)}
+            >
+              <p className="font-semibold" style={{ color: '#e7e9ea' }}>{post.title}</p>
+              <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs" style={{ color: '#536471' }}>
+                <span>{post.age}</span>
+                <span style={{ color: '#2DD4A3' }}>{post.likes} likes</span>
+                <span>{post.comments} comments</span>
+                <span>{post.forks} forks</span>
+              </div>
+            </button>
+          ))}
         </div>
       </section>
 

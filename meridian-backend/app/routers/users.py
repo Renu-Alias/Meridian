@@ -1,9 +1,11 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from app.database import get_db
+from app.models.post import Post
 from app.models.skills import CredibilityScore, SkillsGraphEntry
 from app.models.user import StackProfile, Technology, User
+from app.routers.posts import _post_to_read
 from app.schemas.skills import CredibilityScoreRead, SkillsGraphEntryRead
 from app.schemas.user import (
     StackProfileUpdate,
@@ -41,7 +43,6 @@ def _user_to_read(user: User, db: Session) -> UserRead:
 def get_profile(username: str, db: Session = Depends(get_db)):
     user = db.query(User).filter(User.username == username).first()
     if not user:
-        from fastapi import HTTPException
         raise HTTPException(status_code=404, detail="User not found")
     skills = db.query(SkillsGraphEntry).filter(SkillsGraphEntry.user_id == user.id).all()
     cred = db.query(CredibilityScore).filter(CredibilityScore.user_id == user.id).first()
@@ -55,6 +56,20 @@ def get_profile(username: str, db: Session = Depends(get_db)):
             resolved_flags=cred.resolved_flags if cred else 0,
         ) if cred else CredibilityScoreRead(score=100.0, verified_claims=0, flagged_claims=0, resolved_flags=0),
     }
+
+
+@router.get("/profile/{username}/posts")
+def get_profile_posts(username: str, db: Session = Depends(get_db)):
+    user = db.query(User).filter(User.username == username).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    posts = (
+        db.query(Post)
+        .filter(Post.author_id == user.id, Post.status == "published")
+        .order_by(Post.created_at.desc())
+        .all()
+    )
+    return [_post_to_read(p, db) for p in posts]
 
 
 @router.put("/me")

@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { useUiStore } from '../store/uiStore';
 import { api } from '../services/api';
+import { DEFAULT_AVATAR } from '../services/adapters';
 
 const colors = {
   primary:  '#e7e9ea',
@@ -111,7 +112,7 @@ export function LeaderboardPage() {
         <p className="mb-3 font-mono text-[10px] uppercase tracking-[0.25em]" style={{ color: colors.muted }}>Your standing</p>
         <div className="flex flex-wrap items-center gap-4">
           <img
-            src={me?.avatar_url || 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&w=120&q=80'}
+            src={me?.avatar_url || DEFAULT_AVATAR}
             alt=""
             className="h-12 w-12 rounded-full object-cover grayscale"
           />

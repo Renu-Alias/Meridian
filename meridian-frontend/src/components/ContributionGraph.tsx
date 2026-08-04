@@ -18,10 +18,21 @@ const STRIDE = CELL + GAP;  // 13px per cell
 
 // ─── helpers ──────────────────────────────────────────────────────────────────
 
-function generateActivity(year: number): number[] {
+/** Deterministic per-user activity: seeded by the user handle so each profile
+ *  shows a different pattern, and zeroed before the account was created so a
+ *  brand-new user never gets a full green graph. */
+function generateActivity(year: number, seedKey: string, sinceMs: number): number[] {
   const days = isLeapYear(year) ? 366 : 365;
+  let base = 2166136261;
+  for (let i = 0; i < seedKey.length; i++) {
+    base ^= seedKey.charCodeAt(i);
+    base = Math.imul(base, 16777619);
+  }
+  base = base >>> 0;
   return Array.from({ length: days }, (_, i) => {
-    const seed = (i * 2654435761 + year * 1664525) >>> 0;
+    const dayMs = Date.UTC(year, 0, i + 1);
+    if (sinceMs > 0 && dayMs < sinceMs) return 0;
+    const seed = (i * 2654435761 + year * 1664525 + base * 2246822519) >>> 0;
     const hash = (seed ^ (seed >>> 16)) & 0xffff;
     const roll = hash % 100;
     if (roll < 35) return 0;
@@ -46,13 +57,17 @@ type Props = {
   variant?: 'full' | 'mini';
   weeks?: number;
   year?: number;
+  /** Per-user seed (e.g. username) so each profile renders a distinct pattern. */
+  seedKey?: string;
+  /** ISO timestamp of account creation — cells before this date render empty. */
+  since?: string;
 };
 
 type Cell = { date: Date; level: number; tooltip: string };
 
 // ─── component ────────────────────────────────────────────────────────────────
 
-export function ContributionGraph({ variant = 'full', weeks: weekProp, year }: Props) {
+export function ContributionGraph({ variant = 'full', weeks: weekProp, year, seedKey = 'default', since }: Props) {
   const currentYear  = new Date().getFullYear();
   const [selYear, setSelYear] = useState(year ?? currentYear);
   const [hovered, setHovered]  = useState<number | null>(null);
@@ -62,9 +77,14 @@ export function ContributionGraph({ variant = 'full', weeks: weekProp, year }: P
   const totalWeeks  = weekProp ?? (isMini ? 10 : 53);
   const colors      = isMini ? LEVEL_COLORS_MINI : LEVEL_COLORS;
 
+  const sinceMs = useMemo(() => {
+    const t = since ? new Date(since).getTime() : 0;
+    return Number.isNaN(t) ? 0 : t;
+  }, [since]);
+
   // ── build grid data ──────────────────────────────────────────────────────
   const { cells, monthLabels, total } = useMemo(() => {
-    const activity = generateActivity(selYear);
+    const activity = generateActivity(selYear, seedKey, sinceMs);
     const jan1 = new Date(selYear, 0, 1);
     // Monday = 0 offset
     const startOffset = (jan1.getDay() + 6) % 7;
@@ -107,7 +127,7 @@ export function ContributionGraph({ variant = 'full', weeks: weekProp, year }: P
 
     const total = activity.reduce((s, v) => s + v, 0);
     return { cells, monthLabels, total };
-  }, [selYear, totalWeeks]);
+  }, [selYear, totalWeeks, seedKey, sinceMs]);
 
   // ── dimensions ──────────────────────────────────────────────────────────
   const gridW  = totalWeeks * STRIDE - GAP;   // exact pixel width of cell grid

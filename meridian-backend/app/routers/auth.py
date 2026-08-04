@@ -182,4 +182,5 @@ def get_me(user: User = Depends(get_current_user)):
         "display_name": user.display_name,
         "avatar_url": user.avatar_url,
         "bio": user.bio,
+        "created_at": user.created_at,
     }

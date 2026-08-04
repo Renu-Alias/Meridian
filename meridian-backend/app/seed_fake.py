@@ -292,6 +292,8 @@ def make_user(db, faker: Faker, index: int, used: set) -> User:
         avatar_url=_avatar(index),
         role=random.choice(ROLES),
         seniority=random.choice(SENIORITY),
+        github_username=faker.user_name(),
+        linkedin_username=faker.user_name(),
         recruiter_visible=random.random() < 0.4,
         is_mentor=random.random() < 0.2,
         is_active=True,
@@ -562,45 +564,6 @@ def seed(db, num_users: int, num_posts: int) -> dict:
         p.impact_score = int((p.impact_score or 0) * random.uniform(2.5, 4.5))
     db.commit()
 
-    # Reactions (likes)
-    reactions = 0
-    for post in published:
-        if post in popular:
-            max_reactions = random.randint(60, 200)
-        else:
-            max_reactions = random.randint(0, 24)
-        sample = random.sample(users, min(max_reactions, len(users)))
-        for user in sample:
-            if user.id == post.author_id:
-                continue
-            if post in popular:
-                reaction_type = random.choices(
-                    VALID_REACTION_TYPES, weights=[10, 10, 10, 70], k=1
-                )[0]
-            else:
-                reaction_type = random.choice(VALID_REACTION_TYPES)
-            db.add(
-                Reaction(
-                    post_id=post.id,
-                    user_id=user.id,
-                    reaction_type=reaction_type,
-                    created_at=post.published_at + timedelta(hours=random.uniform(0, 300)),
-                )
-            )
-            reactions += 1
-    db.commit()
-    print(f"Seeded {reactions} reactions")
-
-    # Comments / Q&A threads
-    comments = 0
-    for post in published:
-        max_comments = random.randint(12, 40) if post in popular else random.randint(0, 8)
-        for _ in range(max_comments):
-            make_comment(db, faker, post, random.choice(users), post.published_at + timedelta(hours=random.uniform(1, 300)), users)
-            comments += 1
-    db.commit()
-    print(f"Seeded {comments} comments/Q&A threads")
-
     # Forks (each fork also creates a fork post)
     forks = 0
     for post in published:
@@ -641,6 +604,52 @@ def seed(db, num_users: int, num_posts: int) -> dict:
             forks += 1
     db.commit()
     print(f"Seeded {forks} forks")
+
+    # Reactions (likes) + comments/Q&A threads — applied to ALL published posts
+    # (including fork posts) so no post shows up with zero engagement.
+    all_published = (
+        db.query(Post).filter(Post.status == "published").order_by(Post.id).all()
+    )
+    reactions = 0
+    comments = 0
+    for post in all_published:
+        impact = post.impact_score or 0
+        if impact >= 1500:
+            max_reactions = random.randint(90, 170)
+            max_comments = random.randint(15, 45)
+            weights = [10, 10, 10, 70]
+        elif impact >= 600:
+            max_reactions = random.randint(25, 85)
+            max_comments = random.randint(4, 18)
+            weights = [20, 20, 20, 40]
+        else:
+            max_reactions = random.randint(2, 22)
+            max_comments = random.randint(1, 6)
+            weights = [25, 25, 25, 25]
+        sample = random.sample(users, min(max_reactions, len(users)))
+        for user in sample:
+            if user.id == post.author_id:
+                continue
+            db.add(
+                Reaction(
+                    post_id=post.id,
+                    user_id=user.id,
+                    reaction_type=random.choices(VALID_REACTION_TYPES, weights=weights, k=1)[0],
+                    created_at=post.published_at + timedelta(hours=random.uniform(0, 300)),
+                )
+            )
+            reactions += 1
+        for _ in range(max_comments):
+            make_comment(
+                db, faker, post,
+                random.choice(users),
+                post.published_at + timedelta(hours=random.uniform(1, 300)),
+                users,
+            )
+            comments += 1
+    db.commit()
+    print(f"Seeded {reactions} reactions across {len(all_published)} published posts")
+    print(f"Seeded {comments} comments/Q&A threads")
 
     # Patches
     patches = 0

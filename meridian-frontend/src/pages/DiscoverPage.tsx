@@ -3,7 +3,6 @@ import { Flame, MessageSquare, Repeat2, TrendingUp, X } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { Badge } from '../components/Badge';
-import { useUiStore } from '../store/uiStore';
 import { api } from '../services/api';
 import { toDiscover } from '../services/adapters';
 import { compactNumber } from '../utils/format';
@@ -21,7 +20,6 @@ export function DiscoverPage() {
   const { data } = useQuery({ queryKey: ['discover'], queryFn: () => api.getDiscover().then(toDiscover) });
   const { data: stackData = [] } = useQuery({ queryKey: ['stack'], queryFn: api.getStack });
   const navigate = useNavigate();
-  const showToast = useUiStore((s) => s.showToast);
   const [showExperts, setShowExperts] = useState(false);
   if (!data) return <div className="p-8" style={{ color: colors.secondary }}>Loading discovery graph...</div>;
   const stackChips = stackData.map((s) => s.technology);
@@ -138,21 +136,31 @@ export function DiscoverPage() {
           <button className="text-sm font-bold" style={{ color: colors.verified }} onClick={() => setShowExperts(true)}>View All Experts →</button>
         </div>
         <div className="mt-5 grid gap-4 md:grid-cols-3">
-          {data.mentors.map(([name, role, tagA, tagB]) => (
-            <article key={name} className="rounded-xl p-5 text-center transition-colors hover:bg-[#1a1d24]" style={{ background: colors.card, border: `1px solid ${colors.border}` }}>
-              <div className="mx-auto h-14 w-14 rounded-full" style={{ background: 'rgba(45,212,163,0.1)' }} />
-              <h3 className="mt-3 font-bold" style={{ color: colors.primary }}>{name}</h3>
-              <p className="text-sm" style={{ color: colors.secondary }}>{role}</p>
+          {data.mentors.map((m) => (
+            <article
+              key={m.id}
+              className="cursor-pointer rounded-xl p-5 text-center transition-colors hover:bg-[#1a1d24]"
+              style={{ background: colors.card, border: `1px solid ${colors.border}` }}
+              onClick={() => navigate(`/profile/${m.username}`)}
+            >
+              <img
+                src={m.avatar}
+                alt=""
+                className="mx-auto h-14 w-14 rounded-full object-cover grayscale"
+              />
+              <h3 className="mt-3 font-bold" style={{ color: colors.primary }}>{m.name}</h3>
+              <p className="text-sm" style={{ color: colors.secondary }}>{m.role}</p>
               <div className="mt-3 flex justify-center gap-2">
-                <span className="rounded-full px-3 py-1 text-xs font-semibold" style={{ background: 'rgba(45,212,163,0.14)', color: colors.verified }}>{tagA}</span>
-                <span className="rounded-full px-3 py-1 text-xs font-semibold" style={{ background: 'rgba(45,212,163,0.14)', color: colors.verified }}>{tagB}</span>
+                {m.tags.map((tag) => (
+                  <span key={tag} className="rounded-full px-3 py-1 text-xs font-semibold" style={{ background: 'rgba(45,212,163,0.14)', color: colors.verified }}>{tag}</span>
+                ))}
               </div>
               <button
                 className="mt-4 h-10 w-full rounded-full text-sm font-bold transition-all"
                 style={{ background: colors.verified, color: '#0a0a0a' }}
-                onClick={() => showToast(`Connect request sent to ${name}`, 'success')}
+                onClick={(e) => { e.stopPropagation(); navigate(`/profile/${m.username}`); }}
               >
-                Connect
+                View profile
               </button>
             </article>
           ))}
@@ -166,16 +174,21 @@ export function DiscoverPage() {
               <h3 className="text-lg font-bold" style={{ color: colors.primary }}>All Experts</h3>
               <button onClick={() => setShowExperts(false)} className="grid h-8 w-8 place-items-center rounded-full hover:bg-[#1a1d24]" style={{ color: colors.muted }}><X size={18} /></button>
             </div>
-            <div className="mt-4 space-y-3">
-              {data.mentors.map(([name, role, tagA, tagB]) => (
-                <div key={name} className="flex items-center gap-4 rounded-lg p-4" style={{ border: `1px solid ${colors.border}` }}>
-                  <div className="h-10 w-10 shrink-0 rounded-full" style={{ background: 'rgba(45,212,163,0.1)' }} />
+            <div className="mt-4 max-h-[60vh] space-y-3 overflow-y-auto pr-1 thin-scrollbar">
+              {data.mentors.map((m) => (
+                <button
+                  key={m.id}
+                  className="flex w-full items-center gap-4 rounded-lg p-4 text-left transition-colors hover:bg-[#1a1d24]"
+                  style={{ border: `1px solid ${colors.border}` }}
+                  onClick={() => { setShowExperts(false); navigate(`/profile/${m.username}`); }}
+                >
+                  <img src={m.avatar} alt="" className="h-10 w-10 shrink-0 rounded-full object-cover grayscale" />
                   <div className="min-w-0 flex-1">
-                    <p className="font-bold" style={{ color: colors.primary }}>{name}</p>
-                    <p className="text-sm" style={{ color: colors.secondary }}>{role}</p>
+                    <p className="truncate font-bold" style={{ color: colors.primary }}>{m.name}</p>
+                    <p className="truncate text-sm" style={{ color: colors.secondary }}>{m.role} · {m.tags.join(' · ')}</p>
                   </div>
-                  <button className="h-9 rounded-full px-4 text-xs font-bold text-black" style={{ background: colors.verified }} onClick={() => { showToast(`Connect request sent to ${name}`, 'success'); setShowExperts(false); }}>Connect</button>
-                </div>
+                  <span className="shrink-0 rounded-full px-3 py-1.5 text-xs font-bold" style={{ background: 'rgba(45,212,163,0.14)', color: colors.verified }}>View</span>
+                </button>
               ))}
             </div>
           </div>

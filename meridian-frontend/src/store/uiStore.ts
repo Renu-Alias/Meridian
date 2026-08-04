@@ -9,6 +9,7 @@ export type Me = {
   avatar_url: string;
   email: string;
   bio: string;
+  created_at?: string;
 };
 
 type UiState = {
@@ -70,6 +71,7 @@ export const useUiStore = create<UiState>((set) => ({
         avatar_url: fresh.avatar_url,
         email: fresh.email,
         bio: fresh.bio,
+        created_at: fresh.created_at,
       };
       localStorage.setItem('me', JSON.stringify(next));
       set({ me: next });
