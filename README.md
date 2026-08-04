@@ -123,13 +123,14 @@ meridian-frontend/
 ├── src/
 │   ├── components/        # Reusable UI components
 │   ├── pages/             # Route-level page components
-│   ├── hooks/             # Custom React hooks
-│   ├── context/           # Global state (auth, theme, stack profile)
 │   ├── services/          # API calls to backend
+│   ├── store/             # Global client state (Zustand)
 │   └── utils/             # Helpers and formatters
 ├── public/
+├── index.html
 ├── package.json
-└── vite.config.js
+├── tailwind.config.ts
+└── tsconfig.json
 ```
  
 **Key libraries:**
@@ -138,28 +139,34 @@ meridian-frontend/
 - `Zustand` — lightweight client state
 - `Monaco Editor` — rich code blocks in posts
 - `Tailwind CSS` — utility-first styling
-- `IBM Plex Sans` - custom font creation
+- `IBM Plex Sans` — primary typeface (Google Fonts)
 ---
  
 ### Backend — Python
 ```
 meridian-backend/
 ├── app/
-│   ├── api/               # Route handlers (FastAPI routers)
 │   ├── models/            # SQLAlchemy ORM models
+│   ├── routers/           # Route handlers (FastAPI routers)
 │   ├── schemas/           # Pydantic request/response schemas
 │   ├── services/          # Business logic layer
-│   ├── workers/           # Background tasks (Celery)
-│   └── core/              # Config, auth, middleware
-├── tests/
+│   ├── celery_app.py      # Celery background tasks
+│   ├── config.py          # Settings (pydantic-settings)
+│   ├── database.py        # SQLAlchemy engine & session
+│   ├── main.py            # FastAPI app entry point
+│   ├── seed.py            # Technology seeding
+│   └── seed_fake.py       # Fake demo data seeding
+├── alembic/               # DB migrations
+├── alembic.ini
+├── .env.example
 ├── requirements.txt
-└── main.py
+└── test_full.py           # Integration smoke test
 ```
  
 **Key libraries:**
 - `FastAPI` — high-performance async API framework
-- `PostgreSQL` + `SQLAlchemy` — primary data store
-- `Redis` — caching and session management
+- `SQLAlchemy` + `SQLite` (dev) / `PostgreSQL` (prod) — data store
+- `Redis` (optional) — Celery broker & result backend
 - `Celery` — async background jobs (patch notifications, payouts)
 - `sentence-transformers` — NLP for stack-matching posts to readers
 ---
@@ -188,38 +195,40 @@ meridian-backend/
 ### Prerequisites
 - Node.js 18+
 - Python 3.11+
-- PostgreSQL 15+
-- Redis 7+
+- PostgreSQL 15+ (optional — dev uses SQLite by default)
+- Redis 7+ (optional — only needed for Celery background tasks)
 ### Frontend Setup
 ```bash
 cd meridian-frontend
 npm install
-cp .env.example .env        # Add your API base URL
 npm run dev                 # Runs on http://localhost:5173
 ```
- 
+> `.env` already contains `VITE_API_URL=http://localhost:8000` (points at the local backend). Adjust if your backend runs elsewhere.
+
 ### Backend Setup
 ```bash
 cd meridian-backend
 python -m venv venv
 source venv/bin/activate    # Windows: venv\Scripts\activate
 pip install -r requirements.txt
-cp .env.example .env        # Add DB, Redis, Stripe keys
-alembic upgrade head        # Run migrations
-uvicorn main:app --reload   # Runs on http://localhost:8000
+cp .env.example .env        # Add DB / OAuth / Redis keys
+uvicorn app.main:app --reload   # Runs on http://localhost:8000
 ```
+> Migrations are applied automatically on startup. Seed fake data with `python -m app.seed_fake`.
  
 ---
  
 ## 🧪 Running Tests
- 
+
 ```bash
-# Frontend
-cd meridian-frontend && npm run test
- 
-# Backend
-cd meridian-backend && pytest --cov=app tests/
+# Frontend (type-check + production build)
+cd meridian-frontend && npm run build
+
+# Backend (integration smoke test)
+cd meridian-backend && python test_full.py
 ```
+
+> The frontend has no unit-test runner installed; `npm run build` runs the TypeScript type-checker (`tsc --noEmit`) plus a Vite production build. The backend uses `test_full.py` (a FastAPI `TestClient` integration suite) rather than pytest.
  
 ---
 
