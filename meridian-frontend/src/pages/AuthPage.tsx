@@ -32,7 +32,7 @@ export function AuthPage() {
   const finalize = async () => {
     try {
       const me = await api.getMe();
-      setMe({ username: me.username, display_name: me.display_name, avatar_url: me.avatar_url, email: me.email, bio: me.bio });
+      setMe({ username: me.username, display_name: me.display_name, avatar_url: me.avatar_url, email: me.email, bio: me.bio, created_at: me.created_at });
     } catch {
       // non-fatal — token still valid
     }

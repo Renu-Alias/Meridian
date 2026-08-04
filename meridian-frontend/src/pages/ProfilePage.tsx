@@ -1,5 +1,5 @@
 import { useParams, useNavigate } from 'react-router-dom';
-import { Github, Globe, Linkedin, ShieldCheck } from 'lucide-react';
+import { Github, Linkedin, ShieldCheck } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { ContributionGraph } from '../components/ContributionGraph';
 import { useUiStore } from '../store/uiStore';
