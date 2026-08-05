@@ -69,7 +69,7 @@ TECHNOLOGY_POOL = [
     "Kafka", "RabbitMQ", "NATS", "Docker", "Kubernetes", "Terraform", "Pulumi",
     "AWS", "GCP", "Azure", "Prometheus", "Grafana", "OpenTelemetry", "Jaeger",
     "PyTorch", "TensorFlow", "JAX", "LLM", "Wasm", "Linux Kernel", "eBPF",
-    "Temporal", "Deno", "Bun", "Tauri", "WebRTC", "Supabase",
+    "Temporal", "Deno", "Bun", "Tauri", "WebRTC",
 ]
 
 TOPICS = [
