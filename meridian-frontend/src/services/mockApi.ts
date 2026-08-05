@@ -6,6 +6,7 @@ export type Post = {
   avatar: string;
   role: string;
   age: string;
+  date?: string;
   version?: string;
   status: 'verified' | 'flagged' | 'runtime';
   patched: string;

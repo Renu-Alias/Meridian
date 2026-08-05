@@ -4,6 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import { ContributionGraph } from './ContributionGraph';
 import { useUiStore } from '../store/uiStore';
 import { api } from '../services/api';
+import { toPost } from '../services/adapters';
 
 const colors = {
   card: '#151515',
@@ -20,6 +21,11 @@ export function RightPanel() {
   const me = useUiStore((state) => state.me);
   const { data: stackData = [] } = useQuery({ queryKey: ['stack'], queryFn: api.getStack });
   const stack = stackData.length > 0 ? stackData.map((s) => s.technology) : activeStack;
+  const { data: myPosts = [] } = useQuery({
+    queryKey: ['profile-posts', me?.username],
+    queryFn: async () => (me?.username ? (await api.getProfilePosts(me.username)).map(toPost) : []),
+    enabled: !!me?.username,
+  });
 
   return (
     <aside className="hidden w-[330px] shrink-0 self-start border-l p-5 xl:sticky xl:top-0 xl:block" style={{ borderColor: colors.border, background: 'transparent' }}>
@@ -46,7 +52,7 @@ export function RightPanel() {
           <span className="font-sans text-sm font-bold normal-case tracking-normal" style={{ color: colors.verified }}>+12% this week</span>
         </div>
         <div className="mt-3">
-          <ContributionGraph variant="mini" weeks={10} seedKey={me?.username ?? 'default'} since={me?.created_at} />
+          <ContributionGraph variant="mini" weeks={10} seedKey={me?.username ?? 'default'} since={me?.created_at} events={myPosts.map((p) => ({ date: p.date ?? '' }))} />
         </div>
       </section>
 

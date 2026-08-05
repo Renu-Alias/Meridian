@@ -101,6 +101,7 @@ export function toPost(p: ApiPost): Post {
     avatar: p.author.avatar_url || DEFAULT_AVATAR,
     role: '',
     age: relativeTime(p.published_at || p.created_at),
+    date: p.published_at || p.created_at || '',
     version: p.version,
     status: p.flagged ? 'flagged' : p.citations.length > 0 ? 'verified' : 'runtime',
     patched:
@@ -263,7 +264,7 @@ export function toProfile(p: ApiProfile): ProfileShape {
 }
 
 export type Card = { id: string; title: string; status: string; ripples: number; image: string };
-export type TrendingRow = { title: string; growth: string; author: string; forks: number };
+export type TrendingRow = { id: string; title: string; growth: string; author: string; forks: number };
 export type MentorRow = {
   id: string;
   username: string;
@@ -290,6 +291,7 @@ export function toDiscover(d: ApiDiscover): DiscoverShape {
     image: topicImageUrl(p.tags, (p.impact_score ?? 0) + i * 13),
   }));
   const trending: TrendingRow[] = d.trending.map((p) => ({
+    id: p.id,
     title: p.title,
     growth: `+${((p.impact_score ?? 0) / 100).toFixed(1)}k%`,
     author: p.author.username,

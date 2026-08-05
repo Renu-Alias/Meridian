@@ -1,5 +1,5 @@
-import { useEffect } from 'react';
-import { Navigate, Route, Routes } from 'react-router-dom';
+import { useEffect, useRef } from 'react';
+import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import { HeaderBar } from './components/HeaderBar';
 import { RightPanel } from './components/RightPanel';
 import { Sidebar } from './components/Sidebar';
@@ -21,12 +21,19 @@ import { useUiStore } from './store/uiStore';
 
 function AppShell() {
   const isAuthenticated = useUiStore((s) => s.isAuthenticated);
+  const location = useLocation();
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    scrollRef.current?.scrollTo(0, 0);
+  }, [location.pathname]);
+
   if (!isAuthenticated) return <Navigate to="/auth" replace />;
   return (
     <div className="relative z-10 h-screen overflow-hidden text-surface" style={{ background: '#1C1B1B' }}>
       <div className="flex h-full">
         <Sidebar />
-        <div className="h-full min-w-0 flex-1 overflow-y-auto">
+        <div ref={scrollRef} className="h-full min-w-0 flex-1 overflow-y-auto">
           <div className="flex min-w-0">
             <main className="min-w-0 flex-1">
               <HeaderBar />

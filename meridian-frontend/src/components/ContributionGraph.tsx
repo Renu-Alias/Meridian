@@ -43,6 +43,23 @@ function generateActivity(year: number, seedKey: string, sinceMs: number): numbe
   });
 }
 
+/** Build a per-day contribution count from real activity events (ISO dates).
+ *  Days with no events stay 0, so a brand-new user with no activity renders an
+ *  empty graph instead of a seeded green one. */
+function buildActivityFromEvents(events: ContributionEvent[], year: number): number[] {
+  const days = isLeapYear(year) ? 366 : 365;
+  const yearStart = Date.UTC(year, 0, 1);
+  const counts = new Array<number>(days).fill(0);
+  for (const ev of events) {
+    const d = new Date(ev.date);
+    if (Number.isNaN(d.getTime())) continue;
+    const dayMs = Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate());
+    const doy = Math.floor((dayMs - yearStart) / 86400000);
+    if (doy >= 0 && doy < days) counts[doy] += ev.weight ?? 1;
+  }
+  return counts;
+}
+
 function isLeapYear(y: number) {
   return (y % 4 === 0 && y % 100 !== 0) || y % 400 === 0;
 }
@@ -61,13 +78,19 @@ type Props = {
   seedKey?: string;
   /** ISO timestamp of account creation — cells before this date render empty. */
   since?: string;
+  /** Real activity events (ISO dates). When provided, the graph is drawn from
+   *  these instead of the seeded pseudo-random pattern, so users with no
+   *  activity get an empty graph. */
+  events?: ContributionEvent[];
 };
+
+type ContributionEvent = { date: string; weight?: number };
 
 type Cell = { date: Date; level: number; tooltip: string };
 
 // ─── component ────────────────────────────────────────────────────────────────
 
-export function ContributionGraph({ variant = 'full', weeks: weekProp, year, seedKey = 'default', since }: Props) {
+export function ContributionGraph({ variant = 'full', weeks: weekProp, year, seedKey = 'default', since, events }: Props) {
   const currentYear  = new Date().getFullYear();
   const [selYear, setSelYear] = useState(year ?? currentYear);
   const [hovered, setHovered]  = useState<number | null>(null);
@@ -84,7 +107,7 @@ export function ContributionGraph({ variant = 'full', weeks: weekProp, year, see
 
   // ── build grid data ──────────────────────────────────────────────────────
   const { cells, monthLabels, total } = useMemo(() => {
-    const activity = generateActivity(selYear, seedKey, sinceMs);
+    const activity = events ? buildActivityFromEvents(events, selYear) : generateActivity(selYear, seedKey, sinceMs);
     const jan1 = new Date(selYear, 0, 1);
     // Monday = 0 offset
     const startOffset = (jan1.getDay() + 6) % 7;
@@ -95,8 +118,9 @@ export function ContributionGraph({ variant = 'full', weeks: weekProp, year, see
       const dayOffset = i - startOffset;
       const date      = new Date(jan1.getTime() + dayOffset * 86400000);
       const doy       = Math.floor((date.getTime() - jan1.getTime()) / 86400000);
-      const level     = doy >= 0 && doy < activity.length ? activity[doy] : 0;
-      cells.push({ date, level, tooltip: `${formatDate(date)} — ${level} contribution${level !== 1 ? 's' : ''}` });
+      const count     = doy >= 0 && doy < activity.length ? activity[doy] : 0;
+      const level     = Math.min(4, count);
+      cells.push({ date, level, tooltip: `${formatDate(date)} — ${count} contribution${count !== 1 ? 's' : ''}` });
     }
 
     // Month label positions — place at the first week whose Monday is in that month.
@@ -127,7 +151,7 @@ export function ContributionGraph({ variant = 'full', weeks: weekProp, year, see
 
     const total = activity.reduce((s, v) => s + v, 0);
     return { cells, monthLabels, total };
-  }, [selYear, totalWeeks, seedKey, sinceMs]);
+  }, [selYear, totalWeeks, seedKey, sinceMs, events]);
 
   // ── dimensions ──────────────────────────────────────────────────────────
   const gridW  = totalWeeks * STRIDE - GAP;   // exact pixel width of cell grid

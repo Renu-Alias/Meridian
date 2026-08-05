@@ -136,7 +136,7 @@ function ProfileContent({ username }: { username: string }) {
         <h3 className="text-xl font-bold">Meridian contributions</h3>
         <p className="mt-1 text-sm" style={{ color: '#71767b' }}>Patches, answers, citations, and published writing over the last year.</p>
         <div className="mt-5">
-          <ContributionGraph variant="full" seedKey={username} since={profile.created_at} />
+          <ContributionGraph variant="full" seedKey={username} since={profile.created_at} events={posts.map((p) => ({ date: p.date ?? '' }))} />
         </div>
       </section>
 

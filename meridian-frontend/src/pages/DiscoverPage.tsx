@@ -103,7 +103,12 @@ export function DiscoverPage() {
         </h2>
         <div className="mt-4 space-y-2">
           {data.trending.map((item, index) => (
-            <article key={item.title} className="flex items-center gap-4 rounded-xl p-4 transition-colors hover:bg-[#1a1d24]" style={{ background: colors.card, border: `1px solid ${colors.border}` }}>
+            <article
+              key={item.id}
+              className="flex cursor-pointer items-center gap-4 rounded-xl p-4 transition-colors hover:bg-[#1a1d24]"
+              style={{ background: colors.card, border: `1px solid ${colors.border}` }}
+              onClick={() => navigate(`/post/${item.id}`)}
+            >
               <span className="text-2xl font-bold" style={{ color: index === 0 ? colors.verified : colors.muted }}>
                 {String(index + 1).padStart(2, '0')}
               </span>
