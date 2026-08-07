@@ -5,7 +5,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Badge } from '../components/Badge';
 import { useUiStore } from '../store/uiStore';
 import { api } from '../services/api';
-import { toPost, toComments, DEFAULT_AVATAR } from '../services/adapters';
+import { toPost, toComments, avatarFor } from '../services/adapters';
 import type { Comment } from '../services/adapters';
 
 const colors = {
@@ -428,7 +428,7 @@ export function PostDetailPage() {
         {/* Comment composer */}
         <div className="mt-5 flex gap-3" ref={composerRef}>
           <img
-            src={me?.avatar_url || DEFAULT_AVATAR}
+            src={avatarFor(me?.display_name || me?.username || '', me?.avatar_url)}
             alt=""
             className="h-10 w-10 rounded-full object-cover grayscale"
           />
@@ -528,7 +528,7 @@ export function PostDetailPage() {
                       {isReplying && (
                         <div className="mt-3 flex gap-2">
                           <img
-                            src={me?.avatar_url || DEFAULT_AVATAR}
+                            src={avatarFor(me?.display_name || me?.username || '', me?.avatar_url)}
                             alt=""
                             className="h-7 w-7 shrink-0 rounded-full object-cover grayscale"
                           />

@@ -8,13 +8,12 @@ export class ApiError extends Error {
 
 async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   const token = localStorage.getItem('token');
+  const headers: Record<string, string> = {};
+  if (token) headers.Authorization = `Bearer ${token}`;
+  if (!(options.body instanceof FormData)) headers['Content-Type'] = 'application/json';
   const res = await fetch(`${API}${path}`, {
     ...options,
-    headers: {
-      'Content-Type': 'application/json',
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      ...options.headers,
-    },
+    headers: { ...headers, ...(options.headers as Record<string, string> | undefined) },
   });
   if (!res.ok) {
     const body = await res.json().catch(() => ({ detail: res.statusText }));
@@ -183,6 +182,17 @@ export const api = {
     request<{ id: string; email: string; username: string; display_name: string; avatar_url: string; bio: string; created_at: string }>(
       '/auth/me',
     ),
+
+  uploadAvatar: (file: File) => {
+    const form = new FormData();
+    form.append('file', file);
+    return request<{ avatar_url: string }>('/users/me/avatar', {
+      method: 'POST',
+      body: form,
+    });
+  },
+
+  removeAvatar: () => request<{ avatar_url: string }>('/users/me/avatar', { method: 'DELETE' }),
 
   getFeed: (opts: { filter?: string; tag?: string; offset?: number; limit?: number } = {}) =>
     request<FeedResponse>(`/feed${queryString({ filter: opts.filter, tag: opts.tag, offset: opts.offset, limit: opts.limit })}`),

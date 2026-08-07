@@ -2,6 +2,7 @@ import os
 import uuid
 
 from fastapi import APIRouter, Depends, File, HTTPException, Request, UploadFile
+from fastapi.concurrency import run_in_threadpool
 from sqlalchemy.orm import Session
 
 from app.config import settings
@@ -87,6 +88,64 @@ def update_profile(
     db.commit()
     db.refresh(user)
     return _user_to_read(user, db)
+
+
+ALLOWED_AVATAR_TYPES = {"image/jpeg", "image/png", "image/webp", "image/gif"}
+AVATAR_EXT = {"image/jpeg": "jpg", "image/png": "png", "image/webp": "webp", "image/gif": "gif"}
+MAX_AVATAR_BYTES = 5 * 1024 * 1024
+
+
+def _delete_old_avatar(user: User):
+    url = user.avatar_url or ""
+    if "/uploads/avatars/" not in url:
+        return
+    filename = os.path.basename(url.split("/uploads/avatars/")[-1])
+    path = os.path.join(settings.AVATARS_DIR, filename)
+    try:
+        if os.path.exists(path):
+            os.remove(path)
+    except OSError:
+        pass
+
+
+def _write_file(path: str, data: bytes):
+    with open(path, "wb") as f:
+        f.write(data)
+
+
+@router.post("/me/avatar")
+async def upload_avatar(
+    request: Request,
+    file: UploadFile = File(...),
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    if file.content_type not in ALLOWED_AVATAR_TYPES:
+        raise HTTPException(status_code=400, detail="Only JPG, PNG, WebP or GIF images are allowed")
+    data = await file.read()
+    if len(data) > MAX_AVATAR_BYTES:
+        raise HTTPException(status_code=413, detail="Image must be under 5 MB")
+    os.makedirs(settings.AVATARS_DIR, exist_ok=True)
+    filename = f"{user.id}_{uuid.uuid4().hex[:8]}.{AVATAR_EXT[file.content_type]}"
+    await run_in_threadpool(_write_file, os.path.join(settings.AVATARS_DIR, filename), data)
+    _delete_old_avatar(user)
+    base = str(request.base_url).rstrip("/")
+    user.avatar_url = f"{base}/uploads/avatars/{filename}"
+    db.commit()
+    db.refresh(user)
+    return {"avatar_url": user.avatar_url}
+
+
+@router.delete("/me/avatar")
+def remove_avatar(
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    _delete_old_avatar(user)
+    user.avatar_url = ""
+    db.commit()
+    db.refresh(user)
+    return {"avatar_url": ""}
 
 
 @router.put("/me/stack")

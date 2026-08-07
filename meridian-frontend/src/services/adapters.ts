@@ -9,10 +9,23 @@ import type {
 } from './api';
 import type { Notification, Post } from './mockApi';
 
-const AVATAR_IMG = (index: number) => `https://i.pravatar.cc/150?img=${(index % 70) + 1}`;
+/** Deterministic initials monogram for users without an uploaded avatar. */
+export function initialsAvatar(name: string): string {
+  const parts = (name || '?').trim().split(/\s+/).filter(Boolean);
+  const initials = (
+    parts.length >= 2 ? parts[0][0] + parts[parts.length - 1][0] : (parts[0]?.[0] ?? '?')
+  ).toUpperCase();
+  const svg =
+    `<svg xmlns="http://www.w3.org/2000/svg" width="150" height="150">` +
+    `<rect width="150" height="150" rx="75" fill="#151515"/>` +
+    `<text x="50%" y="50%" dy=".35em" text-anchor="middle" ` +
+    `font-family="Segoe UI, Arial, sans-serif" font-size="56" font-weight="700" fill="#2DD4A3">${initials}</text>` +
+    `</svg>`;
+  return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
+}
 
-/** Single source of truth for the fallback avatar, matching the seeded style. */
-export const DEFAULT_AVATAR = AVATAR_IMG(1);
+/** Avatar URL, falling back to an initials monogram when none is set. */
+export const avatarFor = (name: string, url?: string): string => url || initialsAvatar(name);
 
 // Stable Unsplash engineering imagery, keyed by theme. Each URL maps to a
 // fixed, topic-relevant photo so post covers no longer render random images.
@@ -98,7 +111,7 @@ export function toPost(p: ApiPost): Post {
     title: p.title,
     author: p.author.display_name,
     handle: `@${p.author.username}`,
-    avatar: p.author.avatar_url || DEFAULT_AVATAR,
+    avatar: avatarFor(p.author.display_name, p.author.avatar_url),
     role: '',
     age: relativeTime(p.published_at || p.created_at),
     date: p.published_at || p.created_at || '',
@@ -161,7 +174,7 @@ export function toComments(threads: ApiQA[]): Comment[] {
       id: t.id,
       author: t.answerer ? t.answerer.display_name : t.questioner.display_name,
       handle: `@${person.username}`,
-      avatar: person.avatar_url || DEFAULT_AVATAR,
+      avatar: avatarFor(person.display_name, person.avatar_url),
       body: t.answer || t.question,
       time: relativeTime(t.answered_at || t.created_at),
       likes: 0,
@@ -257,7 +270,7 @@ export function toProfile(p: ApiProfile): ProfileShape {
     credibility: Math.round(p.credibility?.score ?? 100),
     stack: (u.stack ?? []).map((s) => s.technology),
     skills: (p.skills ?? []).map((s) => [s.skill_name, Math.round(s.depth)] as [string, number]),
-    avatar: u.avatar_url || DEFAULT_AVATAR,
+    avatar: avatarFor(u.display_name, u.avatar_url),
     github: u.github_username || null,
     linkedin: u.linkedin_username || null,
   };
@@ -303,7 +316,7 @@ export function toDiscover(d: ApiDiscover): DiscoverShape {
     name: m.display_name,
     role: 'Mentor',
     tags: [m.stack?.[0] || 'Engineering', m.stack?.[1] || 'Leadership'],
-    avatar: m.avatar_url || DEFAULT_AVATAR,
+    avatar: avatarFor(m.display_name, m.avatar_url),
   }));
   return { featured, cards, trending, mentors };
 }

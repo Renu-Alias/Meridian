@@ -1,6 +1,7 @@
+import { useRef, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Github, Linkedin, ShieldCheck } from 'lucide-react';
-import { useQuery } from '@tanstack/react-query';
+import { Camera, Github, Linkedin, ShieldCheck, Trash2 } from 'lucide-react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { ContributionGraph } from '../components/ContributionGraph';
 import { useUiStore } from '../store/uiStore';
 import { api } from '../services/api';
@@ -8,7 +9,12 @@ import { toProfile, toPost } from '../services/adapters';
 
 function ProfileContent({ username }: { username: string }) {
   const me = useUiStore((s) => s.me);
+  const showToast = useUiStore((s) => s.showToast);
+  const setAvatar = useUiStore((s) => s.setAvatar);
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const fileRef = useRef<HTMLInputElement>(null);
+  const [uploading, setUploading] = useState(false);
   const isMe = !!me && me.username === username;
   const { data: profile } = useQuery({
     queryKey: ['profile', username],
@@ -20,17 +26,58 @@ function ProfileContent({ username }: { username: string }) {
     queryFn: () => api.getProfilePosts(username).then((items) => items.map(toPost)),
     enabled: !!username,
   });
+
+  const onPickFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploading(true);
+    try {
+      const res = await api.uploadAvatar(file);
+      setAvatar(res.avatar_url);
+      await queryClient.invalidateQueries({ queryKey: ['profile', username] });
+      showToast('Profile photo updated', 'success');
+    } catch (err) {
+      showToast(err instanceof Error ? err.message : 'Upload failed', 'info');
+    } finally {
+      setUploading(false);
+      if (fileRef.current) fileRef.current.value = '';
+    }
+  };
+
+  const onRemoveAvatar = async () => {
+    try {
+      const res = await api.removeAvatar();
+      setAvatar(res.avatar_url);
+      await queryClient.invalidateQueries({ queryKey: ['profile', username] });
+      showToast('Profile photo removed', 'success');
+    } catch (err) {
+      showToast(err instanceof Error ? err.message : 'Failed to remove photo', 'info');
+    }
+  };
   if (!profile) return <div className="p-8">Loading profile...</div>;
 
   return (
     <div className="space-y-6">
       <section className="rounded-xl border border-[#2f3336] bg-[#151515] p-5">
         <div className="flex flex-col gap-6 sm:flex-row">
-          <img
-            src={profile.avatar}
-            alt=""
-            className="h-24 w-24 rounded-full object-cover grayscale"
-          />
+          <div className="relative shrink-0 self-start">
+            <img
+              src={profile.avatar}
+              alt=""
+              className="h-24 w-24 rounded-full object-cover grayscale"
+            />
+            {isMe && (
+              <button
+                type="button"
+                onClick={() => fileRef.current?.click()}
+                disabled={uploading}
+                className="absolute -bottom-1 -right-1 grid h-8 w-8 place-items-center rounded-full border border-[#2f3336] bg-[#1a1d24] text-[#e7e9ea] transition-colors hover:bg-[#2DD4A3] hover:text-black"
+                title="Upload photo"
+              >
+                <Camera size={15} />
+              </button>
+            )}
+          </div>
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-3">
               <h2 className="text-3xl font-black">{profile.name}</h2>
@@ -70,6 +117,36 @@ function ProfileContent({ username }: { username: string }) {
             </div>
           </div>
         </div>
+        {isMe && (
+          <div className="mt-4 flex flex-wrap items-center gap-2">
+            <input
+              ref={fileRef}
+              type="file"
+              accept="image/jpeg,image/png,image/webp,image/gif"
+              className="hidden"
+              onChange={onPickFile}
+            />
+            <button
+              type="button"
+              onClick={() => fileRef.current?.click()}
+              disabled={uploading}
+              className="rounded-md border border-[#2f3336] px-3 py-1.5 text-sm font-semibold transition-colors hover:border-[#2DD4A3] hover:text-[#2DD4A3]"
+            >
+              {uploading ? 'Uploading…' : 'Change photo'}
+            </button>
+            {me?.avatar_url && (
+              <button
+                type="button"
+                onClick={onRemoveAvatar}
+                className="inline-flex items-center gap-1.5 rounded-md border border-[#2f3336] px-3 py-1.5 text-sm font-semibold transition-colors hover:border-red-500/60 hover:text-red-400"
+              >
+                <Trash2 size={14} />
+                Remove photo
+              </button>
+            )}
+            <span className="text-xs" style={{ color: '#536471' }}>JPG, PNG, WebP or GIF · up to 5 MB</span>
+          </div>
+        )}
       </section>
 
       <section className="rounded-xl border border-[#2f3336] bg-[#151515] p-5">

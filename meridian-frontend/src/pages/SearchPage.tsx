@@ -2,7 +2,7 @@ import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { BarChart3, Heart, MessageCircle, Repeat2 } from 'lucide-react';
 import { api } from '../services/api';
-import { toPost } from '../services/adapters';
+import { toPost, avatarFor } from '../services/adapters';
 import type { Post } from '../services/mockApi';
 import { compactNumber } from '../utils/format';
 
@@ -132,7 +132,7 @@ export function SearchPage() {
                     className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left transition-colors hover:bg-[#1a1d24]/60"
                     onClick={() => navigate(`/profile/${u.username}`)}
                   >
-                    <img src={u.avatar_url} alt="" className="h-10 w-10 rounded-full object-cover grayscale" />
+                    <img src={avatarFor(u.display_name, u.avatar_url)} alt="" className="h-10 w-10 rounded-full object-cover grayscale" />
                     <span className="min-w-0 flex-1">
                       <span className="block truncate text-sm font-bold" style={{ color: colors.primary }}>{u.display_name}</span>
                       <span className="block truncate text-xs" style={{ color: colors.muted }}>@{u.username} · {u.role || 'Engineer'}</span>

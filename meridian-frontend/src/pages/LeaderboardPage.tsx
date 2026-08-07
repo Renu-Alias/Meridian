@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { useUiStore } from '../store/uiStore';
 import { api } from '../services/api';
-import { DEFAULT_AVATAR } from '../services/adapters';
+import { avatarFor } from '../services/adapters';
 
 const colors = {
   primary:  '#e7e9ea',
@@ -113,7 +113,7 @@ export function LeaderboardPage() {
         <p className="mb-3 font-mono text-[10px] uppercase tracking-[0.25em]" style={{ color: colors.muted }}>Your standing</p>
         <div className="flex flex-wrap items-center gap-4">
           <img
-            src={me?.avatar_url || DEFAULT_AVATAR}
+            src={avatarFor(me?.display_name || me?.username || '', me?.avatar_url)}
             alt=""
             className="h-12 w-12 rounded-full object-cover grayscale"
           />
@@ -275,7 +275,7 @@ export function LeaderboardPage() {
                 {/* Engineer */}
                 <div className="flex items-center gap-2.5 min-w-0">
                   <img
-                    src={entry.avatar_url || DEFAULT_AVATAR}
+                    src={avatarFor(entry.display_name, entry.avatar_url)}
                     alt=""
                     className="h-8 w-8 shrink-0 rounded-full object-cover grayscale cursor-pointer"
                     onClick={() => navigate(`/profile/${entry.username}`)}

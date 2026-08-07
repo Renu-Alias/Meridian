@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { Badge } from '../components/Badge';
 import { useUiStore } from '../store/uiStore';
 import { api } from '../services/api';
-import { toPost, DEFAULT_AVATAR } from '../services/adapters';
+import { toPost, avatarFor } from '../services/adapters';
 import { compactNumber } from '../utils/format';
 
 const colors = {
@@ -90,7 +90,7 @@ export function FeedPage({ tag }: { tag?: string }) {
       <section className="border-b px-4 pb-4 pt-7 sm:px-5 sm:pb-5" style={{ borderColor: '#2a2a2a', background: '#151515' }}>
         <div className="flex gap-3">
           <img
-            src={me?.avatar_url || DEFAULT_AVATAR}
+            src={avatarFor(me?.display_name || me?.username || '', me?.avatar_url)}
             alt=""
             className="h-11 w-11 rounded-full object-cover grayscale"
           />

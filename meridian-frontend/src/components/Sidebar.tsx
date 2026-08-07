@@ -2,7 +2,7 @@ import { Bell, Compass, Edit3, Home, Settings, Trophy, User, X } from 'lucide-re
 import { NavLink } from 'react-router-dom';
 import { BrandMark } from './Logo';
 import { useUiStore } from '../store/uiStore';
-import { DEFAULT_AVATAR } from '../services/adapters';
+import { avatarFor } from '../services/adapters';
 
 const colors = {
   border: '#2f3336',
@@ -77,7 +77,7 @@ export function Sidebar() {
         <div className="mt-auto border-t pt-5" style={{ borderColor: colors.border }}>
           <div className="flex items-center gap-3 px-2">
             <img
-              src={me?.avatar_url || DEFAULT_AVATAR}
+              src={avatarFor(me?.display_name || me?.username || '', me?.avatar_url)}
               alt={me?.display_name || 'User'}
               className="h-9 w-9 rounded-full object-cover grayscale"
             />

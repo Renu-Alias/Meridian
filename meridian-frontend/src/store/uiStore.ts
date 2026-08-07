@@ -26,6 +26,7 @@ type UiState = {
   setAuthenticated: (value: boolean) => void;
   setToken: (token: string | null) => void;
   setMe: (me: Me | null) => void;
+  setAvatar: (avatarUrl: string) => void;
   restoreSession: () => Promise<void>;
   logout: () => void;
 };
@@ -52,6 +53,13 @@ export const useUiStore = create<UiState>((set) => ({
     else localStorage.removeItem('me');
     set({ me });
   },
+  setAvatar: (avatarUrl) =>
+    set((state) => {
+      if (!state.me) return state;
+      const me = { ...state.me, avatar_url: avatarUrl };
+      localStorage.setItem('me', JSON.stringify(me));
+      return { me };
+    }),
   restoreSession: async () => {
     const token = localStorage.getItem('token');
     if (!token) return;
