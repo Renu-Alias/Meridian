@@ -1,0 +1,52 @@
+- Set up FastAPI project scaffolding with config, database, and core application structure
+- Created SQLAlchemy data models for User, StackProfile, Technology, Post, PostVersion, Patch, Citation, ClaimFlag, QAThread, Reaction, Fork, Wallet, Transaction, MentorshipSubmission, SkillsGraphEntry, CredibilityScore, and Notification
+- Created Pydantic schemas for all API request/response serialization with full type validation
+- Built auth system with JWT token creation, OAuth endpoints (GitHub OAuth integration, email/password registration), and token verification middleware
+- Built User & Stack Profile CRUD APIs with endpoint for viewing public profiles, updating profile, managing stack tags, and listing approved technologies
+- Built Post CRUD & Tagging APIs supporting full CRUD, publish flow, and technology tag management with autoparse of skills from post body
+- Built Feed & Stack-Matched Discovery APIs with relevance scoring (keyword overlap and sentence-transformers embedding similarity) for personalized stack-based feeds
+- Built Claim Verification system with inline citations, community claim flagging, and auto-updating author credibility score based on verified-to-flagged ratio
+- Built Living Posts system with patch submission (PR-style), author review/approve/reject workflow, automatic version history tracking on approved patches
+- Built Collaborative Forking system with one-click fork creation, preserved attribution chain, fork listing with author metadata, and merge-suggestion tracking
+- Built Structured Q&A system per post with threaded questions, author answers, auto-generated FAQ from resolved threads, and independent Q&A indexing
+- Built Skills Graph / Portfolio system with auto-parsed skill extraction from post content, depth tracking, and public profile display endpoint
+- Built Impact-Based Monetization system with reaction-triggered wallet credits (bookmark/share/used-at-work), balance tracking, transaction ledger, and payout request flow
+- Built Mentored Publishing system with draft submission, mentor matching, review workspace with approve/changes-requested workflow, and reviewer credit display
+- Built Notification system with per-category listing, read/unread tracking, and bulk mark-read endpoint
+- Configured Celery background task worker for async payout processing, stack matching, and notification delivery
+- Set up SQLite database with auto table creation and WAL mode for development; PostgreSQL-ready via config change
+- Frontend: Reordered Feed action buttons — Like (Heart) now appears first before Comment
+- Frontend: Fixed three-dots menu on feed posts — now opens a dropdown with Copy link, Interested (thumbs up), Not Interested (thumbs down), Unfollow, and Report post
+- Frontend: Fork button on feed posts now navigates to editor with pre-populated content (title, body) and shows "Fork Post" heading
+- Frontend: EditorPage reads fork query params and pre-fills title/body; Publish button now shows toast and navigates to feed
+- Frontend: Feed composer "Post" button now shows toast on publish instead of silently clearing
+- Frontend: WalletPage "Request payout" button now opens a confirmation modal instead of "coming soon" toast
+- Frontend: NotificationsPage "Filter" button now opens a dropdown with All/Unread/Today/This Week/Older options
+- Frontend: DiscoverPage "View All Experts" now opens a modal listing all mentors with Connect buttons
+- Frontend: HeaderBar Help button now opens a help popover with Quick Start Guide, API docs, Keyboard Shortcuts, and Report an Issue
+- Added model_config from_attributes to all ORM-backed Pydantic schemas to fix 500 error on profile page
+- Fixed rate-limit test to use 3 distinct reaction types (toggle logic runs before rate-limit check)
+- Added from app.models import * in test to register all models before create_all
+- Backend: Fixed Celery get_db() bug — finally block closed session immediately after return; now returns session directly
+- Backend: Populated Alembic migration b1c195e97352 with all 16 tables + post_tags association table (was empty pass)
+- Backend: Stamped existing meridian.db to revision b1c195e97352
+- Backend: CORS origins now read from settings.CORS_ORIGINS (default: localhost:5173,localhost:4173) instead of wildcard *
+- Backend: Added SECRET_KEY validation — exits with error if using default key in production (ENV=production)
+- Backend: Added FRONTEND_URL to config; Stripe redirect URLs in wallet.py and LinkedIn callback in auth.py now use it instead of hardcoded localhost:5173
+- Backend: Impact score now decrements on reaction removal (was only incrementing on add)
+- Backend: Credibility score now recalculated via compute_credibility_score() after a claim is flagged (was never called)
+- Frontend: Added /post/:id route with full PostDetailPage (author card, body, code block, tags, patch timeline, impact stats, action buttons, comment composer with mock threaded comments, three-dots menu, loading skeleton)
+- Stripe removed entirely: deleted stripe_service.py, removed STRIPE_SECRET_KEY/WEBHOOK_SECRET from config, removed stripe_account_id from Wallet model, removed stripe_payout_id from Transaction, removed /connect/stripe and /stripe-webhook endpoints, removed stripe from requirements.txt
+- Wallet payout simplified to internal transfer (balance -> pending) without Stripe
+- Added /ranking/posts?limit=n endpoint — global ranking by impact_score descending
+- Added /ranking/authors?limit=n endpoint — author ranking by credibility_score descending
+- Added password_hash to User model + password service (hashlib pbkdf2_hmac) + POST /auth/login endpoint with 401 on mismatch
+- Added POST /auth/register now accepts optional password field
+- Added DELETE /posts/{post_id} — post author can delete their own post
+- Added GET /search/posts?q=&limit= — full-text search on published post title/body/excerpt, sorted by impact_score
+- Added GET /search/qa?q=&limit= — renamed from /qa/search, same behavior
+- Added PUT /posts/{id}/flags/{flag_id}/resolve — post author can verify/resolve claim flags, triggers credibility score recalculation
+- Added pagination to GET /feed (offset, limit params, returns {total, offset, limit, items})
+- Added pagination to GET /notifications (offset, limit params, returns {total, offset, limit, items})
+- Added reaction_type validation — rejects invalid types with 400
+- Fixed None safety in credibility score calculations (verified_claims, flagged_claims could be None in DB)

@@ -1,0 +1,57 @@
+# Python
+venv/
+.venv/
+env/
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+.eggs/
+*.egg
+dist/
+build/
+*.manifest
+*.spec
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Frontend
+node_modules/
+dist/
+.vite/
+
+# Database
+*.db
+*.db-shm
+*.db-wal
+
+# Uploaded user files
+meridian-backend/uploads/
+
+# IDE / Editor
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Environment
+.env
+
+# Testing / Coverage
+.pytest_cache/
+.mypy_cache/
+.coverage
+coverage/
+htmlcov/
+.tox/
+.nox/
+
+# Logs
+*.log
+server_err.log
+server_out.log
