@@ -25,6 +25,9 @@ dist/
 *.db-shm
 *.db-wal
 
+# Uploaded user files
+meridian-backend/uploads/
+
 # IDE / Editor
 .idea/
 .vscode/
