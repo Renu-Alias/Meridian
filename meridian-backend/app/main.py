@@ -1,14 +1,18 @@
+import os
 from contextlib import asynccontextmanager
 
 from alembic.config import Config as AlembicConfig
 from alembic import command
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 
 from app.config import settings
 from app.database import SessionLocal
 from app.routers import account, auth, feed, interactions, mentorship, notifications, posts, ranking, recruiter, search, users, wallet
 from app.seed import seed_technologies
+
+os.makedirs(settings.AVATARS_DIR, exist_ok=True)
 
 
 @asynccontextmanager
@@ -45,6 +49,8 @@ app.include_router(recruiter.router)
 app.include_router(account.router)
 app.include_router(search.router)
 app.include_router(ranking.router)
+
+app.mount("/uploads", StaticFiles(directory=settings.UPLOADS_DIR), name="uploads")
 
 
 @app.get("/health")

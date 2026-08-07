@@ -33,6 +33,11 @@ class Settings:
 
     FRONTEND_URL: str = os.getenv("FRONTEND_URL", "http://localhost:5173")
 
+    UPLOADS_DIR: str = os.path.join(
+        os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "uploads"
+    )
+    AVATARS_DIR: str = os.path.join(UPLOADS_DIR, "avatars")
+
     @property
     def is_production(self) -> bool:
         return os.getenv("ENV", "development").lower() == "production"
