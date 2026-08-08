@@ -210,92 +210,193 @@ function drawForkable(ctx: CanvasRenderingContext2D, w: number, h: number, p: nu
   drawBranch(cx, startY, 1, Math.min(w, h) * 0.15);
 }
 
+const RANK_TIERS = ['NEWCOMER', 'CONTRIBUTOR', 'ENGINEER', 'SENIOR', 'ARCHITECT', 'FELLOW'];
+
+function drawRankingRow(
+  ctx: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  w: number,
+  rowH: number,
+  pos: number,
+  name: string,
+  pts: number,
+  k: number,
+  isYou: boolean,
+  raw: number,
+) {
+  const rh = rowH * (isYou ? 1.04 : 0.92);
+  const cy = y + rowH / 2;
+
+  if (isYou) {
+    ctx.fillStyle = 'rgba(0, 200, 150, 0.13)';
+    roundRect(ctx, x, cy - rh / 2, w, rh, 8 * k);
+    ctx.fill();
+    ctx.strokeStyle = `rgba(0, 200, 150, ${0.3 + raw * 0.5})`;
+    ctx.lineWidth = 1;
+    roundRect(ctx, x, cy - rh / 2, w, rh, 8 * k);
+    ctx.stroke();
+  }
+
+  // rank badge
+  const badgeX = x + 10 * k;
+  const badgeW = 22 * k;
+  ctx.fillStyle = isYou ? 'rgba(45,212,163,0.95)' : 'rgba(153,155,153,0.16)';
+  roundRect(ctx, badgeX, cy - 9 * k, badgeW, 18 * k, 5 * k);
+  ctx.fill();
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.font = `700 ${Math.round(9.5 * k)}px Inter, sans-serif`;
+  ctx.fillStyle = isYou ? '#000' : 'rgba(234,236,236,0.65)';
+  ctx.fillText(`#${pos}`, badgeX + badgeW / 2, cy + 0.5 * k);
+
+  // name
+  ctx.textAlign = 'left';
+  ctx.font = `600 ${Math.round(10.5 * k)}px Inter, sans-serif`;
+  ctx.fillStyle = isYou ? VERIFIED : 'rgba(234,236,236,0.85)';
+  ctx.fillText(name, badgeX + badgeW + 10 * k, cy);
+
+  // points
+  ctx.textAlign = 'right';
+  ctx.font = `700 ${Math.round(9.5 * k)}px 'SF Mono', 'Fira Code', monospace`;
+  ctx.fillStyle = isYou ? VERIFIED : 'rgba(153,155,153,0.75)';
+  ctx.fillText(pts.toLocaleString(), x + w - 12 * k, cy);
+
+  // small "you" tag
+  if (isYou) {
+    ctx.font = `700 ${Math.round(7.5 * k)}px 'SF Mono', 'Fira Code', monospace`;
+    ctx.fillStyle = 'rgba(45,212,163,0.85)';
+    ctx.fillText('YOU', badgeX + badgeW + 10 * k + ctx.measureText(name).width + 10 * k, cy);
+  }
+}
+
 function drawRanking(ctx: CanvasRenderingContext2D, w: number, h: number, p: number) {
   clear(ctx, w, h);
   const cx = w / 2, cy = h / 2;
+  const k = Math.max(0.62, Math.min(1, Math.min(w, h) / 420));
+  const cardW = 400 * k;
+  const cardH = 300 * k;
+  const cardX = cx - cardW / 2;
+  const cardY = cy - cardH / 2;
+  const padX = 20 * k;
 
-  // tier ladder — Newcomer → Fellow, fills as the rank climbs
-  const tiers = 6;
-  const lx = cx - Math.min(w, h) * 0.44;
-  const ladderTop = cy - 92;
-  const ladderH = 184;
-  const step = ladderH / (tiers - 1);
-  const filled = Math.min(tiers, Math.ceil(p * tiers));
-  for (let t = 0; t < tiers; t++) {
-    const y = ladderTop + t * step;
-    const active = t < filled;
-    const r = active ? 4.5 : 3;
-    ctx.fillStyle = active ? `rgba(0, 200, 150, ${0.3 + (t / tiers) * 0.45})` : `rgba(153,155,153,${0.12})`;
-    ctx.beginPath();
-    ctx.arc(lx, y, r, 0, Math.PI * 2);
-    ctx.fill();
-    if (t < tiers - 1) {
-      ctx.strokeStyle = active ? `rgba(0, 200, 150, ${0.22})` : `rgba(153,155,153,${0.1})`;
-      ctx.lineWidth = 1;
-      ctx.beginPath();
-      ctx.moveTo(lx, y + r);
-      ctx.lineTo(lx, y + step - r);
-      ctx.stroke();
-    }
-  }
+  // overall progress across the six tiers (eased, completes before scroll end)
+  const raw = Math.min(1, Math.max(0, p * 1.12));
+  const tierIdx = Math.min(5, Math.floor(raw * 6));
+  const tierFrac = Math.min(1, raw * 6 - tierIdx);
+  const current = RANK_TIERS[tierIdx];
+  const next = RANK_TIERS[tierIdx + 1];
+  const rank = Math.max(1, Math.round(4280 * (1 - raw) + 128 * raw));
+  const youPts = Math.round(8177 + raw * 4663);
 
-  // central rank metric — the number improves (drops) as impact grows
-  const rank = Math.max(1, Math.round(4280 * (1 - p) + 128 * p));
-  ctx.fillStyle = SURFACE;
-  ctx.globalAlpha = 0.2 + p * 0.5;
-  ctx.font = `600 ${40 + p * 16}px Inter, sans-serif`;
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
-  ctx.fillText(`#${rank.toLocaleString()}`, cx, cy - 26);
-  ctx.globalAlpha = 1;
-
-  ctx.fillStyle = MUTED;
-  ctx.globalAlpha = 0.2 + p * 0.2;
-  ctx.font = '11px Inter, sans-serif';
-  ctx.fillText('global rank', cx, cy + 2);
-  ctx.globalAlpha = 1;
-
-  // leaderboard bars — the highlighted entry climbs as impact grows
-  const bars = 4;
-  for (let i = 0; i < bars; i++) {
-    const lift = p * (bars - i) * 10;
-    const y = cy + 60 + i * 22 - lift;
-    const width = (48 - i * 6) * (0.75 + p * 0.5);
-    const isYou = i === 0;
-    ctx.fillStyle = isYou ? `rgba(0, 200, 150, ${0.3 + p * 0.4})` : `rgba(153,155,153,${0.16})`;
-    roundRect(ctx, cx - width / 2, y, width, 9, 4.5);
-    ctx.fill();
-    ctx.fillStyle = SURFACE;
-    ctx.globalAlpha = isYou ? 0.65 : 0.3;
-    ctx.font = '8px Inter, sans-serif';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText(`#${i + 1}`, cx, y + 4.5);
-    ctx.globalAlpha = 1;
-  }
-
-  // floating point chips (forks, used-at-work, accepted patches) replace the coins
-  const chips = ['+15', '+10', '+8', '+5'];
+  // floating point chips — points earned from peer impact, drifting upward
+  const chips = ['+15', '+10', '+8'];
   for (let i = 0; i < chips.length; i++) {
-    const ci = i / chips.length;
-    const px = cx + Math.sin(ci * 12 + p * 5) * Math.min(w, h) * 0.36;
-    const py = cy - 60 + ci * 110 - p * 70 + Math.sin(ci * 7 + p * 3) * 18;
-    const visible = ci <= p * 1.3;
-    if (!visible) continue;
-    ctx.fillStyle = `rgba(0, 200, 150, ${0.12 + (1 - ci) * 0.3})`;
-    ctx.font = '9px Inter, sans-serif';
+    const chx = cardX + ((i + 1) / (chips.length + 1)) * cardW;
+    const chy = cardY - 12 * k - (raw * 22 * k) - (i % 2) * 12 * k;
+    ctx.font = `700 ${Math.round(8.5 * k)}px 'SF Mono', 'Fira Code', monospace`;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.fillText(chips[i], px, py + 30);
+    ctx.fillStyle = `rgba(0, 200, 150, ${0.2 + (1 - i / chips.length) * 0.35})`;
+    ctx.fillText(chips[i], chx + Math.sin(raw * 5 + i * 2) * 6 * k, chy);
   }
 
-  // ring pulse
-  const ringR = 60 + p * 30;
-  ctx.strokeStyle = `rgba(0, 200, 150, ${0.2 + (1 - p) * 0.3})`;
-  ctx.lineWidth = 1.5;
-  ctx.beginPath();
-  ctx.arc(cx, cy, ringR, 0, Math.PI * 2);
+  // card background + soft glow
+  ctx.shadowColor = 'rgba(0, 200, 150, 0.14)';
+  ctx.shadowBlur = 44 * k;
+  ctx.fillStyle = 'rgba(21, 21, 21, 0.92)';
+  roundRect(ctx, cardX, cardY, cardW, cardH, 14 * k);
+  ctx.fill();
+  ctx.shadowBlur = 0;
+  ctx.strokeStyle = 'rgba(234, 236, 236, 0.12)';
+  ctx.lineWidth = 1;
+  roundRect(ctx, cardX, cardY, cardW, cardH, 14 * k);
   ctx.stroke();
+
+  // tier header row
+  let y = cardY + 16 * k;
+  ctx.textAlign = 'left';
+  ctx.textBaseline = 'middle';
+  ctx.font = `${Math.round(9 * k)}px 'SF Mono', 'Fira Code', monospace`;
+  ctx.fillStyle = MUTED;
+  ctx.fillText('RANK TIER', cardX + padX, y);
+  ctx.textAlign = 'right';
+  ctx.font = `700 ${Math.round(12 * k)}px Inter, sans-serif`;
+  ctx.fillStyle = VERIFIED;
+  ctx.fillText(current, cardX + cardW - padX, y);
+
+  // big rank number
+  y += 30 * k;
+  ctx.textAlign = 'center';
+  ctx.font = `700 ${Math.round(40 * k)}px Inter, sans-serif`;
+  ctx.fillStyle = SURFACE;
+  ctx.fillText(`#${rank.toLocaleString()}`, cx, y);
+  y += 22 * k;
+  ctx.font = `500 ${Math.round(10 * k)}px 'SF Mono', 'Fira Code', monospace`;
+  ctx.fillStyle = MUTED;
+  ctx.fillText('GLOBAL RANK', cx, y);
+
+  // tier progress track
+  y += 26 * k;
+  const trackW = cardW - padX * 2;
+  const trackH = 6 * k;
+  ctx.fillStyle = 'rgba(153,155,153,0.14)';
+  roundRect(ctx, cardX + padX, y - trackH / 2, trackW, trackH, trackH / 2);
+  ctx.fill();
+  ctx.fillStyle = VERIFIED;
+  roundRect(ctx, cardX + padX, y - trackH / 2, Math.max(trackH, trackW * tierFrac), trackH, trackH / 2);
+  ctx.fill();
+
+  // next tier + progress %
+  y += 16 * k;
+  ctx.textAlign = 'left';
+  ctx.font = `${Math.round(8.5 * k)}px 'SF Mono', 'Fira Code', monospace`;
+  ctx.fillStyle = MUTED;
+  ctx.fillText(next ? `next: ${next}` : 'top rank', cardX + padX, y);
+  ctx.textAlign = 'right';
+  ctx.fillText(`${Math.round(tierFrac * 100)}%`, cardX + cardW - padX, y);
+
+  // divider
+  y += 18 * k;
+  ctx.strokeStyle = 'rgba(234, 236, 236, 0.08)';
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(cardX + padX, y);
+  ctx.lineTo(cardX + cardW - padX, y);
+  ctx.stroke();
+
+  // leaderboard rows
+  const rowH = 30 * k;
+  const rowY0 = y + 12 * k;
+  const youSlot = 3 - raw * 3;
+  const peers = [
+    { name: 'K. Novak', pts: 12840 },
+    { name: 'M. Reyes', pts: 11205 },
+    { name: 'L. Ortiz', pts: 9830 },
+  ];
+
+  peers.forEach((r, i) => {
+    // fade a peer as "you" glides over it, so the climb stays readable
+    const dist = Math.abs(i - youSlot);
+    ctx.globalAlpha = Math.min(1, 0.45 + dist * 0.28);
+    drawRankingRow(ctx, cardX + padX, rowY0 + i * rowH, cardW - padX * 2, rowH, i + 1, r.name, r.pts, k, false, raw);
+    ctx.globalAlpha = 1;
+  });
+
+  // "you" slides from slot 3 up to slot 0 as impact grows, drawn last (on top)
+  drawRankingRow(
+    ctx,
+    cardX + padX,
+    rowY0 + youSlot * rowH,
+    cardW - padX * 2,
+    rowH,
+    Math.round(youSlot) + 1,
+    'You',
+    youPts,
+    k,
+    true,
+    raw,
+  );
 }
 
 function drawPeerDiscovery(ctx: CanvasRenderingContext2D, w: number, h: number, p: number) {
