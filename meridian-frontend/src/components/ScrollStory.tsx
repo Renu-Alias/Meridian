@@ -554,6 +554,7 @@ const features: FeatureDef[] = [
     description: 'Articles surface based on your tech stack, not popularity contests.',
     detail: 'Tag your stack once. Our matching engine surfaces the most relevant engineering writing — no algorithm gaming, no noise.',
     draw: drawDiscovery,
+    scale: 1.2,
   },
   {
     id: 'living-posts',
@@ -562,6 +563,7 @@ const features: FeatureDef[] = [
     description: 'Every post has a full revision history, like a living document.',
     detail: 'Readers see what changed, when, and why. Authors iterate in the open. Knowledge evolves, not stagnates.',
     draw: drawLivingPosts,
+    scale: 1.2,
   },
   {
     id: 'forkable',
@@ -570,6 +572,7 @@ const features: FeatureDef[] = [
     description: 'Fork any post, adapt it, and publish your own version — just like code.',
     detail: 'Build on others\' work with full attribution. The fork tree makes the lineage of every idea traceable.',
     draw: drawForkable,
+    scale: 1.2,
   },
   {
     id: 'ranking',
@@ -586,6 +589,7 @@ const features: FeatureDef[] = [
     description: 'Trust recommendations from engineers who share your stack.',
     detail: 'Follow authors whose judgment you trust. Your network curates a signal feed that cuts through the noise.',
     draw: drawPeerDiscovery,
+    scale: 1.2,
   },
 ];
 
@@ -596,6 +600,7 @@ interface FeatureDef {
   description: string;
   detail: string;
   draw: (ctx: CanvasRenderingContext2D, w: number, h: number, p: number) => void;
+  scale?: number;
 }
 
 /* ── Single Feature Section ───────────────────────────────────────────── */
@@ -639,11 +644,15 @@ function FeatureSection({ feature, index }: { feature: FeatureDef; index: number
         const raw = Math.min(1, progress * 1.0);
         // ease-in-out cubic for smooth gliding feel
         const speed = raw < 0.5 ? 2 * raw * raw : 1 - Math.pow(-2 * raw + 2, 2) / 2;
-        const scale = 0.9 + speed * 0.1;
-        canvasWrapper.style.transform = `scale(${scale})`;
+        const zoom = feature.id === 'ranking' ? 0.9 + speed * 0.1 : 1;
+        canvasWrapper.style.transform = `scale(${zoom})`;
 
         ctx2d.save();
         ctx2d.setTransform(window.devicePixelRatio || 1, 0, 0, window.devicePixelRatio || 1, 0, 0);
+
+        // enlarge non-ranking USP icons by drawing at a higher internal scale (crisp)
+        const extra = feature.scale ?? 1;
+        if (extra !== 1) ctx2d.scale(extra, extra);
 
         feature.draw(ctx2d, w, h, speed);
         ctx2d.restore();
