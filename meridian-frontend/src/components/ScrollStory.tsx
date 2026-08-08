@@ -225,15 +225,16 @@ function drawRankingRow(
   isYou: boolean,
   raw: number,
 ) {
-  const rh = rowH * (isYou ? 1.04 : 0.92);
+  const rh = rowH * (isYou ? 1.1 : 0.94);
   const cy = y + rowH / 2;
 
   if (isYou) {
-    ctx.fillStyle = 'rgba(0, 200, 150, 0.13)';
+    // solid tile so it cleanly covers a peer the instant it overtakes it
+    ctx.fillStyle = '#182624';
     roundRect(ctx, x, cy - rh / 2, w, rh, 8 * k);
     ctx.fill();
-    ctx.strokeStyle = `rgba(0, 200, 150, ${0.3 + raw * 0.5})`;
-    ctx.lineWidth = 1;
+    ctx.strokeStyle = `rgba(0, 200, 150, ${0.35 + raw * 0.45})`;
+    ctx.lineWidth = 1.25;
     roundRect(ctx, x, cy - rh / 2, w, rh, 8 * k);
     ctx.stroke();
   }
@@ -365,38 +366,33 @@ function drawRanking(ctx: CanvasRenderingContext2D, w: number, h: number, p: num
   ctx.lineTo(cardX + cardW - padX, y);
   ctx.stroke();
 
-  // leaderboard rows
+  // leaderboard — "you" climbs one slot at a time; each overtake swaps the peer
+  // down instantly, so all rows always occupy distinct slots (no overlap ever)
   const rowH = 30 * k;
   const rowY0 = y + 12 * k;
-  const youSlot = 3 - raw * 3;
+  const swaps = Math.min(3, Math.floor(raw * 3)); // number of peers already passed
+  const youSlot = 3 - swaps;
   const peers = [
     { name: 'K. Novak', pts: 12840 },
     { name: 'M. Reyes', pts: 11205 },
     { name: 'L. Ortiz', pts: 9830 },
   ];
 
-  peers.forEach((r, i) => {
-    // fade a peer as "you" glides over it, so the climb stays readable
-    const dist = Math.abs(i - youSlot);
-    ctx.globalAlpha = Math.min(1, 0.45 + dist * 0.28);
-    drawRankingRow(ctx, cardX + padX, rowY0 + i * rowH, cardW - padX * 2, rowH, i + 1, r.name, r.pts, k, false, raw);
-    ctx.globalAlpha = 1;
-  });
+  const entities = [
+    ...peers.map((r, i) => ({
+      name: r.name,
+      pts: r.pts,
+      slot: i + (swaps >= 3 - i ? 1 : 0),
+      isYou: false,
+    })),
+    { name: 'You', pts: youPts, slot: youSlot, isYou: true },
+  ];
 
-  // "you" slides from slot 3 up to slot 0 as impact grows, drawn last (on top)
-  drawRankingRow(
-    ctx,
-    cardX + padX,
-    rowY0 + youSlot * rowH,
-    cardW - padX * 2,
-    rowH,
-    Math.round(youSlot) + 1,
-    'You',
-    youPts,
-    k,
-    true,
-    raw,
-  );
+  entities
+    .sort((a, b) => a.slot - b.slot)
+    .forEach((e, i) => {
+      drawRankingRow(ctx, cardX + padX, rowY0 + e.slot * rowH, cardW - padX * 2, rowH, i + 1, e.name, e.pts, k, e.isYou, raw);
+    });
 }
 
 function drawPeerDiscovery(ctx: CanvasRenderingContext2D, w: number, h: number, p: number) {
@@ -639,11 +635,11 @@ function FeatureSection({ feature, index }: { feature: FeatureDef; index: number
         const w = canvas.offsetWidth;
         const h = canvas.offsetHeight;
 
-        // Scale wrapper via CSS so canvas visually enlarges without clipping
+        // Scale wrapper via CSS so canvas subtly zooms without blurring or overflowing
         const raw = Math.min(1, progress * 1.0);
         // ease-in-out cubic for smooth gliding feel
         const speed = raw < 0.5 ? 2 * raw * raw : 1 - Math.pow(-2 * raw + 2, 2) / 2;
-        const scale = 1 + speed * 0.5;
+        const scale = 1 + speed * 0.06;
         canvasWrapper.style.transform = `scale(${scale})`;
 
         ctx2d.save();
