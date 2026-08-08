@@ -554,7 +554,7 @@ const features: FeatureDef[] = [
     description: 'Articles surface based on your tech stack, not popularity contests.',
     detail: 'Tag your stack once. Our matching engine surfaces the most relevant engineering writing — no algorithm gaming, no noise.',
     draw: drawDiscovery,
-    scale: 1.5,
+    scale: 1.2,
   },
   {
     id: 'living-posts',
