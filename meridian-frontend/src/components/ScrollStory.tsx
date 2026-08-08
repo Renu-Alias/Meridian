@@ -210,45 +210,88 @@ function drawForkable(ctx: CanvasRenderingContext2D, w: number, h: number, p: nu
   drawBranch(cx, startY, 1, Math.min(w, h) * 0.15);
 }
 
-function drawRewards(ctx: CanvasRenderingContext2D, w: number, h: number, p: number) {
+function drawRanking(ctx: CanvasRenderingContext2D, w: number, h: number, p: number) {
   clear(ctx, w, h);
   const cx = w / 2, cy = h / 2;
 
-  // central metric
-  const value = Math.floor(p * 8620);
+  // tier ladder — Newcomer → Fellow, fills as the rank climbs
+  const tiers = 6;
+  const lx = cx - Math.min(w, h) * 0.44;
+  const ladderTop = cy - 92;
+  const ladderH = 184;
+  const step = ladderH / (tiers - 1);
+  const filled = Math.min(tiers, Math.ceil(p * tiers));
+  for (let t = 0; t < tiers; t++) {
+    const y = ladderTop + t * step;
+    const active = t < filled;
+    const r = active ? 4.5 : 3;
+    ctx.fillStyle = active ? `rgba(0, 200, 150, ${0.3 + (t / tiers) * 0.45})` : `rgba(153,155,153,${0.12})`;
+    ctx.beginPath();
+    ctx.arc(lx, y, r, 0, Math.PI * 2);
+    ctx.fill();
+    if (t < tiers - 1) {
+      ctx.strokeStyle = active ? `rgba(0, 200, 150, ${0.22})` : `rgba(153,155,153,${0.1})`;
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(lx, y + r);
+      ctx.lineTo(lx, y + step - r);
+      ctx.stroke();
+    }
+  }
+
+  // central rank metric — the number improves (drops) as impact grows
+  const rank = Math.max(1, Math.round(4280 * (1 - p) + 128 * p));
   ctx.fillStyle = SURFACE;
   ctx.globalAlpha = 0.2 + p * 0.5;
-  ctx.font = `600 ${42 + p * 18}px Inter, sans-serif`;
+  ctx.font = `600 ${40 + p * 16}px Inter, sans-serif`;
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
-  ctx.fillText(`$${value.toLocaleString()}`, cx, cy - 6);
+  ctx.fillText(`#${rank.toLocaleString()}`, cx, cy - 26);
   ctx.globalAlpha = 1;
 
   ctx.fillStyle = MUTED;
   ctx.globalAlpha = 0.2 + p * 0.2;
   ctx.font = '11px Inter, sans-serif';
-  ctx.fillText('earned by authors', cx, cy + 28);
+  ctx.fillText('global rank', cx, cy + 2);
   ctx.globalAlpha = 1;
 
-  // floating particles (coins)
-  const particles = 30;
-  for (let i = 0; i < particles; i++) {
-    const pi = i / particles;
-    const px = cx + Math.sin(pi * 13 + p * 5) * Math.min(w, h) * 0.38;
-    const py = cy - 60 + (pi * 120) - p * 80 + Math.sin(pi * 7 + p * 3) * 20;
-    const visible = pi <= p * 1.2;
-    if (!visible) continue;
-
-    const radius = 1.5 + Math.sin(pi * 11) * 1;
-    ctx.fillStyle = `rgba(153,155,153,${0.1 + (1 - pi) * 0.2})`;
-    ctx.beginPath();
-    ctx.arc(px, py + 30, radius, 0, Math.PI * 2);
+  // leaderboard bars — the highlighted entry climbs as impact grows
+  const bars = 4;
+  for (let i = 0; i < bars; i++) {
+    const lift = p * (bars - i) * 10;
+    const y = cy + 60 + i * 22 - lift;
+    const width = (48 - i * 6) * (0.75 + p * 0.5);
+    const isYou = i === 0;
+    ctx.fillStyle = isYou ? `rgba(0, 200, 150, ${0.3 + p * 0.4})` : `rgba(153,155,153,${0.16})`;
+    roundRect(ctx, cx - width / 2, y, width, 9, 4.5);
     ctx.fill();
+    ctx.fillStyle = SURFACE;
+    ctx.globalAlpha = isYou ? 0.65 : 0.3;
+    ctx.font = '8px Inter, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(`#${i + 1}`, cx, y + 4.5);
+    ctx.globalAlpha = 1;
+  }
+
+  // floating point chips (forks, used-at-work, accepted patches) replace the coins
+  const chips = ['+15', '+10', '+8', '+5'];
+  for (let i = 0; i < chips.length; i++) {
+    const ci = i / chips.length;
+    const px = cx + Math.sin(ci * 12 + p * 5) * Math.min(w, h) * 0.36;
+    const py = cy - 60 + ci * 110 - p * 70 + Math.sin(ci * 7 + p * 3) * 18;
+    const visible = ci <= p * 1.3;
+    if (!visible) continue;
+    ctx.fillStyle = `rgba(0, 200, 150, ${0.12 + (1 - ci) * 0.3})`;
+    ctx.font = '9px Inter, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(chips[i], px, py + 30);
   }
 
   // ring pulse
   const ringR = 60 + p * 30;
-  ctx.strokeStyle = `rgba(255, 185, 0, ${0.2 + (1 - p) * 0.3})`; // Amber pulse
+  ctx.strokeStyle = `rgba(0, 200, 150, ${0.2 + (1 - p) * 0.3})`;
   ctx.lineWidth = 1.5;
   ctx.beginPath();
   ctx.arc(cx, cy, ringR, 0, Math.PI * 2);
@@ -427,12 +470,12 @@ const features: FeatureDef[] = [
     draw: drawForkable,
   },
   {
-    id: 'rewards',
+    id: 'ranking',
     number: '04',
-    title: 'Impact-Based Rewards',
-    description: 'Earn based on the value you create, not page views.',
-    detail: 'Forks, citations, and peer endorsements drive rewards. Quality compounds — noise doesn\'t.',
-    draw: drawRewards,
+    title: 'Impact-Based Global Ranking',
+    description: 'Your rank reflects your real-world impact, not your follower count.',
+    detail: 'Forks, reposts, and real-world usage earn reputation points — weighted by the contributor\'s own standing. Game the leaderboard by writing better, not louder.',
+    draw: drawRanking,
   },
   {
     id: 'peer-discovery',
@@ -675,7 +718,7 @@ function FinalConstellation() {
           style={{ color: MUTED, fontFamily: 'Inter, sans-serif' }}
         >
           Join the network where engineering knowledge compounds.
-          Write. Fork. Earn. Build the signal.
+          Write. Fork. Rank. Build the signal.
         </motion.p>
 
         <motion.div

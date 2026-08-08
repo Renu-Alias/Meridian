@@ -192,7 +192,7 @@ export function LandingPage() {
             </motion.h1>
 
             <motion.p custom={0.65} variants={fadeUp} initial="hidden" animate="visible" className="max-w-lg" style={{ fontFamily: 'Inter, sans-serif', fontSize: 'clamp(0.85rem, 1.3vw, 0.95rem)', fontWeight: 400, lineHeight: 1.6, color: 'var(--color-surface)', opacity: 0.75 }}>
-              Discover stack-matched articles, fork ideas, publish living posts, and earn from impact — not algorithms.
+              Discover stack-matched articles, fork ideas, publish living posts, and climb a global reputation rank — not follower counts.
             </motion.p>
 
             <motion.div custom={0.9} variants={fadeUp} initial="hidden" animate="visible" className="flex flex-col items-start gap-4 sm:flex-row">
@@ -209,7 +209,7 @@ export function LandingPage() {
               {[
                 { value: '12k+', label: 'ENGINEERS' },
                 { value: '8k+', label: 'POSTS' },
-                { value: '$86k', label: 'EARNED' },
+                { value: '6', label: 'RANK TIERS' },
               ].map(s => (
                 <div key={s.label} className="flex flex-col gap-0.5">
                   <span className="text-lg font-bold" style={{ fontFamily: 'Inter, sans-serif', color: '#fff' }}>{s.value}</span>
