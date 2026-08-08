@@ -367,7 +367,7 @@ function drawPeerDiscovery(ctx: CanvasRenderingContext2D, w: number, h: number, 
   }
 }
 
-function drawConstellation(ctx: CanvasRenderingContext2D, w: number, h: number, p: number) {
+function drawConstellation(ctx: CanvasRenderingContext2D, w: number, h: number, p: number, t = 0) {
   clear(ctx, w, h);
   const cx = w / 2, cy = h / 2;
   const s = Math.min(w, h) * 0.15;
@@ -383,7 +383,7 @@ function drawConstellation(ctx: CanvasRenderingContext2D, w: number, h: number, 
 
   const starCount = 180;
 
-  // stars — all drawn simultaneously with per-star fade-in based on scroll progress
+  // stars — fade in on scroll, then shimmer and drift continuously
   for (let i = 0; i < starCount; i++) {
     const hx = Math.abs(Math.sin(i * 127.1 + 311.7) * 43758.5453123) % 1;
     const hy = Math.abs(Math.sin(i * 269.5 + 183.3) * 43758.5453123) % 1;
@@ -391,10 +391,15 @@ function drawConstellation(ctx: CanvasRenderingContext2D, w: number, h: number, 
     const hDelay = Math.abs(Math.sin(i * 631.8 + 91.3) * 43758.5453123) % 1;
     const hGlow = Math.abs(Math.sin(i * 823.7 + 136.9) * 43758.5453123) % 1;
 
-    const sx = cx + (hx - 0.5) * w * 0.88;
-    const sy = cy + (hy - 0.5) * h * 0.84;
+    const driftX = Math.sin(t * 0.00025 + i * 1.3) * 1.1;
+    const driftY = Math.cos(t * 0.0003 + i * 2.1) * 0.9;
+    const sx = cx + (hx - 0.5) * w * 0.88 + driftX;
+    const sy = cy + (hy - 0.5) * h * 0.84 + driftY;
     const starR = 0.4 + hSize * 1.6;
-    const starAlpha = Math.min(1, Math.max(0, (p - hDelay * 0.85) * 1.8));
+
+    // per-star shimmer that eases in once the star has appeared
+    const shimmer = 0.7 + 0.3 * Math.sin(t * 0.0016 * (1.1 + hSize * 2.2) + i * 1.7);
+    const starAlpha = Math.min(1, Math.max(0, (p - hDelay * 0.85) * 1.8)) * shimmer;
     if (starAlpha <= 0) continue;
 
     // glow
@@ -422,10 +427,10 @@ function drawConstellation(ctx: CanvasRenderingContext2D, w: number, h: number, 
   }
   ctx.stroke();
 
-  // M-shape nodes
+  // M-shape nodes — gently breathing with time
   for (let i = 0; i < mPoints.length; i++) {
     const mp = mPoints[i];
-    const glow = 1 + Math.sin(p * 3 + i * 1.2) * 0.12;
+    const glow = 1 + Math.sin(t * 0.0012 + i * 1.2) * 0.16;
     ctx.fillStyle = SURFACE;
     ctx.globalAlpha = 0.04 + lineProgress * 0.15;
     ctx.beginPath();
@@ -647,6 +652,10 @@ function FinalConstellation() {
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
+    let raf = 0;
+    let active = false;
+    let progress = 0;
+
     const resize = () => {
       const dpr = window.devicePixelRatio || 1;
       canvas.width = canvas.offsetWidth * dpr;
@@ -655,18 +664,36 @@ function FinalConstellation() {
     };
     resize();
 
+    const tick = (t: number) => {
+      const w = canvas.offsetWidth;
+      const h = canvas.offsetHeight;
+      ctx.save();
+      ctx.setTransform(window.devicePixelRatio || 1, 0, 0, window.devicePixelRatio || 1, 0, 0);
+      drawConstellation(ctx, w, h, progress, t);
+      ctx.restore();
+      if (active) raf = requestAnimationFrame(tick);
+    };
+
+    const start = () => {
+      if (active) return;
+      active = true;
+      raf = requestAnimationFrame(tick);
+    };
+    const stop = () => {
+      active = false;
+      cancelAnimationFrame(raf);
+    };
+
     const st = ScrollTrigger.create({
       trigger: section,
       start: 'top bottom',
       end: 'bottom top',
+      onEnter: start,
+      onEnterBack: start,
+      onLeave: stop,
+      onLeaveBack: stop,
       onUpdate: (self) => {
-        const w = canvas.offsetWidth;
-        const h = canvas.offsetHeight;
-        ctx.save();
-        ctx.setTransform(window.devicePixelRatio || 1, 0, 0, window.devicePixelRatio || 1, 0, 0);
-        const speed = Math.min(1, self.progress * 2);
-        drawConstellation(ctx, w, h, speed);
-        ctx.restore();
+        progress = Math.min(1, self.progress * 1.6);
       },
       onRefresh: resize,
     });
@@ -678,6 +705,7 @@ function FinalConstellation() {
     window.addEventListener('resize', handleResize);
 
     return () => {
+      stop();
       st.kill();
       window.removeEventListener('resize', handleResize);
     };
@@ -697,64 +725,70 @@ function FinalConstellation() {
 
       {/* Content overlay */}
       <div className="relative z-10 flex flex-col items-center gap-6 text-center">
-        <motion.h2
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.7, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
-          className="max-w-2xl text-3xl font-bold leading-tight sm:text-4xl md:text-5xl"
-          style={{ color: SURFACE, fontFamily: 'Inter, sans-serif', letterSpacing: '-0.03em' }}
-        >
-          Every idea is a star.<br />
-          <span style={{ color: MUTED }}>Together, they form a constellation.</span>
-        </motion.h2>
-
-        <motion.p
-          initial={{ opacity: 0, y: 16 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6, delay: 0.35 }}
-          className="max-w-md text-sm leading-relaxed"
-          style={{ color: MUTED, fontFamily: 'Inter, sans-serif' }}
-        >
-          Join the network where engineering knowledge compounds.
-          Write. Fork. Rank. Build the signal.
-        </motion.p>
-
         <motion.div
-          initial={{ opacity: 0, y: 16 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6, delay: 0.5 }}
-          className="mt-4 flex flex-col items-center gap-3 sm:flex-row"
+          animate={{ y: [0, -10, 0] }}
+          transition={{ duration: 6.5, repeat: Infinity, ease: 'easeInOut' }}
+          className="flex flex-col items-center gap-6 text-center"
         >
-          <Link
-            to={isAuthenticated ? '/editor/new' : '/auth'}
-            className="group inline-flex h-10 items-center gap-2 rounded-md px-6 text-sm font-semibold transition-all hover:scale-[1.03] active:scale-[0.98]"
-            style={{
-              fontFamily: 'Inter, sans-serif',
-              background: VERIFIED,
-              color: '#0a0a0a',
-              boxShadow: '0 4px 14px rgba(45,212,163,0.3)',
-            }}
+          <motion.h2
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.7, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
+            className="max-w-2xl text-3xl font-bold leading-tight sm:text-4xl md:text-5xl"
+            style={{ color: SURFACE, fontFamily: 'Inter, sans-serif', letterSpacing: '-0.03em' }}
           >
-            Start Writing
-            <ArrowRight size={14} className="transition-transform group-hover:translate-x-0.5" />
-          </Link>
+            Every idea is a star.<br />
+            <span style={{ color: MUTED }}>Together, they form a constellation.</span>
+          </motion.h2>
 
-          <Link
-            to={isAuthenticated ? '/feed' : '/auth'}
-            className="inline-flex h-10 items-center gap-2 rounded-md px-6 text-sm font-medium transition-all hover:scale-[1.03] active:scale-[0.98]"
-            style={{
-              fontFamily: 'Inter, sans-serif',
-              background: 'transparent',
-              border: '1px solid var(--color-muted)',
-              color: 'var(--color-surface)',
-            }}
+          <motion.p
+            initial={{ opacity: 0, y: 16 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, delay: 0.35 }}
+            className="max-w-md text-sm leading-relaxed"
+            style={{ color: MUTED, fontFamily: 'Inter, sans-serif' }}
           >
-            <Sparkles size={14} />
-            Explore Posts
-          </Link>
+            Join the network where engineering knowledge compounds.
+            Write. Fork. Rank. Build the signal.
+          </motion.p>
+
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, delay: 0.5 }}
+            className="mt-4 flex flex-col items-center gap-3 sm:flex-row"
+          >
+            <Link
+              to={isAuthenticated ? '/editor/new' : '/auth'}
+              className="group inline-flex h-10 items-center gap-2 rounded-md px-6 text-sm font-semibold transition-all hover:scale-[1.03] active:scale-[0.98]"
+              style={{
+                fontFamily: 'Inter, sans-serif',
+                background: VERIFIED,
+                color: '#0a0a0a',
+                boxShadow: '0 4px 14px rgba(45,212,163,0.3)',
+              }}
+            >
+              Start Writing
+              <ArrowRight size={14} className="transition-transform group-hover:translate-x-0.5" />
+            </Link>
+
+            <Link
+              to={isAuthenticated ? '/feed' : '/auth'}
+              className="inline-flex h-10 items-center gap-2 rounded-md px-6 text-sm font-medium transition-all hover:scale-[1.03] active:scale-[0.98]"
+              style={{
+                fontFamily: 'Inter, sans-serif',
+                background: 'transparent',
+                border: '1px solid var(--color-muted)',
+                color: 'var(--color-surface)',
+              }}
+            >
+              <Sparkles size={14} />
+              Explore Posts
+            </Link>
+          </motion.div>
         </motion.div>
       </div>
     </section>
