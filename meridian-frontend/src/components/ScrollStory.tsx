@@ -640,6 +640,7 @@ function FeatureSection({ feature, index }: { feature: FeatureDef; index: number
         const w = canvas.offsetWidth;
         const h = canvas.offsetHeight;
 
+        const raw = Math.min(1, progress * 1.0);
         // ease-in-out cubic for smooth gliding feel
         const speed = raw < 0.5 ? 2 * raw * raw : 1 - Math.pow(-2 * raw + 2, 2) / 2;
 
