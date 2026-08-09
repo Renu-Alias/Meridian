@@ -1,4 +1,4 @@
-﻿import { useEffect, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -8,7 +8,7 @@ import { useUiStore } from '../store/uiStore';
 
 gsap.registerPlugin(ScrollTrigger);
 
-/* â”€â”€ Monochrome canvas utilities â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* ── Monochrome canvas utilities ──────────────────────────────────────── */
 
 const BLACK = 'transparent';
 const SURFACE = '#EAECEC'; // Light text color for drawings on dark background
@@ -35,7 +35,7 @@ function roundRect(ctx: CanvasRenderingContext2D, x: number, y: number, w: numbe
   ctx.closePath();
 }
 
-/* â”€â”€ Feature drawing functions â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* ── Feature drawing functions ────────────────────────────────────────── */
 
 function drawDiscovery(ctx: CanvasRenderingContext2D, w: number, h: number, p: number) {
   clear(ctx, w, h);
@@ -103,8 +103,8 @@ function drawLivingPosts(ctx: CanvasRenderingContext2D, w: number, h: number, p:
   clear(ctx, w, h);
   const cx = w / 2, cy = h / 2;
 
-  // document outline
-  const dw = 200, dh = 140;
+  // document outline (sized so the 1.4x scale fits short/narrow canvases)
+  const dw = 192, dh = 128;
   ctx.strokeStyle = `rgba(234, 236, 236, ${0.15 + p * 0.25})`;
   ctx.lineWidth = 1;
   roundRect(ctx, cx - dw / 2, cy - dh / 2, dw, dh, 6);
@@ -118,7 +118,7 @@ function drawLivingPosts(ctx: CanvasRenderingContext2D, w: number, h: number, p:
   // text lines - some "changed" lines in lighter color
   const lines = 6;
   for (let i = 0; i < lines; i++) {
-    const ly = cy - dh / 2 + 40 + i * 18;
+    const ly = cy - dh / 2 + 36 + i * 16;
     const lw = 60 + Math.sin(i * 2.1) * 25;
     const isChanged = i < Math.floor(p * lines);
     ctx.fillStyle = isChanged
@@ -135,7 +135,7 @@ function drawLivingPosts(ctx: CanvasRenderingContext2D, w: number, h: number, p:
   const versions = 4;
   for (let v = 0; v < versions; v++) {
     const vx = cx - dw / 2 + 20 + (v / (versions - 1)) * (dw - 40);
-    const vy = cy + dh / 2 + 24;
+    const vy = cy + dh / 2 + 16;
     const vActive = p > v / (versions - 1) - 0.1;
     ctx.fillStyle = vActive ? SURFACE : MUTED;
     ctx.globalAlpha = vActive ? 0.6 : 0.15;
@@ -155,8 +155,8 @@ function drawLivingPosts(ctx: CanvasRenderingContext2D, w: number, h: number, p:
   ctx.strokeStyle = `rgba(153,155,153,${0.1 + p * 0.15})`;
   ctx.lineWidth = 0.5;
   ctx.beginPath();
-  ctx.moveTo(cx - dw / 2 + 20, cy + dh / 2 + 24);
-  ctx.lineTo(cx + dw / 2 - 20, cy + dh / 2 + 24);
+  ctx.moveTo(cx - dw / 2 + 20, cy + dh / 2 + 16);
+  ctx.lineTo(cx + dw / 2 - 20, cy + dh / 2 + 16);
   ctx.stroke();
 }
 
@@ -164,7 +164,7 @@ function drawForkable(ctx: CanvasRenderingContext2D, w: number, h: number, p: nu
   clear(ctx, w, h);
   const cx = w / 2;
 
-  // tree levels â€” max 4 levels
+  // tree levels — max 4 levels
   const levels = 1 + Math.floor(p * 3.5);
   const startY = h * 0.2;
   const endY = h * 0.8;
@@ -290,7 +290,7 @@ function drawRanking(ctx: CanvasRenderingContext2D, w: number, h: number, p: num
   const rank = Math.max(1, Math.round(4280 * (1 - raw) + 128 * raw));
   const youPts = Math.round(8177 + raw * 4663);
 
-  // floating point chips â€” points earned from peer impact, drifting upward
+  // floating point chips — points earned from peer impact, drifting upward
   const chips = ['+15', '+10', '+8'];
   for (let i = 0; i < chips.length; i++) {
     const chx = cardX + ((i + 1) / (chips.length + 1)) * cardW;
@@ -366,7 +366,7 @@ function drawRanking(ctx: CanvasRenderingContext2D, w: number, h: number, p: num
   ctx.lineTo(cardX + cardW - padX, y);
   ctx.stroke();
 
-  // leaderboard â€” "you" climbs one slot at a time; each overtake swaps the peer
+  // leaderboard — "you" climbs one slot at a time; each overtake swaps the peer
   // down instantly, so all rows always occupy distinct slots (no overlap ever)
   const rowH = 30 * k;
   const rowY0 = y + 12 * k;
@@ -480,7 +480,7 @@ function drawConstellation(ctx: CanvasRenderingContext2D, w: number, h: number, 
 
   const starCount = 180;
 
-  // stars â€” fade in on scroll, then shimmer and drift continuously
+  // stars — fade in on scroll, then shimmer and drift continuously
   for (let i = 0; i < starCount; i++) {
     const hx = Math.abs(Math.sin(i * 127.1 + 311.7) * 43758.5453123) % 1;
     const hy = Math.abs(Math.sin(i * 269.5 + 183.3) * 43758.5453123) % 1;
@@ -524,7 +524,7 @@ function drawConstellation(ctx: CanvasRenderingContext2D, w: number, h: number, 
   }
   ctx.stroke();
 
-  // M-shape nodes â€” gently breathing with time
+  // M-shape nodes — gently breathing with time
   for (let i = 0; i < mPoints.length; i++) {
     const mp = mPoints[i];
     const glow = 1 + Math.sin(t * 0.0012 + i * 1.2) * 0.16;
@@ -544,7 +544,7 @@ function drawConstellation(ctx: CanvasRenderingContext2D, w: number, h: number, 
   }
 }
 
-/* â”€â”€ Feature data â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* ── Feature data ─────────────────────────────────────────────────────── */
 
 const features: FeatureDef[] = [
   {
@@ -552,9 +552,9 @@ const features: FeatureDef[] = [
     number: '01',
     title: 'Stack-Matched Discovery',
     description: 'Articles surface based on your tech stack, not popularity contests.',
-    detail: 'Tag your stack once. Our matching engine surfaces the most relevant engineering writing â€” no algorithm gaming, no noise.',
+    detail: 'Tag your stack once. Our matching engine surfaces the most relevant engineering writing — no algorithm gaming, no noise.',
     draw: drawDiscovery,
-    scale: 1.25,
+    scale: 1.4,
   },
   {
     id: 'living-posts',
@@ -563,23 +563,23 @@ const features: FeatureDef[] = [
     description: 'Every post has a full revision history, like a living document.',
     detail: 'Readers see what changed, when, and why. Authors iterate in the open. Knowledge evolves, not stagnates.',
     draw: drawLivingPosts,
-    scale: 1.25,
+    scale: 1.4,
   },
   {
     id: 'forkable',
     number: '03',
     title: 'Forkable Articles',
-    description: 'Fork any post, adapt it, and publish your own version â€” just like code.',
+    description: 'Fork any post, adapt it, and publish your own version — just like code.',
     detail: 'Build on others\' work with full attribution. The fork tree makes the lineage of every idea traceable.',
     draw: drawForkable,
-    scale: 1.25,
+    scale: 1.4,
   },
   {
     id: 'ranking',
     number: '04',
     title: 'Impact-Based Global Ranking',
     description: 'Your rank reflects your real-world impact, not your follower count.',
-    detail: 'Forks, reposts, and real-world usage earn reputation points â€” weighted by the contributor\'s own standing. Game the leaderboard by writing better, not louder.',
+    detail: 'Forks, reposts, and real-world usage earn reputation points — weighted by the contributor\'s own standing. Game the leaderboard by writing better, not louder.',
     draw: drawRanking,
   },
   {
@@ -589,7 +589,7 @@ const features: FeatureDef[] = [
     description: 'Trust recommendations from engineers who share your stack.',
     detail: 'Follow authors whose judgment you trust. Your network curates a signal feed that cuts through the noise.',
     draw: drawPeerDiscovery,
-    scale: 1.25,
+    scale: 1.4,
   },
 ];
 
@@ -603,7 +603,7 @@ interface FeatureDef {
   scale?: number;
 }
 
-/* â”€â”€ Single Feature Section â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* ── Single Feature Section ───────────────────────────────────────────── */
 
 function FeatureSection({ feature, index }: { feature: FeatureDef; index: number }) {
   const sectionRef = useRef<HTMLDivElement>(null!);
@@ -746,7 +746,7 @@ function FeatureSection({ feature, index }: { feature: FeatureDef; index: number
   );
 }
 
-/* â”€â”€ Final Constellation Section â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* ── Final Constellation Section ──────────────────────────────────────── */
 
 function FinalConstellation() {
   const sectionRef = useRef<HTMLDivElement>(null!);
@@ -903,7 +903,7 @@ function FinalConstellation() {
   );
 }
 
-/* â”€â”€ Main Export â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* ── Main Export ──────────────────────────────────────────────────────── */
 
 export function ScrollStory() {
   useEffect(() => {
