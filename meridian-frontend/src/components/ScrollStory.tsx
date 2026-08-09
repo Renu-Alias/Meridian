@@ -42,7 +42,7 @@ function drawDiscovery(ctx: CanvasRenderingContext2D, w: number, h: number, p: n
   const cx = w / 2, cy = h / 2;
   const tags = ['React', 'Go', 'Python', 'K8s', 'Rust', 'TS', 'Docker', 'Postgres'];
   const n = tags.length;
-  const radius = Math.min(w, h) * 0.32;
+  const radius = Math.min(w, h) * 0.28;
   const count = Math.min(n, Math.ceil(p * n));
 
   // central card
