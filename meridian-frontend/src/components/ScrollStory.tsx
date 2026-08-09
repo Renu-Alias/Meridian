@@ -554,7 +554,7 @@ const features: FeatureDef[] = [
     description: 'Articles surface based on your tech stack, not popularity contests.',
     detail: 'Tag your stack once. Our matching engine surfaces the most relevant engineering writing â€” no algorithm gaming, no noise.',
     draw: drawDiscovery,
-    scale: 1.12,
+    scale: 1.25,
   },
   {
     id: 'living-posts',
@@ -563,7 +563,7 @@ const features: FeatureDef[] = [
     description: 'Every post has a full revision history, like a living document.',
     detail: 'Readers see what changed, when, and why. Authors iterate in the open. Knowledge evolves, not stagnates.',
     draw: drawLivingPosts,
-    scale: 1.12,
+    scale: 1.25,
   },
   {
     id: 'forkable',
@@ -572,7 +572,7 @@ const features: FeatureDef[] = [
     description: 'Fork any post, adapt it, and publish your own version â€” just like code.',
     detail: 'Build on others\' work with full attribution. The fork tree makes the lineage of every idea traceable.',
     draw: drawForkable,
-    scale: 1.12,
+    scale: 1.25,
   },
   {
     id: 'ranking',
@@ -589,7 +589,7 @@ const features: FeatureDef[] = [
     description: 'Trust recommendations from engineers who share your stack.',
     detail: 'Follow authors whose judgment you trust. Your network curates a signal feed that cuts through the noise.',
     draw: drawPeerDiscovery,
-    scale: 1.12,
+    scale: 1.25,
   },
 ];
 
@@ -650,9 +650,13 @@ function FeatureSection({ feature, index }: { feature: FeatureDef; index: number
         ctx2d.save();
         ctx2d.setTransform(window.devicePixelRatio || 1, 0, 0, window.devicePixelRatio || 1, 0, 0);
 
-        // enlarge non-ranking USP icons by drawing at a higher internal scale (crisp)
+        // enlarge non-ranking USP icons by scaling around the canvas center (crisp, stays centered)
         const extra = feature.scale ?? 1;
-        if (extra !== 1) ctx2d.scale(extra, extra);
+        if (extra !== 1) {
+          ctx2d.translate(w / 2, h / 2);
+          ctx2d.scale(extra, extra);
+          ctx2d.translate(-w / 2, -h / 2);
+        }
 
         feature.draw(ctx2d, w, h, speed);
         ctx2d.restore();
@@ -920,5 +924,6 @@ export function ScrollStory() {
     </>
   );
 }
+
 
 
