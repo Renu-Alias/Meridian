@@ -399,14 +399,14 @@ function drawPeerDiscovery(ctx: CanvasRenderingContext2D, w: number, h: number, 
   clear(ctx, w, h);
   const cx = w / 2, cy = h / 2;
 
-  // avatar positions in a loose network
+  // avatar positions in a loose network (slightly tight so the 1.25x scale fits narrow canvases)
   const nodes = [
-    { x: cx, y: cy - 80 },
-    { x: cx - 120, y: cy + 20 },
-    { x: cx + 110, y: cy + 30 },
-    { x: cx - 60, y: cy + 90 },
-    { x: cx + 70, y: cy + 85 },
-    { x: cx, y: cy - 10 },
+    { x: cx, y: cy - 70 },
+    { x: cx - 104, y: cy + 17 },
+    { x: cx + 96, y: cy + 26 },
+    { x: cx - 52, y: cy + 78 },
+    { x: cx + 61, y: cy + 74 },
+    { x: cx, y: cy - 9 },
   ];
 
   const active = Math.min(nodes.length, Math.ceil(p * nodes.length));
