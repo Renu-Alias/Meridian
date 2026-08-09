@@ -640,21 +640,18 @@ function FeatureSection({ feature, index }: { feature: FeatureDef; index: number
         const w = canvas.offsetWidth;
         const h = canvas.offsetHeight;
 
-        // Scale wrapper via CSS so canvas subtly zooms without blurring or overflowing
-        const raw = Math.min(1, progress * 1.0);
         // ease-in-out cubic for smooth gliding feel
         const speed = raw < 0.5 ? 2 * raw * raw : 1 - Math.pow(-2 * raw + 2, 2) / 2;
-        const zoom = feature.id === 'ranking' ? 0.9 + speed * 0.1 : 1;
-        canvasWrapper.style.transform = `scale(${zoom})`;
 
         ctx2d.save();
         ctx2d.setTransform(window.devicePixelRatio || 1, 0, 0, window.devicePixelRatio || 1, 0, 0);
 
-        // enlarge non-ranking USP icons by scaling around the canvas center (crisp, stays centered)
+        // icons start small and grow as you scroll (crisp canvas-scale, centered)
         const extra = feature.scale ?? 1;
-        if (extra !== 1) {
+        const growth = 0.6 + (extra - 0.6) * speed;
+        if (growth !== 1) {
           ctx2d.translate(w / 2, h / 2);
-          ctx2d.scale(extra, extra);
+          ctx2d.scale(growth, growth);
           ctx2d.translate(-w / 2, -h / 2);
         }
 
