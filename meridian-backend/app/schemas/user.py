@@ -35,6 +35,8 @@ class UserRead(BaseModel):
     is_mentor: bool
     created_at: datetime
     stack: list[StackProfileRead] = []
+    followers_count: int = 0
+    following_count: int = 0
 
 
 class UserUpdate(BaseModel):

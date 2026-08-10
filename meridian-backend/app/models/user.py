@@ -1,7 +1,7 @@
 import uuid
 from datetime import datetime
 
-from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String, Text
+from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String, Text, UniqueConstraint
 from sqlalchemy.dialects.sqlite import JSON
 from sqlalchemy.orm import relationship
 
@@ -38,6 +38,27 @@ class User(Base):
     notifications = relationship("Notification", back_populates="user", cascade="all, delete-orphan")
     mentorship_submissions = relationship("MentorshipSubmission", back_populates="author", foreign_keys="MentorshipSubmission.author_id")
     mentorship_reviews = relationship("MentorshipSubmission", back_populates="mentor", foreign_keys="MentorshipSubmission.mentor_id")
+    following = relationship(
+        "Follow", back_populates="follower", foreign_keys="Follow.follower_id", cascade="all, delete-orphan"
+    )
+    followers = relationship(
+        "Follow", back_populates="followed", foreign_keys="Follow.followed_id", cascade="all, delete-orphan"
+    )
+
+
+class Follow(Base):
+    __tablename__ = "follows"
+    __table_args__ = (
+        UniqueConstraint("follower_id", "followed_id", name="uq_follows_follower_followed"),
+    )
+
+    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    follower_id = Column(String, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
+    followed_id = Column(String, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    follower = relationship("User", back_populates="following", foreign_keys=[follower_id])
+    followed = relationship("User", back_populates="followers", foreign_keys=[followed_id])
 
 
 class StackProfile(Base):

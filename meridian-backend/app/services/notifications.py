@@ -79,6 +79,17 @@ def create_qa_answered_notification(db: Session, questioner_id: str, post_title:
     )
 
 
+def create_follow_notification(db: Session, followed_id: str, follower_name: str, follower_username: str):
+    return create_notification(
+        db=db,
+        user_id=followed_id,
+        category="Mentions",
+        title=f"{follower_name} followed you",
+        detail=f"@{follower_username} started following your work",
+        link=f"/profile/{follower_username}",
+    )
+
+
 def create_wallet_notification(db: Session, user_id: str, amount: float, post_title: str):
     return create_notification(
         db=db,

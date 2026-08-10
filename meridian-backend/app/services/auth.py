@@ -11,6 +11,7 @@ from app.database import get_db
 from app.models.user import User
 
 security = HTTPBearer()
+security_optional = HTTPBearer(auto_error=False)
 
 
 def create_access_token(user_id: str) -> str:
@@ -37,4 +38,20 @@ def get_current_user(
     user = db.query(User).filter(User.id == user_id).first()
     if not user:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+    return user
+
+
+def get_current_user_optional(
+    credentials: HTTPAuthorizationCredentials | None = Depends(security_optional),
+    db: Session = Depends(get_db),
+) -> User | None:
+    """Like get_current_user but returns None for anonymous requests, so
+    public endpoints can expose viewer-relative fields (e.g. is_following)."""
+    if credentials is None:
+        return None
+    try:
+        payload = verify_token(credentials.credentials)
+    except HTTPException:
+        return None
+    user = db.query(User).filter(User.id == payload.get("sub")).first()
     return user

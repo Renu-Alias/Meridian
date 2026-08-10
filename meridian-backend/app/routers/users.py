@@ -9,7 +9,7 @@ from app.config import settings
 from app.database import get_db
 from app.models.post import Post
 from app.models.skills import CredibilityScore, SkillsGraphEntry
-from app.models.user import StackProfile, Technology, User
+from app.models.user import Follow, StackProfile, Technology, User
 from app.routers.posts import _post_to_read
 from app.schemas.skills import CredibilityScoreRead, SkillsGraphEntryRead
 from app.schemas.user import (
@@ -19,13 +19,16 @@ from app.schemas.user import (
     UserRead,
     UserUpdate,
 )
-from app.services.auth import get_current_user
+from app.services.auth import get_current_user, get_current_user_optional
+from app.services.notifications import create_follow_notification
 
 router = APIRouter(prefix="/users", tags=["users"])
 
 
 def _user_to_read(user: User, db: Session) -> UserRead:
     stack = db.query(StackProfile).filter(StackProfile.user_id == user.id).all()
+    followers_count = db.query(Follow).filter(Follow.followed_id == user.id).count()
+    following_count = db.query(Follow).filter(Follow.follower_id == user.id).count()
     return UserRead(
         id=user.id,
         email=user.email,
@@ -41,16 +44,32 @@ def _user_to_read(user: User, db: Session) -> UserRead:
         is_mentor=user.is_mentor or False,
         created_at=user.created_at,
         stack=[s for s in stack],
+        followers_count=followers_count,
+        following_count=following_count,
     )
 
 
 @router.get("/profile/{username}")
-def get_profile(username: str, db: Session = Depends(get_db)):
+def get_profile(
+    username: str,
+    db: Session = Depends(get_db),
+    viewer: User | None = Depends(get_current_user_optional),
+):
     user = db.query(User).filter(User.username == username).first()
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     skills = db.query(SkillsGraphEntry).filter(SkillsGraphEntry.user_id == user.id).all()
     cred = db.query(CredibilityScore).filter(CredibilityScore.user_id == user.id).first()
+    followers_count = db.query(Follow).filter(Follow.followed_id == user.id).count()
+    following_count = db.query(Follow).filter(Follow.follower_id == user.id).count()
+    is_following = False
+    if viewer is not None and viewer.id != user.id:
+        is_following = (
+            db.query(Follow)
+            .filter(Follow.follower_id == viewer.id, Follow.followed_id == user.id)
+            .first()
+            is not None
+        )
     return {
         "user": _user_to_read(user, db),
         "skills": [SkillsGraphEntryRead(skill_name=s.skill_name, depth=s.depth, source=s.source) for s in skills],
@@ -60,7 +79,53 @@ def get_profile(username: str, db: Session = Depends(get_db)):
             flagged_claims=cred.flagged_claims if cred else 0,
             resolved_flags=cred.resolved_flags if cred else 0,
         ) if cred else CredibilityScoreRead(score=100.0, verified_claims=0, flagged_claims=0, resolved_flags=0),
+        "followers_count": followers_count,
+        "following_count": following_count,
+        "is_following": is_following,
     }
+
+
+@router.post("/profile/{username}/follow")
+def follow_user(
+    username: str,
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    target = db.query(User).filter(User.username == username).first()
+    if not target:
+        raise HTTPException(status_code=404, detail="User not found")
+    if target.id == user.id:
+        raise HTTPException(status_code=400, detail="You cannot follow yourself")
+    existing = db.query(Follow).filter(
+        Follow.follower_id == user.id,
+        Follow.followed_id == target.id,
+    ).first()
+    if not existing:
+        db.add(Follow(follower_id=user.id, followed_id=target.id))
+        db.commit()
+        create_follow_notification(db, target.id, user.display_name or user.username, user.username)
+    followers_count = db.query(Follow).filter(Follow.followed_id == target.id).count()
+    return {"detail": "Now following", "is_following": True, "followers_count": followers_count}
+
+
+@router.delete("/profile/{username}/follow")
+def unfollow_user(
+    username: str,
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    target = db.query(User).filter(User.username == username).first()
+    if not target:
+        raise HTTPException(status_code=404, detail="User not found")
+    existing = db.query(Follow).filter(
+        Follow.follower_id == user.id,
+        Follow.followed_id == target.id,
+    ).first()
+    if existing:
+        db.delete(existing)
+        db.commit()
+    followers_count = db.query(Follow).filter(Follow.followed_id == target.id).count()
+    return {"detail": "Unfollowed", "is_following": False, "followers_count": followers_count}
 
 
 @router.get("/profile/{username}/posts")

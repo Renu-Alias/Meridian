@@ -8,7 +8,7 @@ const LEVEL_COLORS_MINI = ['#161b22', '#0b3530', '#0d5e49', '#14956b', '#27b890'
 
 const MONTH_NAMES = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 
-// Earliest year the switcher can navigate back to.
+// Fallback earliest year when no account-creation date is known.
 const MIN_YEAR = 2023;
 
 // Cell geometry
@@ -92,18 +92,29 @@ type Cell = { date: Date; level: number; tooltip: string };
 
 export function ContributionGraph({ variant = 'full', weeks: weekProp, year, seedKey = 'default', since, events }: Props) {
   const currentYear  = new Date().getFullYear();
-  const [selYear, setSelYear] = useState(year ?? currentYear);
+
+  const sinceMs = useMemo(() => {
+    const t = since ? new Date(since).getTime() : 0;
+    return Number.isNaN(t) ? 0 : t;
+  }, [since]);
+
+  // A user's contribution graph only goes back to the year they joined — a brand-new
+  // account has no history before that, so older years aren't selectable.
+  const minYear = useMemo(() => {
+    if (sinceMs > 0) {
+      const y = new Date(sinceMs).getUTCFullYear();
+      if (!Number.isNaN(y)) return y;
+    }
+    return MIN_YEAR;
+  }, [sinceMs]);
+
+  const [selYear, setSelYear] = useState(() => Math.min(currentYear, Math.max(minYear, year ?? currentYear)));
   const [hovered, setHovered]  = useState<number | null>(null);
   const wrapRef = useRef<HTMLDivElement>(null);
 
   const isMini      = variant === 'mini';
   const totalWeeks  = weekProp ?? (isMini ? 10 : 53);
   const colors      = isMini ? LEVEL_COLORS_MINI : LEVEL_COLORS;
-
-  const sinceMs = useMemo(() => {
-    const t = since ? new Date(since).getTime() : 0;
-    return Number.isNaN(t) ? 0 : t;
-  }, [since]);
 
   // ── build grid data ──────────────────────────────────────────────────────
   const { cells, monthLabels, total } = useMemo(() => {
@@ -177,9 +188,9 @@ export function ContributionGraph({ variant = 'full', weeks: weekProp, year, see
           <div className="flex items-center gap-0.5">
             <button
               className="grid h-7 w-7 place-items-center rounded-full transition-colors hover:bg-[#1a1d24]"
-              style={{ color: selYear <= MIN_YEAR ? '#2f3336' : '#536471' }}
-              onClick={() => setSelYear((y) => Math.max(MIN_YEAR, y - 1))}
-              disabled={selYear <= MIN_YEAR}
+              style={{ color: selYear <= minYear ? '#2f3336' : '#536471' }}
+              onClick={() => setSelYear((y) => Math.max(minYear, y - 1))}
+              disabled={selYear <= minYear}
               aria-label="Previous year"
             >
               <ChevronLeft size={14} />
