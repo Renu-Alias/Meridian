@@ -125,9 +125,20 @@ export type ApiProfile = {
     is_mentor: boolean;
     created_at: string;
     stack: { technology: string }[];
+    followers_count: number;
+    following_count: number;
   };
   skills: { skill_name: string; depth: number; source: string }[];
   credibility: { score: number; verified_claims: number; flagged_claims: number; resolved_flags: number };
+  followers_count: number;
+  following_count: number;
+  is_following: boolean;
+};
+
+export type ApiFollowStatus = {
+  detail: string;
+  is_following: boolean;
+  followers_count: number;
 };
 
 export type ApiDiscover = {
@@ -274,6 +285,12 @@ export const api = {
     ),
 
   getProfile: (username: string) => request<ApiProfile>(`/users/profile/${username}`),
+
+  followUser: (username: string) =>
+    request<ApiFollowStatus>(`/users/profile/${username}/follow`, { method: 'POST' }),
+
+  unfollowUser: (username: string) =>
+    request<ApiFollowStatus>(`/users/profile/${username}/follow`, { method: 'DELETE' }),
 
   getProfilePosts: (username: string) =>
     request<ApiPost[]>(`/users/profile/${username}/posts`),

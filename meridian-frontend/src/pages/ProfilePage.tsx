@@ -15,6 +15,7 @@ function ProfileContent({ username }: { username: string }) {
   const queryClient = useQueryClient();
   const fileRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
+  const [followBusy, setFollowBusy] = useState(false);
   const isMe = !!me && me.username === username;
   const { data: profile } = useQuery({
     queryKey: ['profile', username],
@@ -54,6 +55,29 @@ function ProfileContent({ username }: { username: string }) {
       showToast(err instanceof Error ? err.message : 'Failed to remove photo', 'info');
     }
   };
+
+  const toggleFollow = async () => {
+    if (!me) {
+      showToast('Sign in to follow accounts', 'info');
+      return;
+    }
+    if (!profile) return;
+    const target = profile.is_following;
+    setFollowBusy(true);
+    try {
+      if (target) {
+        await api.unfollowUser(username);
+      } else {
+        await api.followUser(username);
+      }
+      await queryClient.invalidateQueries({ queryKey: ['profile', username] });
+      showToast(target ? 'Unfollowed' : 'Following', 'success');
+    } catch (err) {
+      showToast(err instanceof Error ? err.message : 'Action failed', 'info');
+    } finally {
+      setFollowBusy(false);
+    }
+  };
   if (!profile) return <div className="p-8">Loading profile...</div>;
 
   return (
@@ -79,12 +103,29 @@ function ProfileContent({ username }: { username: string }) {
             )}
           </div>
           <div className="min-w-0 flex-1">
-            <div className="flex flex-wrap items-center gap-3">
-              <h2 className="text-3xl font-black">{profile.name}</h2>
-              <span className="inline-flex items-center gap-1 rounded-md px-3 py-1 text-sm font-bold" style={{ background: 'rgba(45,212,163,0.14)', color: '#2DD4A3' }}>
-                <ShieldCheck size={16} />
-                {profile.credibility}% credible
-              </span>
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div className="flex flex-wrap items-center gap-3">
+                <h2 className="text-3xl font-black">{profile.name}</h2>
+                <span className="inline-flex items-center gap-1 rounded-md px-3 py-1 text-sm font-bold" style={{ background: 'rgba(45,212,163,0.14)', color: '#2DD4A3' }}>
+                  <ShieldCheck size={16} />
+                  {profile.credibility}% credible
+                </span>
+              </div>
+              {!isMe && (
+                <button
+                  type="button"
+                  onClick={toggleFollow}
+                  disabled={followBusy}
+                  className="rounded-md px-4 py-1.5 text-sm font-bold transition-colors"
+                  style={
+                    profile.is_following
+                      ? { border: '1px solid #2DD4A3', color: '#2DD4A3' }
+                      : { background: '#2DD4A3', color: '#0a0a0a' }
+                  }
+                >
+                  {followBusy ? 'Working…' : profile.is_following ? 'Following' : 'Follow'}
+                </button>
+              )}
             </div>
             <p className="mt-1" style={{ color: '#71767b' }}>
               {profile.handle} · {profile.designation}
@@ -114,6 +155,14 @@ function ProfileContent({ username }: { username: string }) {
                 </a>
               )}
               <span>{profile.joined}</span>
+              <span className="flex items-center gap-3 text-sm">
+                <span>
+                  <b style={{ color: '#e7e9ea' }}>{profile.followers_count}</b> followers
+                </span>
+                <span>
+                  <b style={{ color: '#e7e9ea' }}>{profile.following_count}</b> following
+                </span>
+              </span>
             </div>
           </div>
         </div>

@@ -253,6 +253,9 @@ export type ProfileShape = {
   avatar: string;
   github: string | null;
   linkedin: string | null;
+  followers_count: number;
+  following_count: number;
+  is_following: boolean;
 };
 
 export function toProfile(p: ApiProfile): ProfileShape {
@@ -273,6 +276,9 @@ export function toProfile(p: ApiProfile): ProfileShape {
     avatar: avatarFor(u.display_name, u.avatar_url),
     github: u.github_username || null,
     linkedin: u.linkedin_username || null,
+    followers_count: p.followers_count ?? 0,
+    following_count: p.following_count ?? 0,
+    is_following: !!p.is_following,
   };
 }
 
