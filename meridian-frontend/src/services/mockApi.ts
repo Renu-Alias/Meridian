@@ -177,10 +177,14 @@ function fakeNotification(
  * Demo notification feed for the Activity Center. Generates realistic items
  * across every category (Patches, Q&A, Forks, Payouts, Mentions) with varied
  * recency so the Unread / Today / This Week / Older filters all show results.
+ *
+ * The volume is scaled to the user's actual activity: forks, patches, mentions,
+ * Q&A questions and payouts all require the user to have published posts, so a
+ * brand-new user with no posts gets no demo notifications at all.
  */
-export function generateFakeNotifications(): Notification[] {
+export function generateFakeNotifications(postCount: number): Notification[] {
   fakeId = 0;
-  return [
+  const feed: Notification[] = [
     fakeNotification('Patches', 'Patch accepted on io_uring event loops', 'Sarah merged your benchmark correction into v2.4.', 12, 'verified', false),
     fakeNotification('Mentions', 'Sarah Chen mentioned you in a comment', 'You were tagged in a discussion on \'Refactoring a Rust event loop around io_uring\'. Check what they said.', 26, 'muted', false),
     fakeNotification('Q&A', 'Author answered your Kubernetes CRD question', 'The resolved answer was added to the generated FAQ.', 38, 'highlight', false),
@@ -198,6 +202,12 @@ export function generateFakeNotifications(): Notification[] {
     fakeNotification('Payouts', 'Wallet credited $3.15', 'Earned $3.15 from bookmarks, internal shares, and Used This At Work reactions on \'eBPF: A New Frontier for Observability\'.', 12960, 'verified', true),
     fakeNotification('Payouts', 'Payout cycle complete', 'Your latest earnings of $87.40 are on the way. See the wallet breakdown.', 17280, 'verified', true),
   ];
+
+  if (postCount <= 0) return [];
+  if (postCount === 1) return feed.slice(0, 3);
+  if (postCount <= 3) return feed.slice(0, 6);
+  if (postCount <= 6) return feed.slice(0, 10);
+  return feed;
 }
 
 export const fetchWallet = async () => {

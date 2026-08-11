@@ -17,11 +17,17 @@ const filterOptions = ['All', 'Unread', 'Today', 'This Week', 'Older'];
 
 export function NotificationsPage() {
   const queryClient = useQueryClient();
+  const me = useUiStore((s) => s.me);
   const { data: real = [] } = useQuery({
     queryKey: ['notifications'],
     queryFn: async () => (await api.getNotifications({ limit: 50 })).items.map(toNotification),
   });
-  const fake = useMemo(() => generateFakeNotifications(), []);
+  const { data: myPosts = 0 } = useQuery({
+    queryKey: ['my-post-count', me?.username],
+    queryFn: () => api.getProfilePosts(me!.username!).then((items) => items.length),
+    enabled: !!me?.username,
+  });
+  const fake = useMemo(() => generateFakeNotifications(myPosts), [myPosts]);
   const [fakeRead, setFakeRead] = useState(false);
   const categories = ['All', 'Patches', 'Q&A', 'Forks', 'Payouts', 'Mentions'];
   const [activeCat, setActiveCat] = useState('All');
