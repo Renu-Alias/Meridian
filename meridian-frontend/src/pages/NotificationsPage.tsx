@@ -53,8 +53,6 @@ export function NotificationsPage() {
     showToast('All notifications marked as read', 'success');
   };
 
-  const showActions = activeCat !== 'All';
-
   return (
     <div className="mx-auto max-w-4xl p-6 lg:p-8">
       {/* Page header */}
@@ -83,9 +81,8 @@ export function NotificationsPage() {
           ))}
         </div>
 
-        {/* Action buttons — only visible when a specific category is selected */}
-        {showActions && (
-          <div className="flex shrink-0 items-center gap-2">
+        {/* Action buttons */}
+        <div className="flex shrink-0 items-center gap-2">
             <button
               className="inline-flex h-9 items-center rounded-md px-4 text-sm font-bold transition-colors hover:bg-[#1a1d24]"
               style={{ border: '1px solid #2f3336' }}
@@ -122,8 +119,7 @@ export function NotificationsPage() {
                 </>
               )}
             </div>
-          </div>
-        )}
+        </div>
       </div>
 
       <section className="mt-4 border border-[#333] bg-[#14171C]">
