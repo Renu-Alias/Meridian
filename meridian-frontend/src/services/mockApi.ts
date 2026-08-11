@@ -142,51 +142,63 @@ export const fetchDiscover = async () => {
   };
 };
 
-export const fetchNotifications = async (): Promise<Notification[]> => {
-  await wait();
-  return [
-    {
-      id: 'n1',
-      category: 'Patches',
-      title: 'Patch accepted on io_uring event loops',
-      detail: 'Sarah merged your benchmark correction into v2.4.',
-      time: '12m',
-      accent: 'verified',
-    },
-    {
-      id: 'n2',
-      category: 'Q&A',
-      title: 'Author answered your Kubernetes CRD question',
-      detail: 'The resolved answer was added to the generated FAQ.',
-      time: '38m',
-      accent: 'highlight',
-    },
-    {
-      id: 'n3',
-      category: 'Forks',
-      title: 'Marcus forked your WASM article',
-      detail: 'Attribution chain preserved. Merge suggestion pending.',
-      time: '2h',
-      accent: 'muted',
-    },
-    {
-      id: 'n4',
-      category: 'Payouts',
-      title: 'Wallet credited for 18 work-use reactions',
-      detail: '$42.80 added to this cycle from 3 posts.',
-      time: '5h',
-      accent: 'verified',
-    },
-    {
-      id: 'n5',
-      category: 'Patches',
-      title: 'Unverified claim flagged',
-      detail: 'A reader requested evidence for a latency claim.',
-      time: '1d',
-      accent: 'flagged',
-    },
-  ];
+const now = Date.now();
+const isoAgo = (mins: number) => new Date(now - mins * 60_000).toISOString();
+const timeAgo = (mins: number): string => {
+  if (mins < 60) return `${mins}m`;
+  if (mins < 60 * 24) return `${Math.round(mins / 60)}h`;
+  if (mins < 60 * 24 * 7) return `${Math.round(mins / (60 * 24))}d`;
+  return `${Math.round(mins / (60 * 24 * 7))}w`;
 };
+
+let fakeId = 0;
+function fakeNotification(
+  category: Notification['category'],
+  title: string,
+  detail: string,
+  minsAgo: number,
+  accent: Notification['accent'],
+  is_read: boolean,
+): Notification {
+  fakeId += 1;
+  return {
+    id: `fake-${fakeId}`,
+    category,
+    title,
+    detail,
+    time: timeAgo(minsAgo),
+    accent,
+    is_read,
+    created_at: isoAgo(minsAgo),
+  };
+}
+
+/**
+ * Demo notification feed for the Activity Center. Generates realistic items
+ * across every category (Patches, Q&A, Forks, Payouts, Mentions) with varied
+ * recency so the Unread / Today / This Week / Older filters all show results.
+ */
+export function generateFakeNotifications(): Notification[] {
+  fakeId = 0;
+  return [
+    fakeNotification('Patches', 'Patch accepted on io_uring event loops', 'Sarah merged your benchmark correction into v2.4.', 12, 'verified', false),
+    fakeNotification('Mentions', 'Sarah Chen mentioned you in a comment', 'You were tagged in a discussion on \'Refactoring a Rust event loop around io_uring\'. Check what they said.', 26, 'muted', false),
+    fakeNotification('Q&A', 'Author answered your Kubernetes CRD question', 'The resolved answer was added to the generated FAQ.', 38, 'highlight', false),
+    fakeNotification('Payouts', 'Wallet credited for 18 work-use reactions', '$42.80 added to this cycle from 3 posts.', 300, 'verified', false),
+    fakeNotification('Forks', 'Marcus forked your WASM article', 'Attribution chain preserved. Merge suggestion pending.', 120, 'muted', false),
+    fakeNotification('Patches', 'New patch waiting for review', 'Lyn Park submitted a patch to \'Refactoring a Rust event loop around io_uring\'. Review it when you\'re ready.', 180, 'verified', false),
+    fakeNotification('Q&A', 'New question on your post', 'A reader wants to know more about \'Refactoring a Rust event loop around io_uring\'. Check the comments.', 300, 'highlight', false),
+    fakeNotification('Mentions', '@lynx_dev referenced your work', 'Someone cited \'Implementing Raft from scratch in 500 lines of Go\' in a comment thread. Your post got noticed.', 480, 'muted', false),
+    fakeNotification('Patches', 'Patch merged: Kubernetes CRD migration notes', '\'Optimizing React Re-renders in Large Lists\' was updated with a merged patch from Marcus Thorne.', 1440, 'verified', true),
+    fakeNotification('Forks', 'Fork created from your post', 'Lyn Park extended \'Optimizing React Re-renders in Large Lists\' with a fork. Your contribution was credited.', 1440, 'muted', true),
+    fakeNotification('Q&A', 'Reader question: how does this hold up under network partitions?', 'Sarah Chen is asking about \'Implementing Raft from scratch in 500 lines of Go\'.', 2880, 'highlight', true),
+    fakeNotification('Mentions', 'You were mentioned by Marcus Thorne', '\'Shipping the first iteration of Meridian CLI\' came up in a conversation — Marcus Thorne brought you in.', 4320, 'muted', true),
+    fakeNotification('Forks', 'Your post was forked', 'Sarah Chen forked your post and is building on your work. Attribution chain preserved.', 5760, 'muted', true),
+    fakeNotification('Patches', 'Unverified claim flagged', 'A reader requested evidence for a latency claim on \'Implementing Raft from scratch in 500 lines of Go\'.', 11520, 'flagged', true),
+    fakeNotification('Payouts', 'Wallet credited $3.15', 'Earned $3.15 from bookmarks, internal shares, and Used This At Work reactions on \'eBPF: A New Frontier for Observability\'.', 12960, 'verified', true),
+    fakeNotification('Payouts', 'Payout cycle complete', 'Your latest earnings of $87.40 are on the way. See the wallet breakdown.', 17280, 'verified', true),
+  ];
+}
 
 export const fetchWallet = async () => {
   await wait();

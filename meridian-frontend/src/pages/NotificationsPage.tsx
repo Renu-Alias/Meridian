@@ -1,9 +1,10 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Filter } from 'lucide-react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useUiStore } from '../store/uiStore';
 import { api } from '../services/api';
 import { toNotification } from '../services/adapters';
+import { generateFakeNotifications } from '../services/mockApi';
 
 const accentClass = {
   verified: 'bg-verified',
@@ -16,15 +17,22 @@ const filterOptions = ['All', 'Unread', 'Today', 'This Week', 'Older'];
 
 export function NotificationsPage() {
   const queryClient = useQueryClient();
-  const { data: notifications = [] } = useQuery({
+  const { data: real = [] } = useQuery({
     queryKey: ['notifications'],
     queryFn: async () => (await api.getNotifications({ limit: 50 })).items.map(toNotification),
   });
+  const fake = useMemo(() => generateFakeNotifications(), []);
+  const [fakeRead, setFakeRead] = useState(false);
   const categories = ['All', 'Patches', 'Q&A', 'Forks', 'Payouts', 'Mentions'];
   const [activeCat, setActiveCat] = useState('All');
   const [filterOpen, setFilterOpen] = useState(false);
   const [activeFilter, setActiveFilter] = useState('All');
   const showToast = useUiStore((s) => s.showToast);
+
+  const notifications = useMemo(() => {
+    const demo = fakeRead ? fake.map((n) => ({ ...n, is_read: true })) : fake;
+    return [...real, ...demo];
+  }, [real, fake, fakeRead]);
 
   const now = Date.now();
   const filtered = notifications.filter((n) => {
@@ -39,6 +47,7 @@ export function NotificationsPage() {
   });
 
   const markAllRead = async () => {
+    setFakeRead(true);
     await api.markAllNotificationsRead().catch(() => {});
     queryClient.invalidateQueries({ queryKey: ['notifications'] });
     showToast('All notifications marked as read', 'success');
